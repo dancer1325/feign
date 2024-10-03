@@ -402,7 +402,9 @@ Feign includes example [GitHub](./example-github) and [Wikipedia](./example-wiki
 
 ---
 ### Integrations
-Feign intends to work well with other Open Source tools.  Modules are welcome to integrate with your favorite projects!
+
+* goal
+  * work well with OTHER Open Source tools
 
 ### Encoder/Decoder
 
@@ -424,23 +426,33 @@ public class Example {
 ```
 
 #### Jackson
-[Jackson](./jackson) includes an encoder and decoder you can use with a JSON API.
 
-Add `JacksonEncoder` and/or `JacksonDecoder` to your `Feign.Builder` like so:
+* [Jackson](./jackson)
+  * available
+    * encoder -- `JacksonEncoder` --
+    * decoder -- `JacksonDecoder` --
+  * uses
+    * | JSON API
+  * way to use it
+    * add | `Feign.Builder`
 
-```java
-public class Example {
-  public static void main(String[] args) {
-      GitHub github = Feign.builder()
-                     .encoder(new JacksonEncoder())
-                     .decoder(new JacksonDecoder())
-                     .target(GitHub.class, "https://api.github.com");
-  }
-}
-```
+        ```java
+        public class Example {
+          public static void main(String[] args) {
+              GitHub github = Feign.builder()
+                             .encoder(new JacksonEncoder())
+                             .decoder(new JacksonDecoder())
+                             .target(GitHub.class, "https://api.github.com");
+          }
+        }
+        ```
 
-For the lighter weight Jackson Jr, use `JacksonJrEncoder` and `JacksonJrDecoder` from
-the [Jackson Jr Module](./jackson-jr).
+* [Jackson Jr Module](./jackson-jr)
+  * == lighter weight Jackson Jr
+  * available
+    * encoder -- `JacksonJrEncoder` --
+    * decoder -- `JacksonJrDecoder` --
+
 
 #### Moshi
 [Moshi](./moshi) includes an encoder and decoder you can use with a JSON API.
