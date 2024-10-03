@@ -1,9 +1,11 @@
 Jackson Codec
 ===================
 
-This module adds support for encoding and decoding JSON via Jackson.
+* goal
+  * via Jackson
+    * encode JSON
+    * decode JSON
 
-Add `JacksonEncoder` and/or `JacksonDecoder` to your `Feign.Builder` like so:
 
 ```java
 GitHub github = Feign.builder()
@@ -12,9 +14,10 @@ GitHub github = Feign.builder()
                      .target(GitHub.class, "https://api.github.com");
 ```
 
-If you want to customize the `ObjectMapper` that is used, provide it to the `JacksonEncoder` and `JacksonDecoder`:
+*  `ObjectMapper` / provided | `JacksonEncoder` & `JacksonDecoder` -- can be -- customized
 
 ```java
+// customize the ObjectMapper 
 ObjectMapper mapper = new ObjectMapper()
         .setSerializationInclusion(JsonInclude.Include.NON_NULL)
         .configure(SerializationFeature.INDENT_OUTPUT, true)
