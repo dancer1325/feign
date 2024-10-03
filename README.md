@@ -617,9 +617,13 @@ public class Example {
 ### Logger
 
 #### SLF4J
-[SLF4JModule](./slf4j) allows directing Feign's logging to [SLF4J](http://www.slf4j.org/), allowing you to easily use a logging backend of your choice (Logback, Log4J, etc.)
-
-To use SLF4J with Feign, add both the SLF4J module and an SLF4J binding of your choice to your classpath.  Then, configure Feign to use the Slf4jLogger:
+* [SLF4JModule](./slf4j)
+  * allows
+    * Feign's logging -- is directed to -> [SLF4J](http://www.slf4j.org/)
+      * == make easier to use a logging backend of your choice (Logback, Log4J, etc.)
+* steps
+  * add SLF4J module + your desired SLF4J binding | your classpath
+  * configure Feign -- to use -- Slf4jLogger
 
 ```java
 public class Example {
