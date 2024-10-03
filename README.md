@@ -4,33 +4,62 @@
 [![CircleCI](https://circleci.com/gh/OpenFeign/feign/tree/master.svg?style=svg)](https://circleci.com/gh/OpenFeign/feign/tree/master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.openfeign/feign-core/badge.png)](https://search.maven.org/artifact/io.github.openfeign/feign-core/)
 
-Feign is a Java to HTTP client binder inspired by [Retrofit](https://github.com/square/retrofit), [JAXRS-2.0](https://jax-rs-spec.java.net/nonav/2.0/apidocs/index.html), and [WebSocket](http://www.oracle.com/technetwork/articles/java/jsr356-1937161.html).  Feign's first goal was reducing the complexity of binding [Denominator](https://github.com/Netflix/Denominator) uniformly to HTTP APIs regardless of [ReSTfulness](http://www.slideshare.net/adrianfcole/99problems).
+* Feign
+  * == client binder / Java -- HTTP 
+  * inspired by
+    * [Retrofit](https://github.com/square/retrofit)
+    * [JAXRS-2.0](https://jax-rs-spec.java.net/nonav/2.0/apidocs/index.html)
+    * [WebSocket](http://www.oracle.com/technetwork/articles/java/jsr356-1937161.html)
+  * goal
+    * originally
+      * reduce the complexity of binding [Denominator](https://github.com/Netflix/Denominator) -- to -- HTTP APIs /
+        * regardless of [ReSTfulness](http://www.slideshare.net/adrianfcole/99problems)
 
 ---
 ### Why Feign and not X?
 
-Feign uses tools like Jersey and CXF to write Java clients for ReST or SOAP services. Furthermore, Feign allows you to write your own code on top of http libraries such as Apache HC. Feign connects your code to http APIs with minimal overhead and code via customizable decoders and error handling, which can be written to any text-based http API.
+* Feign
+  * -- based on -- tools
+    * _Example:_ Jersey, CXF
+  * allows
+    * writing Java clients -- for -- ReST or SOAP services
+    * writing your OWN code | http libraries (_Example:_Apache HC)
+    * minimal 
+      * overhead -- via -- customizable error handling
+      * code -- via -- customizable decoders 
+  * limitations
+    * 👁️ ANY text-based http API 👁️
+      * -> benefit: replaying requests is simple
 
 ### How does Feign work?
 
-Feign works by processing annotations into a templatized request. Arguments are applied to these templates in a straightforward fashion before output.  Although Feign is limited to supporting text-based APIs, it dramatically simplifies system aspects such as replaying requests. Furthermore, Feign makes it easy to unit test your conversions knowing this.
+* annotations -- are processed into a -- templatized request
+  * 's arguments -- are applied -- before output the templates
 
 ### Java Version Compatibility
 
-Feign 10.x and above are built on Java 8 and should work on Java 9, 10, and 11.  For those that need JDK 6 compatibility, please use Feign 9.x
+* Feign v10.x+
+  * built | Java 8
+  * should work | Java 9, 10, and 11
+* Feign 9.x
+  * use
+    * you need JDK 6 
 
 ## Feature overview
 
-This is a map with current key features provided by feign:
+* current key features / -- provided by -- feign
 
 ![MindMap overview](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/OpenFeign/feign/master/src/docs/overview-mindmap.iuml)
 
 # Roadmap
 ## Feign 11 and beyond
-Making _API_ clients easier
+
+* make _API_ clients easier
 
 Short Term - What we're working on now. ⏰
 ---
+
+* TODO:
 * Response Caching
   * Support caching of api responses.  Allow for users to define under what conditions a response is eligible for caching and what type of caching mechanism should be used.
   * Support in-memory caching and external cache implementations (EhCache, Google, Spring, etc...)
@@ -40,7 +69,9 @@ Short Term - What we're working on now. ⏰
 * `Logger` API refactor
   * Refactor the `Logger` API to adhere closer to frameworks like SLF4J providing a common mental model for logging within Feign.  This model will be used by Feign itself throughout and provide clearer direction on how the `Logger` will be used.
 * `Retry` API refactor
-  * Refactor the `Retry` API to support user-supplied conditions and better control over back-off policies. **This may result in non-backward-compatible breaking changes**
+  * support user-supplied conditions
+  * better control -- over -- back-off policies
+  * **-- may result in -- NON-backward-compatible / breaking changes**
 
 Medium Term - What's up next. ⏲
 ---
@@ -59,7 +90,7 @@ Long Term - The future ☁️
 
 # Usage
 
-The feign library is available from [Maven Central](https://central.sonatype.com/artifact/io.github.openfeign/feign-core).
+* available | [Maven Central](https://central.sonatype.com/artifact/io.github.openfeign/feign-core)
 
 ```xml
 <dependency>
@@ -71,7 +102,8 @@ The feign library is available from [Maven Central](https://central.sonatype.com
 
 ### Basics
 
-Usage typically looks like this, an adaptation of the [canonical Retrofit sample](https://github.com/square/retrofit/blob/master/samples/src/main/java/com/example/retrofit/SimpleService.java).
+* Usage
+  * == [canonical Retrofit sample](https://github.com/square/retrofit/blob/master/samples/src/main/java/com/example/retrofit/SimpleService.java)
 
 ```java
 interface GitHub {
@@ -113,19 +145,20 @@ public class MyApp {
 
 ### Interface Annotations
 
-Feign annotations define the `Contract` between the interface and how the underlying client
-should work.  Feign's default contract defines the following annotations:
+* Feign annotations
+  * == `Contract` between the interface -- and -- how the underlying client should work
+  * built-in
 
 | Annotation     | Interface Target | Usage |
 |----------------|------------------|-------|
-| `@RequestLine` | Method           | Defines the `HttpMethod` and `UriTemplate` for request.  `Expressions`, values wrapped in curly-braces `{expression}` are resolved using their corresponding `@Param` annotated parameters. |
-| `@Param`       | Parameter        | Defines a template variable, whose value will be used to resolve the corresponding template `Expression`, by name provided as annotation value. If value is missing it will try to get the name from bytecode method parameter name (if the code was compiled with `-parameters` flag). |
+| `@RequestLine` | Method           | `HttpMethod` and `UriTemplate` / request<br/>  `Expressions` == values wrapped in curly-braces / -- are resolved via -- `@Param` <br/> _Example:_ `{expression}` |
+| `@Param`       | Parameter        | == template variable / used in `Expression` <br/> resolved by name <br/> if value is missing & code compiled with `-parameters` -> try to get the name -- from -- bytecode method parameter name|
 | `@Headers`     | Method, Type     | Defines a `HeaderTemplate`; a variation on a `UriTemplate`.  that uses `@Param` annotated values to resolve the corresponding `Expressions`.  When used on a `Type`, the template will be applied to every request.  When used on a `Method`, the template will apply only to the annotated method. |
 | `@QueryMap`    | Parameter        | Defines a `Map` of name-value pairs, or POJO, to expand into a query string. |
 | `@HeaderMap`   | Parameter        | Defines a `Map` of name-value pairs, to expand into `Http Headers` |
 | `@Body`        | Method           | Defines a `Template`, similar to a `UriTemplate` and `HeaderTemplate`, that uses `@Param` annotated values to resolve the corresponding `Expressions`.|
 
-
+* TODO:
 > **Overriding the Request Line**
 >
 > If there is a need to target a request to a different host then the one supplied when the Feign client was created, or
