@@ -1,9 +1,13 @@
 OkHttp
 ===================
 
-This module directs Feign's http requests to [OkHttp](http://square.github.io/okhttp/), which enables SPDY and better network control.
+* goal
+  * Feign's http requests -- are redirected to -- [OkHttp](http://square.github.io/okhttp/)
+    * Reason: 🧠enables SPDY & better network control 🧠
 
-To use OkHttp with Feign, add the OkHttp module to your classpath. Then, configure Feign to use the OkHttpClient:
+* how to use OkHttp + Feign?
+  * add OkHttp | your classpath
+  * configure Feign to use the OkHttpClient
 
 ```java
 GitHub github = Feign.builder()
