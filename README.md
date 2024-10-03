@@ -67,7 +67,8 @@ Short Term - What we're working on now. ⏰
   * Support [level 1 through level 4](https://tools.ietf.org/html/rfc6570#section-1.2) URI template expressions.
   * Use [URI Templates TCK](https://github.com/uri-templates/uritemplate-test) to verify compliance.
 * `Logger` API refactor
-  * Refactor the `Logger` API to adhere closer to frameworks like SLF4J providing a common mental model for logging within Feign.  This model will be used by Feign itself throughout and provide clearer direction on how the `Logger` will be used.
+  * -- closer to -- frameworks / SLF4J
+    * common mental model for logging | Feign
 * `Retry` API refactor
   * support user-supplied conditions
   * better control -- over -- back-off policies
@@ -911,26 +912,35 @@ interface BarApi extends BaseApi<Bar> { }
 ```
 
 #### Logging
-You can log the http messages going to and from the target by setting up a `Logger`.  Here's the easiest way to do that:
-```java
-public class Example {
-  public static void main(String[] args) {
-    GitHub github = Feign.builder()
-                     .decoder(new GsonDecoder())
-                     .logger(new Logger.JavaLogger("GitHub.Logger").appendToFile("logs/http.log"))
-                     .logLevel(Logger.Level.FULL)
-                     .target(GitHub.class, "https://api.github.com");
-  }
-}
-```
 
-> **A Note on JavaLogger**:
-> Avoid using of default ```JavaLogger()``` constructor - it was marked as deprecated and will be removed soon.
+* `Logger`
+  * allows
+    * logging the HTTP messages / going
+      * -> target
+      * target -> 
+  * easiest way to do
 
-The SLF4JLogger (see above) may also be of interest.
+    ```java
+    public class Example {
+      public static void main(String[] args) {
+        GitHub github = Feign.builder()
+                         .decoder(new GsonDecoder())
+                         .logger(new Logger.JavaLogger("GitHub.Logger").appendToFile("logs/http.log"))
+                         .logLevel(Logger.Level.FULL)
+                         .target(GitHub.class, "https://api.github.com");
+      }
+    }
+    ```
 
-To filter out sensitive information like authorization or tokens
-override methods `shouldLogRequestHeader` or `shouldLogResponseHeader`.
+  * available loggers
+    * `JavaLogger`
+      * NOT use `JavaLogger()`
+        * Reason: 🧠 marked as deprecated 🧠
+    * `SLF4JLogger`
+      * check above
+  * if you want to filter out sensitive information (_Example:_ authorization or tokens) -> override
+    * `shouldLogRequestHeader()`
+    * `shouldLogResponseHeader()`
 
 #### Request Interceptors
 When you need to change all requests, regardless of their target, you'll want to configure a `RequestInterceptor`.
