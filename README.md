@@ -638,68 +638,66 @@ public class Example {
 ```
 
 ### Decoders
-`Feign.builder()` allows you to specify additional configuration such as how to decode a response.
 
-If any methods in your interface return types besides `Response`, `String`, `byte[]` or `void`, you'll need to configure a non-default `Decoder`.
+* `Feign.builder().decoder(Decoder)`
+  * if any methods | your interface, return types besides `Response`, `String`, `byte[]` or `void` -> you'll need to configure a NON-DEFAULT `Decoder`
+  * _Example:_ JSON decoding -- via -- `feign-gson` extension
 
-Here's how to configure JSON decoding (using the `feign-gson` extension):
+    ```java
+    public class Example {
+      public static void main(String[] args) {
+        GitHub github = Feign.builder()
+                         .decoder(new GsonDecoder())
+                         .target(GitHub.class, "https://api.github.com");
+      }
+    }
+    ```
 
-```java
-public class Example {
-  public static void main(String[] args) {
-    GitHub github = Feign.builder()
-                     .decoder(new GsonDecoder())
-                     .target(GitHub.class, "https://api.github.com");
-  }
-}
-```
+* if you need to pre-process the response / before give it to the Decoder -> use the `Feign.builder().mapAndDecode()`
+  * uses
+    * API / ONLY serves jsonp
 
-If you need to pre-process the response before give it to the Decoder, you can use the `mapAndDecode` builder method.
-An example use case is dealing with an API that only serves jsonp, you will maybe need to unwrap the jsonp before
-send it to the Json decoder of your choice:
+    ```java
+    public class Example {
+      public static void main(String[] args) {
+        JsonpApi jsonpApi = Feign.builder()
+                             .mapAndDecode((response, type) -> jsopUnwrap(response, type), new GsonDecoder())
+                             .target(JsonpApi.class, "https://some-jsonp-api.com");
+      }
+    }
+    ```
 
-```java
-public class Example {
-  public static void main(String[] args) {
-    JsonpApi jsonpApi = Feign.builder()
-                         .mapAndDecode((response, type) -> jsopUnwrap(response, type), new GsonDecoder())
-                         .target(JsonpApi.class, "https://some-jsonp-api.com");
-  }
-}
-```
+* if any methods | your interface, return type `Stream` -> you'll need to configure a `Feign.builder().decoder(StreamDecoder)`
+  * _Example:_ Stream decoder / WITHOUT delegate decoder
 
-If any methods in your interface return type `Stream`, you'll need to configure a `StreamDecoder`.
+    ```java
+    public class Example {
+      public static void main(String[] args) {
+        GitHub github = Feign.builder()
+                .decoder(StreamDecoder.create((r, t) -> {
+                  BufferedReader bufferedReader = new BufferedReader(r.body().asReader(UTF_8));
+                  return bufferedReader.lines().iterator();
+                }))
+                .target(GitHub.class, "https://api.github.com");
+      }
+    }
+    ``` 
 
-Here's how to configure Stream decoder without delegate decoder:
+  * _Example:_ Stream decoder WITH delegate decoder
 
-```java
-public class Example {
-  public static void main(String[] args) {
-    GitHub github = Feign.builder()
-            .decoder(StreamDecoder.create((r, t) -> {
-              BufferedReader bufferedReader = new BufferedReader(r.body().asReader(UTF_8));
-              return bufferedReader.lines().iterator();
-            }))
-            .target(GitHub.class, "https://api.github.com");
-  }
-}
-``` 
-
-Here's how to configure Stream decoder with delegate decoder:
-
-```java
-
-public class Example {
-  public static void main(String[] args) {
-    GitHub github = Feign.builder()
-            .decoder(StreamDecoder.create((r, t) -> {
-              BufferedReader bufferedReader = new BufferedReader(r.body().asReader(UTF_8));
-              return bufferedReader.lines().iterator();
-            }, (r, t) -> "this is delegate decoder"))
-            .target(GitHub.class, "https://api.github.com");
-  }
-}
-```
+    ```java
+    
+    public class Example {
+      public static void main(String[] args) {
+        GitHub github = Feign.builder()
+                .decoder(StreamDecoder.create((r, t) -> {
+                  BufferedReader bufferedReader = new BufferedReader(r.body().asReader(UTF_8));
+                  return bufferedReader.lines().iterator();
+                }, (r, t) -> "this is delegate decoder"))
+                .target(GitHub.class, "https://api.github.com");
+      }
+    }
+    ```
 
 ### Encoders
 The simplest way to send a request body to a server is to define a `POST` method that has a `String` or `byte[]` parameter without any annotations on it. You will likely need to add a `Content-Type` header.
