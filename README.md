@@ -540,9 +540,11 @@ public class Example {
 ### Contract
 
 #### JAX-RS
-[JAXRSContract](./jaxrs) overrides annotation processing to instead use standard ones supplied by the JAX-RS specification.  This is currently targeted at the 1.1 spec.
 
-Here's the example above re-written to use JAX-RS:
+* [JAXRSContract](./jaxrs)
+  * overrides annotation processing / 1.1 spec
+
+* _Example:_ previous example / use JAX-RS
 ```java
 interface GitHub {
   @GET @Path("/repos/{owner}/{repo}/contributors")
