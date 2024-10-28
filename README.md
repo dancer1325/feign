@@ -154,7 +154,7 @@ public class MyApp {
 |----------------|------------------|-------|
 | `@RequestLine` | Method           | `HttpMethod` and `UriTemplate` / request<br/>  `Expressions` == values wrapped in curly-braces / -- are resolved via -- `@Param` <br/> _Example:_ `{expression}` |
 | `@Param`       | Parameter        | == template variable / used in `Expression` <br/> resolved by name <br/> if value is missing & code compiled with `-parameters` -> try to get the name -- from -- bytecode method parameter name|
-| `@Headers`     | Method, Type     | Defines a `HeaderTemplate`; a variation on a `UriTemplate`.  that uses `@Param` annotated values to resolve the corresponding `Expressions`.  When used on a `Type`, the template will be applied to every request.  When used on a `Method`, the template will apply only to the annotated method. |
+| `@Headers`     | Method, Type     | == `HeaderTemplate` / variation of `UriTemplate`<br/>  -- via `@Param` -- resolve the corresponding `Expressions`<br/> if it's used on `Type` -> template will be applied / EVERY request<br/>  if it's used on `Method` -> template will applied ONLY  annotated method. |
 | `@QueryMap`    | Parameter        | Defines a `Map` of name-value pairs, or POJO, to expand into a query string. |
 | `@HeaderMap`   | Parameter        | Defines a `Map` of name-value pairs, to expand into `Http Headers` |
 | `@Body`        | Method           | Defines a `Template`, similar to a `UriTemplate` and `HeaderTemplate`, that uses `@Param` annotated values to resolve the corresponding `Expressions`.|
@@ -774,50 +774,49 @@ public class Example {
 ```
 
 ### Headers
-Feign supports settings headers on requests either as part of the api or as part of the client
-depending on the use case.
+
+* can be applied | requests -- as part of the --
+  * api or
+  * client
 
 #### Set headers using apis
-In cases where specific interfaces or calls should always have certain header values set, it
-makes sense to define headers as part of the api.
 
-Static headers can be set on an api interface or method using the `@Headers` annotation.
+* allowed |
+  * api interface or
+  * api method
 
-```java
-@Headers("Accept: application/json")
-interface BaseApi<V> {
-  @Headers("Content-Type: application/json")
-  @RequestLine("PUT /api/{key}")
-  void put(@Param("key") String key, V value);
-}
-```
+    ```java
+    @Headers("Accept: application/json")                // | API interface
+    interface BaseApi<V> {
+      @Headers("Content-Type: application/json")        // | API method
+      @RequestLine("PUT /api/{key}")
+      void put(@Param("key") String key, V value);
+    }
+    ```
 
-Methods can specify dynamic content for static headers using variable expansion in `@Headers`.
+* pass dynamic content
+  * | header's value -- via -- variable expansion | `@Headers`
 
-```java
-public interface Api {
-   @RequestLine("POST /")
-   @Headers("X-Ping: {token}")
-   void post(@Param("token") String token);
-}
-```
+      ```java
+      public interface Api {
+         @RequestLine("POST /")
+         @Headers("X-Ping: {token}")
+         void post(@Param("token") String token);
+      }
+      ```
 
-In cases where both the header field keys and values are dynamic and the range of possible keys cannot
-be known ahead of time and may vary between different method calls in the same api/client (e.g. custom
-metadata header fields such as "x-amz-meta-\*" or "x-goog-meta-\*"), a Map parameter can be annotated
-with `HeaderMap` to construct a query that uses the contents of the map as its header parameters.
+  * | header's key & value, & dynamic range of possible keys -- via -- `@HeaderMap`
 
-```java
-public interface Api {
-   @RequestLine("POST /")
-   void post(@HeaderMap Map<String, Object> headerMap);
-}
-```
-
-These approaches specify header entries as part of the api and do not require any customizations
-when building the Feign client.
+    ```java
+    public interface Api {
+       @RequestLine("POST /")
+       void post(@HeaderMap Map<String, Object> headerMap);
+    }
+    ```
 
 #### Setting headers per target
+
+* TODO:
 To customize headers for each request method on a Target, a RequestInterceptor can be used. RequestInterceptors can be
 shared across Target instances and are expected to be thread-safe. RequestInterceptors are applied to all request
 methods on a Target.
