@@ -399,7 +399,10 @@ public class CloudService {
 ```
 
 ### Examples
-Feign includes example [GitHub](./example-github) and [Wikipedia](./example-wikipedia) clients. The denominator project can also be scraped for Feign in practice. Particularly, look at its [example daemon](https://github.com/Netflix/denominator/tree/master/example-daemon).
+* clients
+  * [GitHub](./example-github)
+  * [Wikipedia](./example-wikipedia) 
+* [denominator project](https://github.com/Netflix/denominator/tree/master/example-daemon)
 
 ---
 ### Integrations
@@ -1332,6 +1335,7 @@ The Bill Of Material is a special POM file that groups dependency versions that 
   </dependencyManagement>
 </project>
 ```
+
 # Form Encoder
 
 * support
@@ -1565,3 +1569,35 @@ public interface DownloadClient {
   }
 }
 ```
+
+
+# How to compile or package the project locally?
+
+* Problems:
+  * Problem1: "[ERROR] jdk [ version='11' ][ERROR] Please make sure you define the required toolchains in your ~/.m2/toolchains.xml file."
+* Attempts:
+  * Attempt1: `.mvn clean compile` --
+  * Attempt2: create .m2/toolchains.xml + `.mvn clean compile` 
+    ```
+    <?xml version="1.0" encoding="UTF-8"?>
+    <toolchains>
+      <toolchain>
+        <type>jdk</type>
+        <provides>
+          <version>1.11</version>
+          <vendor>zulu</vendor>
+        </provides>
+        <configuration>
+          <jdkHome>/pathTo11.jdk</jdkHome>
+        </configuration>
+      </toolchain>
+    </toolchains>
+    ```
+  * Attempt3: | root pom.xml, DIFFERENT combinations of
+    ```
+    <!--<main.java.version>1.8</main.java.version>-->
+    <main.java.version>1.11</main.java.version>
+    <!--<latest.java.version>21</latest.java.version>-->
+    <latest.java.version>11</latest.java.version>
+    ```
+* Solution: TODO:
