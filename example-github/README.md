@@ -1,10 +1,13 @@
 GitHub Example
 ===================
 
-This is an example of a simple json client.
+* goal  
+  * simple json client
 
-=== Building example with Gradle
-Install and run `gradle` to produce `build/github`
-
-=== Building example with Maven
-Install and run `mvn` to produce `target/github`
+## How to run ?
+* -- via -- Gradle
+  * `gradle`
+    * generate `build/github`
+* -- via -- Maven
+  * `mvn`
+    * generate `target/github`
