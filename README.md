@@ -1601,3 +1601,4 @@ public interface DownloadClient {
     <latest.java.version>11</latest.java.version>
     ```
 * Solution: TODO:
+* Note: [Github issue created](https://github.com/OpenFeign/feign/issues/2758)
