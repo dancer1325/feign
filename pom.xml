@@ -547,7 +547,7 @@
           </configuration>
         </plugin>
 
-        <plugin>
+        <!--<plugin>
           <groupId>com.gradle</groupId>
           <artifactId>develocity-maven-extension</artifactId>
           <configuration>
@@ -561,7 +561,7 @@
               </normalization>
             </develocity>
           </configuration>
-        </plugin>
+        </plugin>-->
       </plugins>
     </pluginManagement>
 

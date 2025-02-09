@@ -1575,6 +1575,10 @@ public interface DownloadClient {
 
 * Problems:
   * Problem1: "[ERROR] jdk [ version='11' ][ERROR] Please make sure you define the required toolchains in your ~/.m2/toolchains.xml file."
+  * Problem2: "Extension com.gradle:develocity-maven-extension:1.23.1 or one of its dependencies could not be resolved"
+    * Attempt1: comment the plugin line
+    * Attempt2: Remove .m2/ related
+    * Solution: TODO:
 * Attempts:
   * Attempt1: `.mvn clean compile` --
   * Attempt2: create .m2/toolchains.xml + `.mvn clean compile` 
