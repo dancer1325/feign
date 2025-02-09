@@ -21,6 +21,7 @@
     <groupId>io.github.openfeign</groupId>
     <artifactId>parent</artifactId>
     <version>13.5</version>
+    <!-- Revert to original, as soon as I can compile the parent -->
   </parent>
 
   <artifactId>feign-example-github</artifactId>
