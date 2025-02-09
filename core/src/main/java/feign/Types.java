@@ -1,17 +1,21 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
+
+import static feign.Util.checkState;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -22,7 +26,6 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
-import static feign.Util.checkState;
 
 /**
  * Static methods for working with types.
@@ -68,15 +71,16 @@ public final class Types {
 
     } else {
       String className = type == null ? "null" : type.getClass().getName();
-      throw new IllegalArgumentException("Expected a Class, ParameterizedType, or "
-          + "GenericArrayType, but <" + type + "> is of type "
-          + className);
+      throw new IllegalArgumentException(
+          "Expected a Class, ParameterizedType, or "
+              + "GenericArrayType, but <"
+              + type
+              + "> is of type "
+              + className);
     }
   }
 
-  /**
-   * Returns true if {@code a} and {@code b} are equal.
-   */
+  /** Returns true if {@code a} and {@code b} are equal. */
   static boolean equals(Type a, Type b) {
     if (a == b) {
       return true; // Also handles (a == null && b == null).
@@ -196,8 +200,8 @@ public final class Types {
     if (!supertype.isAssignableFrom(contextRawType)) {
       throw new IllegalArgumentException();
     }
-    return resolve(context, contextRawType,
-        getGenericSupertype(context, contextRawType, supertype));
+    return resolve(
+        context, contextRawType, getGenericSupertype(context, contextRawType, supertype));
   }
 
   public static Type resolve(Type context, Class<?> contextRawType, Type toResolve) {
@@ -214,17 +218,17 @@ public final class Types {
         Class<?> original = (Class<?>) toResolve;
         Type componentType = original.getComponentType();
         Type newComponentType = resolve(context, contextRawType, componentType);
-        return componentType == newComponentType ? original
-            : new GenericArrayTypeImpl(
-                newComponentType);
+        return componentType == newComponentType
+            ? original
+            : new GenericArrayTypeImpl(newComponentType);
 
       } else if (toResolve instanceof GenericArrayType) {
         GenericArrayType original = (GenericArrayType) toResolve;
         Type componentType = original.getGenericComponentType();
         Type newComponentType = resolve(context, contextRawType, componentType);
-        return componentType == newComponentType ? original
-            : new GenericArrayTypeImpl(
-                newComponentType);
+        return componentType == newComponentType
+            ? original
+            : new GenericArrayTypeImpl(newComponentType);
 
       } else if (toResolve instanceof ParameterizedType) {
         ParameterizedType original = (ParameterizedType) toResolve;
@@ -273,9 +277,7 @@ public final class Types {
   }
 
   private static Type resolveTypeVariable(
-                                          Type context,
-                                          Class<?> contextRawType,
-                                          TypeVariable<?> unknown) {
+      Type context, Class<?> contextRawType, TypeVariable<?> unknown) {
     Class<?> declaredByRaw = declaringClassOf(unknown);
 
     // We can't reduce this further.
@@ -308,8 +310,9 @@ public final class Types {
   }
 
   public static Type resolveReturnType(Type baseType, Type overridingType) {
-    if (baseType instanceof Class && overridingType instanceof Class &&
-        ((Class<?>) baseType).isAssignableFrom((Class<?>) overridingType)) {
+    if (baseType instanceof Class
+        && overridingType instanceof Class
+        && ((Class<?>) baseType).isAssignableFrom((Class<?>) overridingType)) {
       // NOTE: javac generates multiple same methods for multiple inherited generic interfaces
       return overridingType;
     }
@@ -329,23 +332,24 @@ public final class Types {
   /**
    * Resolves the last type parameter of the parameterized {@code supertype}, based on the {@code
    * genericContext}, into its upper bounds.
-   * <p/>
-   * Implementation copied from {@code
-   * retrofit.RestMethodInfo}.
+   *
+   * <p>Implementation copied from {@code retrofit.RestMethodInfo}.
    *
    * @param genericContext Ex. {@link java.lang.reflect.Field#getGenericType()}
    * @param supertype Ex. {@code Decoder.class}
    * @return in the example above, the type parameter of {@code Decoder}.
    * @throws IllegalStateException if {@code supertype} cannot be resolved into a parameterized type
-   *         using {@code context}.
+   *     using {@code context}.
    */
   public static Type resolveLastTypeParameter(Type genericContext, Class<?> supertype)
       throws IllegalStateException {
     Type resolvedSuperType =
         Types.getSupertype(genericContext, Types.getRawType(genericContext), supertype);
-    checkState(resolvedSuperType instanceof ParameterizedType,
+    checkState(
+        resolvedSuperType instanceof ParameterizedType,
         "could not resolve %s into a parameterized type %s",
-        genericContext, supertype);
+        genericContext,
+        supertype);
     Type[] types = ParameterizedType.class.cast(resolvedSuperType).getActualTypeArguments();
     for (int i = 0; i < types.length; i++) {
       Type type = types[i];
@@ -440,8 +444,7 @@ public final class Types {
 
     @Override
     public boolean equals(Object o) {
-      return o instanceof GenericArrayType
-          && Types.equals(this, (GenericArrayType) o);
+      return o instanceof GenericArrayType && Types.equals(this, (GenericArrayType) o);
     }
 
     @Override

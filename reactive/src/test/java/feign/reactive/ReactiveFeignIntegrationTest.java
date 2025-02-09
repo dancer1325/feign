@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.reactive;
 
@@ -24,18 +26,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.AdditionalAnswers;
-import org.mockito.stubbing.Answer;
+
 import feign.Client;
 import feign.FeignIgnore;
 import feign.Logger;
@@ -58,8 +49,20 @@ import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JAXRSContract;
 import io.reactivex.Flowable;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.AdditionalAnswers;
+import org.mockito.stubbing.Answer;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -74,8 +77,8 @@ public class ReactiveFeignIntegrationTest {
 
   @Test
   void callIgnoredMethod() throws Exception {
-    TestReactorService service = ReactorFeign.builder()
-        .target(TestReactorService.class, this.getServerUrl());
+    TestReactorService service =
+        ReactorFeign.builder().target(TestReactorService.class, this.getServerUrl());
 
     try {
       service.ignore().subscribe();
@@ -88,8 +91,8 @@ public class ReactiveFeignIntegrationTest {
 
   @Test
   void defaultMethodsNotProxied() {
-    TestReactorService service = ReactorFeign.builder()
-        .target(TestReactorService.class, this.getServerUrl());
+    TestReactorService service =
+        ReactorFeign.builder().target(TestReactorService.class, this.getServerUrl());
     assertThat(service).isEqualTo(service);
     assertThat(service.toString()).isNotNull();
     assertThat(service.hashCode()).isNotZero();
@@ -102,20 +105,18 @@ public class ReactiveFeignIntegrationTest {
     this.webServer.enqueue(new MockResponse().setBody("[{ \"username\": \"test\" }]"));
     this.webServer.enqueue(new MockResponse().setBody("[{ \"username\": \"test\" }]"));
 
-    TestReactorService service = ReactorFeign.builder()
-        .encoder(new JacksonEncoder())
-        .decoder(new ReactorDecoder(new JacksonDecoder()))
-        .logger(new ConsoleLogger())
-        .dismiss404()
-        .options(new Options())
-        .logLevel(Level.FULL)
-        .target(TestReactorService.class, this.getServerUrl());
+    TestReactorService service =
+        ReactorFeign.builder()
+            .encoder(new JacksonEncoder())
+            .decoder(new ReactorDecoder(new JacksonDecoder()))
+            .logger(new ConsoleLogger())
+            .dismiss404()
+            .options(new Options())
+            .logLevel(Level.FULL)
+            .target(TestReactorService.class, this.getServerUrl());
     assertThat(service).isNotNull();
 
-    StepVerifier.create(service.version())
-        .expectNext("1.0")
-        .expectComplete()
-        .verify();
+    StepVerifier.create(service.version()).expectNext("1.0").expectComplete().verify();
     assertThat(webServer.takeRequest().getPath()).isEqualToIgnoringCase("/version");
 
     /* test encoding and decoding */
@@ -145,18 +146,16 @@ public class ReactiveFeignIntegrationTest {
     this.webServer.enqueue(new MockResponse().setBody("{ \"username\": \"test\" }"));
     this.webServer.enqueue(new MockResponse().setBody("[{ \"username\": \"test\" }]"));
 
-    TestReactiveXService service = RxJavaFeign.builder()
-        .encoder(new JacksonEncoder())
-        .decoder(new RxJavaDecoder(new JacksonDecoder()))
-        .logger(new ConsoleLogger())
-        .logLevel(Level.FULL)
-        .target(TestReactiveXService.class, this.getServerUrl());
+    TestReactiveXService service =
+        RxJavaFeign.builder()
+            .encoder(new JacksonEncoder())
+            .decoder(new RxJavaDecoder(new JacksonDecoder()))
+            .logger(new ConsoleLogger())
+            .logLevel(Level.FULL)
+            .target(TestReactiveXService.class, this.getServerUrl());
     assertThat(service).isNotNull();
 
-    StepVerifier.create(service.version())
-        .expectNext("1.0")
-        .expectComplete()
-        .verify();
+    StepVerifier.create(service.version()).expectNext("1.0").expectComplete().verify();
     assertThat(webServer.takeRequest().getPath()).isEqualToIgnoringCase("/version");
 
     /* test encoding and decoding */
@@ -176,21 +175,24 @@ public class ReactiveFeignIntegrationTest {
 
   @Test
   void invocationFactoryIsNotSupported() {
-    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
-      ReactorFeign.builder()
-          .invocationHandlerFactory(
-              (target, dispatch) -> null)
-          .target(TestReactiveXService.class, "http://localhost");
-    });
+    assertThatExceptionOfType(UnsupportedOperationException.class)
+        .isThrownBy(
+            () -> {
+              ReactorFeign.builder()
+                  .invocationHandlerFactory((target, dispatch) -> null)
+                  .target(TestReactiveXService.class, "http://localhost");
+            });
   }
 
   @Test
   void doNotCloseUnsupported() {
-    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
-      ReactorFeign.builder()
-          .doNotCloseAfterDecode()
-          .target(TestReactiveXService.class, "http://localhost");
-    });
+    assertThatExceptionOfType(UnsupportedOperationException.class)
+        .isThrownBy(
+            () -> {
+              ReactorFeign.builder()
+                  .doNotCloseAfterDecode()
+                  .target(TestReactiveXService.class, "http://localhost");
+            });
   }
 
   @Test
@@ -198,14 +200,12 @@ public class ReactiveFeignIntegrationTest {
     this.webServer.enqueue(new MockResponse().setBody("1.0"));
 
     RequestInterceptor mockInterceptor = mock(RequestInterceptor.class);
-    TestReactorService service = ReactorFeign.builder()
-        .requestInterceptor(mockInterceptor)
-        .decoder(new ReactorDecoder(new Decoder.Default()))
-        .target(TestReactorService.class, this.getServerUrl());
-    StepVerifier.create(service.version())
-        .expectNext("1.0")
-        .expectComplete()
-        .verify();
+    TestReactorService service =
+        ReactorFeign.builder()
+            .requestInterceptor(mockInterceptor)
+            .decoder(new ReactorDecoder(new Decoder.Default()))
+            .target(TestReactorService.class, this.getServerUrl());
+    StepVerifier.create(service.version()).expectNext("1.0").expectComplete().verify();
     verify(mockInterceptor, times(1)).apply(any(RequestTemplate.class));
   }
 
@@ -214,14 +214,12 @@ public class ReactiveFeignIntegrationTest {
     this.webServer.enqueue(new MockResponse().setBody("1.0"));
 
     RequestInterceptor mockInterceptor = mock(RequestInterceptor.class);
-    TestReactorService service = ReactorFeign.builder()
-        .requestInterceptors(Arrays.asList(mockInterceptor, mockInterceptor))
-        .decoder(new ReactorDecoder(new Decoder.Default()))
-        .target(TestReactorService.class, this.getServerUrl());
-    StepVerifier.create(service.version())
-        .expectNext("1.0")
-        .expectComplete()
-        .verify();
+    TestReactorService service =
+        ReactorFeign.builder()
+            .requestInterceptors(Arrays.asList(mockInterceptor, mockInterceptor))
+            .decoder(new ReactorDecoder(new Decoder.Default()))
+            .target(TestReactorService.class, this.getServerUrl());
+    StepVerifier.create(service.version()).expectNext("1.0").expectComplete().verify();
     verify(mockInterceptor, times(2)).apply(any(RequestTemplate.class));
   }
 
@@ -235,15 +233,12 @@ public class ReactiveFeignIntegrationTest {
         .willAnswer(AdditionalAnswers.returnsFirstArg());
     given(decoder.decode(any(Response.class), any(Type.class))).willReturn("1.0");
 
-    TestReactorService service = ReactorFeign.builder()
-        .mapAndDecode(responseMapper, decoder)
-        .target(TestReactorService.class, this.getServerUrl());
-    StepVerifier.create(service.version())
-        .expectNext("1.0")
-        .expectComplete()
-        .verify();
-    verify(responseMapper, times(1))
-        .map(any(Response.class), any(Type.class));
+    TestReactorService service =
+        ReactorFeign.builder()
+            .mapAndDecode(responseMapper, decoder)
+            .target(TestReactorService.class, this.getServerUrl());
+    StepVerifier.create(service.version()).expectNext("1.0").expectComplete().verify();
+    verify(responseMapper, times(1)).map(any(Response.class), any(Type.class));
     verify(decoder, times(1)).decode(any(Response.class), any(Type.class));
   }
 
@@ -253,10 +248,11 @@ public class ReactiveFeignIntegrationTest {
 
     QueryMapEncoder encoder = mock(QueryMapEncoder.class);
     given(encoder.encode(any(Object.class))).willReturn(Collections.emptyMap());
-    TestReactiveXService service = RxJavaFeign.builder()
-        .queryMapEncoder(encoder)
-        .decoder(new RxJavaDecoder(new Decoder.Default()))
-        .target(TestReactiveXService.class, this.getServerUrl());
+    TestReactiveXService service =
+        RxJavaFeign.builder()
+            .queryMapEncoder(encoder)
+            .decoder(new RxJavaDecoder(new Decoder.Default()))
+            .target(TestReactiveXService.class, this.getServerUrl());
     StepVerifier.create(service.search(new SearchQuery()))
         .expectNext("No Results Found")
         .expectComplete()
@@ -273,13 +269,14 @@ public class ReactiveFeignIntegrationTest {
     given(errorDecoder.decode(anyString(), any(Response.class)))
         .willReturn(new IllegalStateException("bad request"));
 
-    TestReactiveXService service = RxJavaFeign.builder()
-        .errorDecoder(errorDecoder)
-        .target(TestReactiveXService.class, this.getServerUrl());
+    TestReactiveXService service =
+        RxJavaFeign.builder()
+            .errorDecoder(errorDecoder)
+            .target(TestReactiveXService.class, this.getServerUrl());
     StepVerifier.create(service.search(new SearchQuery()))
-        .expectErrorSatisfies(ex -> assertThat(ex)
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("bad request"))
+        .expectErrorSatisfies(
+            ex ->
+                assertThat(ex).isInstanceOf(IllegalStateException.class).hasMessage("bad request"))
         .verify();
     verify(errorDecoder, times(1)).decode(anyString(), any(Response.class));
   }
@@ -292,14 +289,12 @@ public class ReactiveFeignIntegrationTest {
     Retryer retryer = new Retryer.Default();
     Retryer spy = spy(retryer);
     when(spy.clone()).thenReturn(spy);
-    TestReactorService service = ReactorFeign.builder()
-        .retryer(spy)
-        .decoder(new ReactorDecoder(new Decoder.Default()))
-        .target(TestReactorService.class, this.getServerUrl());
-    StepVerifier.create(service.version())
-        .expectNext("1.0")
-        .expectComplete()
-        .verify();
+    TestReactorService service =
+        ReactorFeign.builder()
+            .retryer(spy)
+            .decoder(new ReactorDecoder(new Decoder.Default()))
+            .target(TestReactorService.class, this.getServerUrl());
+    StepVerifier.create(service.version()).expectNext("1.0").expectComplete().verify();
     verify(spy, times(1)).continueOrPropagate(any(RetryableException.class));
   }
 
@@ -307,21 +302,22 @@ public class ReactiveFeignIntegrationTest {
   void client() throws Exception {
     Client client = mock(Client.class);
     given(client.execute(any(Request.class), any(Options.class)))
-        .willAnswer((Answer<Response>) invocation -> Response.builder()
-            .status(200)
-            .headers(Collections.emptyMap())
-            .body("1.0", Charset.defaultCharset())
-            .request((Request) invocation.getArguments()[0])
-            .build());
+        .willAnswer(
+            (Answer<Response>)
+                invocation ->
+                    Response.builder()
+                        .status(200)
+                        .headers(Collections.emptyMap())
+                        .body("1.0", Charset.defaultCharset())
+                        .request((Request) invocation.getArguments()[0])
+                        .build());
 
-    TestReactorService service = ReactorFeign.builder()
-        .client(client)
-        .decoder(new ReactorDecoder(new Decoder.Default()))
-        .target(TestReactorService.class, this.getServerUrl());
-    StepVerifier.create(service.version())
-        .expectNext("1.0")
-        .expectComplete()
-        .verify();
+    TestReactorService service =
+        ReactorFeign.builder()
+            .client(client)
+            .decoder(new ReactorDecoder(new Decoder.Default()))
+            .target(TestReactorService.class, this.getServerUrl());
+    StepVerifier.create(service.version()).expectNext("1.0").expectComplete().verify();
     verify(client, times(1)).execute(any(Request.class), any(Options.class));
   }
 
@@ -329,17 +325,14 @@ public class ReactiveFeignIntegrationTest {
   void differentContract() throws Exception {
     this.webServer.enqueue(new MockResponse().setBody("1.0"));
 
-    TestJaxRSReactorService service = ReactorFeign.builder()
-        .contract(new JAXRSContract())
-        .decoder(new ReactorDecoder(new Decoder.Default()))
-        .target(TestJaxRSReactorService.class, this.getServerUrl());
-    StepVerifier.create(service.version())
-        .expectNext("1.0")
-        .expectComplete()
-        .verify();
+    TestJaxRSReactorService service =
+        ReactorFeign.builder()
+            .contract(new JAXRSContract())
+            .decoder(new ReactorDecoder(new Decoder.Default()))
+            .target(TestJaxRSReactorService.class, this.getServerUrl());
+    StepVerifier.create(service.version()).expectNext("1.0").expectComplete().verify();
     assertThat(webServer.takeRequest().getPath()).isEqualToIgnoringCase("/version");
   }
-
 
   interface TestReactorService {
     @RequestLine("GET /version")
@@ -357,7 +350,6 @@ public class ReactiveFeignIntegrationTest {
     @FeignIgnore
     Mono<String> ignore();
   }
-
 
   interface TestReactiveXService {
     @RequestLine("GET /version")
@@ -380,7 +372,6 @@ public class ReactiveFeignIntegrationTest {
     Mono<String> version();
   }
 
-
   @SuppressWarnings("unused")
   static class User {
     private String username;
@@ -394,7 +385,6 @@ public class ReactiveFeignIntegrationTest {
     }
   }
 
-
   @SuppressWarnings("unused")
   static class SearchQuery {
     SearchQuery() {
@@ -405,7 +395,6 @@ public class ReactiveFeignIntegrationTest {
       return "query";
     }
   }
-
 
   public static class ConsoleLogger extends Logger {
     @Override

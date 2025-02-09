@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.mock;
 
@@ -17,14 +19,7 @@ import static feign.Util.UTF_8;
 import static feign.Util.toByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
 import feign.Body;
 import feign.Feign;
 import feign.FeignException;
@@ -36,6 +31,14 @@ import feign.Response;
 import feign.codec.DecodeException;
 import feign.codec.Decoder;
 import feign.gson.GsonDecoder;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class MockClientTest {
 
@@ -45,9 +48,10 @@ class MockClientTest {
     List<Contributor> contributors(@Param("owner") String owner, @Param("repo") String repo);
 
     @RequestLine("GET /repos/{owner}/{repo}/contributors?client_id={client_id}")
-    List<Contributor> contributors(@Param("client_id") String clientId,
-                                   @Param("owner") String owner,
-                                   @Param("repo") String repo);
+    List<Contributor> contributors(
+        @Param("client_id") String clientId,
+        @Param("owner") String owner,
+        @Param("repo") String repo);
 
     @RequestLine("PATCH /repos/{owner}/{repo}/contributors")
     List<Contributor> patchContributors(@Param("owner") String owner, @Param("repo") String repo);
@@ -55,11 +59,11 @@ class MockClientTest {
     @RequestLine("POST /repos/{owner}/{repo}/contributors")
     @Headers({"Content-Type: application/json"})
     @Body("%7B\"login\":\"{login}\",\"type\":\"{type}\"%7D")
-    Contributor create(@Param("owner") String owner,
-                       @Param("repo") String repo,
-                       @Param("login") String login,
-                       @Param("type") String type);
-
+    Contributor create(
+        @Param("owner") String owner,
+        @Param("repo") String repo,
+        @Param("login") String login,
+        @Param("type") String type);
   }
 
   static class Contributor {
@@ -67,7 +71,6 @@ class MockClientTest {
     String login;
 
     int contributions;
-
   }
 
   class AssertionDecoder implements Decoder {
@@ -85,7 +88,6 @@ class MockClientTest {
 
       return delegate.decode(response, type);
     }
-
   }
 
   private GitHub github;
@@ -98,29 +100,47 @@ class MockClientTest {
       RequestKey postContributorKey =
           RequestKey.builder(HttpMethod.POST, "/repos/netflix/feign/contributors")
               .charset(UTF_8)
-              .headers(RequestHeaders.builder()
-                  .add("Content-Length", "55")
-                  .add("Content-Type", "application/json")
-                  .build())
+              .headers(
+                  RequestHeaders.builder()
+                      .add("Content-Length", "55")
+                      .add("Content-Type", "application/json")
+                      .build())
               .body("{\"login\":\"velo_at_github\",\"type\":\"preposterous hacker\"}")
               .build();
       mockClient = new MockClient();
-      github = Feign.builder().decoder(new AssertionDecoder(new GsonDecoder()))
-          .client(mockClient.ok(HttpMethod.GET, "/repos/netflix/feign/contributors", data)
-              .ok(HttpMethod.GET, "/repos/netflix/feign/contributors?client_id=55")
-              .ok(HttpMethod.GET, "/repos/netflix/feign/contributors?client_id=7 7",
-                  new ByteArrayInputStream(data))
-              .ok(postContributorKey, "{\"login\":\"velo\",\"contributions\":0}")
-              .noContent(HttpMethod.PATCH, "/repos/velo/feign-mock/contributors")
-              .add(HttpMethod.GET, "/repos/netflix/feign/contributors?client_id=1234567890",
-                  HttpURLConnection.HTTP_NOT_FOUND)
-              .add(HttpMethod.GET, "/repos/netflix/feign/contributors?client_id=123456789",
-                  HttpURLConnection.HTTP_INTERNAL_ERROR, new ByteArrayInputStream(data))
-              .add(HttpMethod.GET, "/repos/netflix/feign/contributors?client_id=123456789",
-                  HttpURLConnection.HTTP_INTERNAL_ERROR, "")
-              .add(HttpMethod.GET, "/repos/netflix/feign/contributors?client_id=123456789",
-                  HttpURLConnection.HTTP_INTERNAL_ERROR, data))
-          .target(new MockTarget<>(GitHub.class));
+      github =
+          Feign.builder()
+              .decoder(new AssertionDecoder(new GsonDecoder()))
+              .client(
+                  mockClient
+                      .ok(HttpMethod.GET, "/repos/netflix/feign/contributors", data)
+                      .ok(HttpMethod.GET, "/repos/netflix/feign/contributors?client_id=55")
+                      .ok(
+                          HttpMethod.GET,
+                          "/repos/netflix/feign/contributors?client_id=7 7",
+                          new ByteArrayInputStream(data))
+                      .ok(postContributorKey, "{\"login\":\"velo\",\"contributions\":0}")
+                      .noContent(HttpMethod.PATCH, "/repos/velo/feign-mock/contributors")
+                      .add(
+                          HttpMethod.GET,
+                          "/repos/netflix/feign/contributors?client_id=1234567890",
+                          HttpURLConnection.HTTP_NOT_FOUND)
+                      .add(
+                          HttpMethod.GET,
+                          "/repos/netflix/feign/contributors?client_id=123456789",
+                          HttpURLConnection.HTTP_INTERNAL_ERROR,
+                          new ByteArrayInputStream(data))
+                      .add(
+                          HttpMethod.GET,
+                          "/repos/netflix/feign/contributors?client_id=123456789",
+                          HttpURLConnection.HTTP_INTERNAL_ERROR,
+                          "")
+                      .add(
+                          HttpMethod.GET,
+                          "/repos/netflix/feign/contributors?client_id=123456789",
+                          HttpURLConnection.HTTP_INTERNAL_ERROR,
+                          data))
+              .target(new MockTarget<>(GitHub.class));
     }
   }
 
@@ -162,10 +182,11 @@ class MockClientTest {
   void verifyInvocation() {
     RequestKey testRequestKey =
         RequestKey.builder(HttpMethod.POST, "/repos/netflix/feign/contributors")
-            .headers(RequestHeaders.builder()
-                .add("Content-Length", "55")
-                .add("Content-Type", "application/json")
-                .build())
+            .headers(
+                RequestHeaders.builder()
+                    .add("Content-Length", "55")
+                    .add("Content-Type", "application/json")
+                    .build())
             .body("{\"login\":\"velo_at_github\",\"type\":\"preposterous hacker\"}")
             .build();
 
@@ -182,10 +203,8 @@ class MockClientTest {
     results = mockClient.verifyTimes(testRequestKey, 1);
     assertThat(results).hasSize(1);
 
-
     assertThat(mockClient.verifyOne(testRequestKey).body()).isNotNull();
-    byte[] body = mockClient.verifyOne(HttpMethod.POST, "/repos/netflix/feign/contributors")
-        .body();
+    byte[] body = mockClient.verifyOne(HttpMethod.POST, "/repos/netflix/feign/contributors").body();
     assertThat(body).isNotNull();
 
     String message = new String(body);
@@ -204,10 +223,11 @@ class MockClientTest {
     testRequestKey =
         RequestKey.builder(HttpMethod.POST, "/repos/netflix/feign/contributors")
             .charset(UTF_8)
-            .headers(RequestHeaders.builder()
-                .add("Content-Length", "55")
-                .add("Content-Type", "application/json")
-                .build())
+            .headers(
+                RequestHeaders.builder()
+                    .add("Content-Length", "55")
+                    .add("Content-Type", "application/json")
+                    .build())
             // body is not equal
             .body("{\"login\":\"velo[at]github\",\"type\":\"preposterous hacker\"}")
             .build();
@@ -224,12 +244,13 @@ class MockClientTest {
     testRequestKey =
         RequestKey.builder(HttpMethod.POST, "/repos/netflix/feign/contributors")
             .charset(UTF_8)
-            .headers(RequestHeaders.builder()
-                .add("Content-Length", "55")
-                .add("Content-Type", "application/json")
-                // headers are not equal
-                .add("X-Header", "qwerty")
-                .build())
+            .headers(
+                RequestHeaders.builder()
+                    .add("Content-Length", "55")
+                    .add("Content-Type", "application/json")
+                    // headers are not equal
+                    .add("X-Header", "qwerty")
+                    .build())
             .body("{\"login\":\"velo_at_github\",\"type\":\"preposterous hacker\"}")
             .build();
     try {
@@ -322,5 +343,4 @@ class MockClientTest {
 
     mockClient.verifyNever(HttpMethod.POST, "/repos/netflix/feign/contributors");
   }
-
 }

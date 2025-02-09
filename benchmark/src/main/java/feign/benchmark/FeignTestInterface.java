@@ -1,24 +1,26 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.benchmark;
 
-import java.util.List;
 import feign.Body;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 import feign.Response;
+import java.util.List;
 
 @Headers("Accept: application/json")
 interface FeignTestInterface {
@@ -27,9 +29,10 @@ interface FeignTestInterface {
   Response query();
 
   @RequestLine("GET /domains/{domainId}/records?name={name}&type={type}")
-  Response mixedParams(@Param("domainId") int id,
-                       @Param("name") String nameFilter,
-                       @Param("type") String typeFilter);
+  Response mixedParams(
+      @Param("domainId") int id,
+      @Param("name") String nameFilter,
+      @Param("type") String typeFilter);
 
   @RequestLine("PATCH /")
   Response customMethod();
@@ -39,10 +42,13 @@ interface FeignTestInterface {
   void bodyParam(List<String> body);
 
   @RequestLine("POST /")
-  @Body("%7B\"customer_name\": \"{customer_name}\", \"user_name\": \"{user_name}\", \"password\": \"{password}\"%7D")
-  void form(@Param("customer_name") String customer,
-            @Param("user_name") String user,
-            @Param("password") String password);
+  @Body(
+      "%7B\"customer_name\": \"{customer_name}\", \"user_name\": \"{user_name}\", \"password\":"
+          + " \"{password}\"%7D")
+  void form(
+      @Param("customer_name") String customer,
+      @Param("user_name") String user,
+      @Param("password") String password);
 
   @RequestLine("POST /")
   @Headers({"Happy: sad", "Auth-Token: {authToken}"})

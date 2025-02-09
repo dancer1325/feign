@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.googlehttpclient;
 
@@ -17,19 +19,18 @@ import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.HashMap;
 import feign.Client;
 import feign.Request;
 import feign.Response;
-
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This module directs Feign's http requests to
@@ -56,17 +57,15 @@ public class GoogleHttpClient implements Client {
   }
 
   @Override
-  public final Response execute(final Request inputRequest,
-                                final Request.Options options)
+  public final Response execute(final Request inputRequest, final Request.Options options)
       throws IOException {
     final HttpRequest request = convertRequest(inputRequest, options);
     final HttpResponse response = request.execute();
     return convertResponse(inputRequest, response);
   }
 
-  private final HttpRequest convertRequest(final Request inputRequest,
-                                           final Request.Options options)
-      throws IOException {
+  private final HttpRequest convertRequest(
+      final Request inputRequest, final Request.Options options) throws IOException {
     // Setup the request body
     HttpContent content = null;
     if (inputRequest.length() > 0) {
@@ -81,9 +80,9 @@ public class GoogleHttpClient implements Client {
     }
 
     // Build the request
-    final HttpRequest request = requestFactory.buildRequest(inputRequest.httpMethod().name(),
-        new GenericUrl(inputRequest.url()),
-        content);
+    final HttpRequest request =
+        requestFactory.buildRequest(
+            inputRequest.httpMethod().name(), new GenericUrl(inputRequest.url()), content);
     // Setup headers
     final HttpHeaders headers = new HttpHeaders();
     for (final Map.Entry<String, Collection<String>> header : inputRequest.headers().entrySet()) {
@@ -101,16 +100,16 @@ public class GoogleHttpClient implements Client {
     request.setHeaders(headers);
 
     // Setup request options
-    request.setReadTimeout(options.readTimeoutMillis())
+    request
+        .setReadTimeout(options.readTimeoutMillis())
         .setConnectTimeout(options.connectTimeoutMillis())
         .setFollowRedirects(options.isFollowRedirects())
         .setThrowExceptionOnExecuteError(false);
     return request;
   }
 
-  private final Response convertResponse(final Request inputRequest,
-                                         final HttpResponse inputResponse)
-      throws IOException {
+  private final Response convertResponse(
+      final Request inputRequest, final HttpResponse inputResponse) throws IOException {
     final HttpHeaders headers = inputResponse.getHeaders();
     Integer contentLength = null;
     if (headers.getContentLength() != null && headers.getContentLength() <= Integer.MAX_VALUE) {

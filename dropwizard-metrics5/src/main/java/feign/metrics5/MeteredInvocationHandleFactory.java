@@ -1,33 +1,33 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.metrics5;
 
+import feign.*;
 import feign.utils.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.dropwizard.metrics5.MetricRegistry;
+import io.dropwizard.metrics5.Timer.Context;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import feign.*;
-import io.dropwizard.metrics5.MetricRegistry;
-import io.dropwizard.metrics5.Timer.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Warp feign {@link InvocationHandler} with metrics.
- */
+/** Warp feign {@link InvocationHandler} with metrics. */
 public class MeteredInvocationHandleFactory implements InvocationHandlerFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(MeteredInvocationHandleFactory.class);
@@ -47,8 +47,10 @@ public class MeteredInvocationHandleFactory implements InvocationHandlerFactory 
 
   private final MetricSuppliers metricSuppliers;
 
-  public MeteredInvocationHandleFactory(InvocationHandlerFactory invocationHandler,
-      MetricRegistry metricRegistry, MetricSuppliers metricSuppliers) {
+  public MeteredInvocationHandleFactory(
+      InvocationHandlerFactory invocationHandler,
+      MetricRegistry metricRegistry,
+      MetricSuppliers metricSuppliers) {
     this.invocationHandler = invocationHandler;
     this.metricRegistry = metricRegistry;
     this.metricSuppliers = metricSuppliers;
@@ -61,34 +63,41 @@ public class MeteredInvocationHandleFactory implements InvocationHandlerFactory 
 
     final InvocationHandler invocationHandle = invocationHandler.create(target, dispatch);
     return (proxy, method, args) -> {
-
-      if (JAVA_OBJECT_METHODS.contains(method.getName())
-          || Util.isDefault(method)) {
+      if (JAVA_OBJECT_METHODS.contains(method.getName()) || Util.isDefault(method)) {
         LOG.trace("Skipping metrics for method={}", method);
         return invocationHandle.invoke(proxy, method, args);
       }
 
       try (final Context classTimer =
-          metricRegistry.timer(metricName.metricName(clientClass, method, target.url()),
-              metricSuppliers.timers()).time()) {
+          metricRegistry
+              .timer(
+                  metricName.metricName(clientClass, method, target.url()),
+                  metricSuppliers.timers())
+              .time()) {
 
         return invocationHandle.invoke(proxy, method, args);
       } catch (final FeignException e) {
-        metricRegistry.meter(
-            metricName.metricName(clientClass, method, target.url())
-                .resolve("http_error")
-                .tagged("http_status", String.valueOf(e.status()))
-                .tagged("error_group", e.status() / 100 + "xx"),
-            metricSuppliers.meters()).mark();
+        metricRegistry
+            .meter(
+                metricName
+                    .metricName(clientClass, method, target.url())
+                    .resolve("http_error")
+                    .tagged("http_status", String.valueOf(e.status()))
+                    .tagged("error_group", e.status() / 100 + "xx"),
+                metricSuppliers.meters())
+            .mark();
 
         throw e;
       } catch (final Throwable e) {
         metricRegistry
-            .meter(metricName.metricName(clientClass, method, target.url())
-                .resolve("exception")
-                .tagged("exception_name", e.getClass().getSimpleName())
-                .tagged("root_cause_name",
-                    ExceptionUtils.getRootCause(e).getClass().getSimpleName()),
+            .meter(
+                metricName
+                    .metricName(clientClass, method, target.url())
+                    .resolve("exception")
+                    .tagged("exception_name", e.getClass().getSimpleName())
+                    .tagged(
+                        "root_cause_name",
+                        ExceptionUtils.getRootCause(e).getClass().getSimpleName()),
                 metricSuppliers.meters())
             .mark();
 
@@ -96,6 +105,4 @@ public class MeteredInvocationHandleFactory implements InvocationHandlerFactory 
       }
     };
   }
-
-
 }

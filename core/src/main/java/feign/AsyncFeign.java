@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
@@ -30,9 +32,8 @@ import java.util.function.Supplier;
  * session cookies or tokens) is explicit, as calls for the same session may be done across several
  * threads. <br>
  * <br>
- * {@link Retryer} is not supported in this model, as that is a blocking API.
- * {@link ExceptionPropagationPolicy} is made redundant as {@link RetryableException} is never
- * thrown. <br>
+ * {@link Retryer} is not supported in this model, as that is a blocking API. {@link
+ * ExceptionPropagationPolicy} is made redundant as {@link RetryableException} is never thrown. <br>
  * Alternative approaches to retrying can be handled through {@link AsyncClient clients}. <br>
  * <br>
  * Target interface methods must return {@link CompletableFuture} with a non-wildcard type. As the
@@ -68,8 +69,9 @@ public final class AsyncFeign<C> {
   public static class AsyncBuilder<C> extends BaseBuilder<AsyncBuilder<C>, AsyncFeign<C>> {
 
     private AsyncContextSupplier<C> defaultContextSupplier = () -> null;
-    private AsyncClient<C> client = new AsyncClient.Default<>(
-        new Client.Default(null, null), LazyInitializedExecutorService.instance);
+    private AsyncClient<C> client =
+        new AsyncClient.Default<>(
+            new Client.Default(null, null), LazyInitializedExecutorService.instance);
     private MethodInfoResolver methodInfoResolver = MethodInfo::new;
 
     @Deprecated
@@ -186,34 +188,43 @@ public final class AsyncFeign<C> {
     }
 
     @Override
-    public AsyncBuilder<C> invocationHandlerFactory(InvocationHandlerFactory invocationHandlerFactory) {
+    public AsyncBuilder<C> invocationHandlerFactory(
+        InvocationHandlerFactory invocationHandlerFactory) {
       return super.invocationHandlerFactory(invocationHandlerFactory);
     }
 
     @Override
     public AsyncFeign<C> internalBuild() {
       AsyncResponseHandler responseHandler =
-          (AsyncResponseHandler) Capability.enrich(
-              new AsyncResponseHandler(
-                  logLevel,
-                  logger,
-                  decoder,
-                  errorDecoder,
-                  dismiss404,
-                  closeAfterDecode, decodeVoid, responseInterceptorChain()),
-              AsyncResponseHandler.class,
-              capabilities);
+          (AsyncResponseHandler)
+              Capability.enrich(
+                  new AsyncResponseHandler(
+                      logLevel,
+                      logger,
+                      decoder,
+                      errorDecoder,
+                      dismiss404,
+                      closeAfterDecode,
+                      decodeVoid,
+                      responseInterceptorChain()),
+                  AsyncResponseHandler.class,
+                  capabilities);
 
       final MethodHandler.Factory<C> methodHandlerFactory =
           new AsynchronousMethodHandler.Factory<>(
-              client, retryer, requestInterceptors,
-              responseHandler, logger, logLevel,
-              propagationPolicy, methodInfoResolver,
+              client,
+              retryer,
+              requestInterceptors,
+              responseHandler,
+              logger,
+              logLevel,
+              propagationPolicy,
+              methodInfoResolver,
               new RequestTemplateFactoryResolver(encoder, queryMapEncoder),
               options);
       final ReflectiveFeign<C> feign =
-          new ReflectiveFeign<>(contract, methodHandlerFactory, invocationHandlerFactory,
-              defaultContextSupplier);
+          new ReflectiveFeign<>(
+              contract, methodHandlerFactory, invocationHandlerFactory, defaultContextSupplier);
       return new AsyncFeign<>(feign);
     }
   }

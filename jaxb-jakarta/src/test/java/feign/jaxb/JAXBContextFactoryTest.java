@@ -1,19 +1,27 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.jaxb;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import feign.jaxb.mock.onepackage.AnotherMockedJAXBObject;
+import feign.jaxb.mock.onepackage.MockedJAXBObject;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
+import jakarta.xml.bind.ValidationEventHandler;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -22,11 +30,6 @@ import javax.xml.XMLConstants;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import org.junit.jupiter.api.Test;
-import feign.jaxb.mock.onepackage.AnotherMockedJAXBObject;
-import feign.jaxb.mock.onepackage.MockedJAXBObject;
-import jakarta.xml.bind.Marshaller;
-import jakarta.xml.bind.Unmarshaller;
-import jakarta.xml.bind.ValidationEventHandler;
 
 class JAXBContextFactoryTest {
 
@@ -55,7 +58,8 @@ class JAXBContextFactoryTest {
   void buildsMarshallerWithNoNamespaceSchemaLocationProperty() throws Exception {
     JAXBContextFactory factory =
         new JAXBContextFactory.Builder()
-            .withMarshallerNoNamespaceSchemaLocation("http://apihost/schema.xsd").build();
+            .withMarshallerNoNamespaceSchemaLocation("http://apihost/schema.xsd")
+            .build();
 
     Marshaller marshaller = factory.createMarshaller(Object.class);
     assertThat(marshaller.getProperty(Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION))
@@ -112,8 +116,7 @@ class JAXBContextFactoryTest {
 
   @Test
   void buildsMarshallerWithDefaultEventHandler() throws Exception {
-    JAXBContextFactory factory =
-        new JAXBContextFactory.Builder().build();
+    JAXBContextFactory factory = new JAXBContextFactory.Builder().build();
 
     Marshaller marshaller = factory.createMarshaller(Object.class);
     assertThat(marshaller.getEventHandler()).isNotNull();
@@ -131,8 +134,7 @@ class JAXBContextFactoryTest {
 
   @Test
   void buildsUnmarshallerWithDefaultEventHandler() throws Exception {
-    JAXBContextFactory factory =
-        new JAXBContextFactory.Builder().build();
+    JAXBContextFactory factory = new JAXBContextFactory.Builder().build();
 
     Unmarshaller unmarshaller = factory.createUnmarshaller(Object.class);
     assertThat(unmarshaller.getEventHandler()).isNotNull();
@@ -142,8 +144,7 @@ class JAXBContextFactoryTest {
   void preloadCache() throws Exception {
 
     List<Class<?>> classes = Arrays.asList(String.class, Integer.class);
-    JAXBContextFactory factory =
-        new JAXBContextFactory.Builder().build(classes);
+    JAXBContextFactory factory = new JAXBContextFactory.Builder().build(classes);
 
     Field f = factory.getClass().getDeclaredField("jaxbContexts"); // NoSuchFieldException
     f.setAccessible(true);
@@ -152,7 +153,6 @@ class JAXBContextFactoryTest {
     assertThat(internalCache.size() == classes.size()).isTrue();
     assertThat(internalCache.get(new JAXBContextClassCacheKey(String.class))).isNotNull();
     assertThat(internalCache.get(new JAXBContextClassCacheKey(Integer.class))).isNotNull();
-
   }
 
   @Test
@@ -171,44 +171,53 @@ class JAXBContextFactoryTest {
     assertThat(classes).hasSize(internalCache.size());
     assertThat(internalCache.get(new JAXBContextClassCacheKey(String.class))).isNotNull();
     assertThat(internalCache.get(new JAXBContextClassCacheKey(Integer.class))).isNotNull();
-
   }
 
   @Test
   void packageModeInstantiationUsingSamePackage() throws Exception {
 
-    JAXBContextFactory factory = new JAXBContextFactory.Builder()
-        .withJAXBContextInstantiationMode(JAXBContextInstantationMode.PACKAGE)
-        .build(Arrays.asList(MockedJAXBObject.class, AnotherMockedJAXBObject.class));
+    JAXBContextFactory factory =
+        new JAXBContextFactory.Builder()
+            .withJAXBContextInstantiationMode(JAXBContextInstantationMode.PACKAGE)
+            .build(Arrays.asList(MockedJAXBObject.class, AnotherMockedJAXBObject.class));
 
     Field f = factory.getClass().getDeclaredField("jaxbContexts"); // NoSuchFieldException
     f.setAccessible(true);
     Map internalCache = (Map) f.get(factory); // IllegalAccessException
     assertThat(internalCache.isEmpty()).isFalse();
     assertThat(internalCache).hasSize(1);
-    assertThat(internalCache.get(new JAXBContextPackageCacheKey("feign.jaxb.mock.onepackage",
-        AnotherMockedJAXBObject.class.getClassLoader()))).isNotNull();
-
+    assertThat(
+            internalCache.get(
+                new JAXBContextPackageCacheKey(
+                    "feign.jaxb.mock.onepackage", AnotherMockedJAXBObject.class.getClassLoader())))
+        .isNotNull();
   }
 
   @Test
   void packageModeInstantiationUsingMultiplePackages() throws Exception {
 
-    JAXBContextFactory factory = new JAXBContextFactory.Builder()
-        .withJAXBContextInstantiationMode(JAXBContextInstantationMode.PACKAGE)
-        .build(Arrays.asList(MockedJAXBObject.class,
-            feign.jaxb.mock.anotherpackage.MockedJAXBObject.class));
+    JAXBContextFactory factory =
+        new JAXBContextFactory.Builder()
+            .withJAXBContextInstantiationMode(JAXBContextInstantationMode.PACKAGE)
+            .build(
+                Arrays.asList(
+                    MockedJAXBObject.class, feign.jaxb.mock.anotherpackage.MockedJAXBObject.class));
 
     Field f = factory.getClass().getDeclaredField("jaxbContexts"); // NoSuchFieldException
     f.setAccessible(true);
     Map internalCache = (Map) f.get(factory); // IllegalAccessException
     assertThat(internalCache.isEmpty()).isFalse();
     assertThat(internalCache).hasSize(2);
-    assertThat(internalCache.get(new JAXBContextPackageCacheKey("feign.jaxb.mock.onepackage",
-        MockedJAXBObject.class.getClassLoader()))).isNotNull();
-    assertThat(internalCache.get(new JAXBContextPackageCacheKey("feign.jaxb.mock.anotherpackage",
-        feign.jaxb.mock.anotherpackage.MockedJAXBObject.class.getClassLoader()))).isNotNull();
-
-
+    assertThat(
+            internalCache.get(
+                new JAXBContextPackageCacheKey(
+                    "feign.jaxb.mock.onepackage", MockedJAXBObject.class.getClassLoader())))
+        .isNotNull();
+    assertThat(
+            internalCache.get(
+                new JAXBContextPackageCacheKey(
+                    "feign.jaxb.mock.anotherpackage",
+                    feign.jaxb.mock.anotherpackage.MockedJAXBObject.class.getClassLoader())))
+        .isNotNull();
   }
 }

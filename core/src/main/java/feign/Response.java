@@ -1,28 +1,29 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
+import static feign.Util.*;
+
+import feign.Request.ProtocolVersion;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import feign.Request.ProtocolVersion;
-import static feign.Util.*;
 
-/**
- * An immutable response to an http invocation which only returns string content.
- */
+/** An immutable response to an http invocation which only returns string content. */
 public final class Response implements Closeable {
 
   private final int status;
@@ -71,43 +72,57 @@ public final class Response implements Closeable {
       this.protocolVersion = source.protocolVersion;
     }
 
-    /** @see Response#status */
+    /**
+     * @see Response#status
+     */
     public Builder status(int status) {
       this.status = status;
       return this;
     }
 
-    /** @see Response#reason */
+    /**
+     * @see Response#reason
+     */
     public Builder reason(String reason) {
       this.reason = reason;
       return this;
     }
 
-    /** @see Response#headers */
+    /**
+     * @see Response#headers
+     */
     public Builder headers(Map<String, Collection<String>> headers) {
       this.headers = headers;
       return this;
     }
 
-    /** @see Response#body */
+    /**
+     * @see Response#body
+     */
     public Builder body(Body body) {
       this.body = body;
       return this;
     }
 
-    /** @see Response#body */
+    /**
+     * @see Response#body
+     */
     public Builder body(InputStream inputStream, Integer length) {
       this.body = InputStreamBody.orNull(inputStream, length);
       return this;
     }
 
-    /** @see Response#body */
+    /**
+     * @see Response#body
+     */
     public Builder body(byte[] data) {
       this.body = ByteArrayBody.orNull(data);
       return this;
     }
 
-    /** @see Response#body */
+    /**
+     * @see Response#body
+     */
     public Builder body(String text, Charset charset) {
       this.body = ByteArrayBody.orNull(text, charset);
       return this;
@@ -122,9 +137,7 @@ public final class Response implements Closeable {
       return this;
     }
 
-    /**
-     * HTTP protocol version
-     */
+    /** HTTP protocol version */
     public Builder protocolVersion(ProtocolVersion protocolVersion) {
       this.protocolVersion = (protocolVersion != null) ? protocolVersion : DEFAULT_PROTOCOL_VERSION;
       return this;
@@ -150,38 +163,32 @@ public final class Response implements Closeable {
   /**
    * status code. ex {@code 200}
    *
-   * See <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html" >rfc2616</a>
+   * <p>See <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html" >rfc2616</a>
    */
   public int status() {
     return status;
   }
 
   /**
-   * Nullable and not set when using http/2 See
-   * <a href="https://github.com/http2/http2-spec/issues/202">...</a> See
-   * <a href="https://github.com/http2/http2-spec/issues/202">...</a>
+   * Nullable and not set when using http/2 See <a
+   * href="https://github.com/http2/http2-spec/issues/202">...</a> See <a
+   * href="https://github.com/http2/http2-spec/issues/202">...</a>
    */
   public String reason() {
     return reason;
   }
 
-  /**
-   * Returns a case-insensitive mapping of header names to their values.
-   */
+  /** Returns a case-insensitive mapping of header names to their values. */
   public Map<String, Collection<String>> headers() {
     return headers;
   }
 
-  /**
-   * if present, the response had a body
-   */
+  /** if present, the response had a body */
   public Body body() {
     return body;
   }
 
-  /**
-   * the request that generated this response
-   */
+  /** the request that generated this response */
   public Request request() {
     return request;
   }
@@ -196,10 +203,9 @@ public final class Response implements Closeable {
   }
 
   /**
-   * Returns a charset object based on the requests content type. Defaults to UTF-8 See
-   * <a href="https://datatracker.ietf.org/doc/html/rfc7231#section-5.3.3">rfc7231 -
-   * Accept-Charset</a> See
-   * <a href="https://datatracker.ietf.org/doc/html/rfc7231#section-3.1.1.1">rfc7231 - Media
+   * Returns a charset object based on the requests content type. Defaults to UTF-8 See <a
+   * href="https://datatracker.ietf.org/doc/html/rfc7231#section-5.3.3">rfc7231 - Accept-Charset</a>
+   * See <a href="https://datatracker.ietf.org/doc/html/rfc7231#section-3.1.1.1">rfc7231 - Media
    * Type</a>
    */
   public Charset charset() {
@@ -226,16 +232,14 @@ public final class Response implements Closeable {
   public String toString() {
     StringBuilder builder =
         new StringBuilder(protocolVersion.toString()).append(" ").append(status);
-    if (reason != null)
-      builder.append(' ').append(reason);
+    if (reason != null) builder.append(' ').append(reason);
     builder.append('\n');
     for (String field : headers.keySet()) {
       for (String value : valuesOrEmpty(headers, field)) {
         builder.append(field).append(": ").append(value).append('\n');
       }
     }
-    if (body != null)
-      builder.append('\n').append(body);
+    if (body != null) builder.append('\n').append(body);
     return builder.toString();
   }
 
@@ -247,9 +251,7 @@ public final class Response implements Closeable {
   public interface Body extends Closeable {
 
     /**
-     * length in bytes, if known. Null if unknown or greater than {@link Integer#MAX_VALUE}.
-     *
-     * <br>
+     * length in bytes, if known. Null if unknown or greater than {@link Integer#MAX_VALUE}. <br>
      * <br>
      * <br>
      * <b>Note</b><br>
@@ -257,14 +259,10 @@ public final class Response implements Closeable {
      */
     Integer length();
 
-    /**
-     * True if {@link #asInputStream()} and {@link #asReader()} can be called more than once.
-     */
+    /** True if {@link #asInputStream()} and {@link #asReader()} can be called more than once. */
     boolean isRepeatable();
 
-    /**
-     * It is the responsibility of the caller to close the stream.
-     */
+    /** It is the responsibility of the caller to close the stream. */
     InputStream asInputStream() throws IOException;
 
     /**
@@ -277,9 +275,7 @@ public final class Response implements Closeable {
       return asReader(StandardCharsets.UTF_8);
     }
 
-    /**
-     * It is the responsibility of the caller to close the stream.
-     */
+    /** It is the responsibility of the caller to close the stream. */
     Reader asReader(Charset charset) throws IOException;
   }
 
@@ -331,7 +327,6 @@ public final class Response implements Closeable {
     public void close() throws IOException {
       inputStream.close();
     }
-
   }
 
   private static final class ByteArrayBody implements Response.Body {
@@ -386,7 +381,5 @@ public final class Response implements Closeable {
 
     @Override
     public void close() {}
-
   }
-
 }

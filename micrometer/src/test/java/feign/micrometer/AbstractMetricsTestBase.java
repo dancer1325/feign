@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.micrometer;
 
@@ -17,12 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
 import feign.AsyncFeign;
 import feign.Capability;
 import feign.Feign;
@@ -32,6 +29,12 @@ import feign.RequestLine;
 import feign.mock.HttpMethod;
 import feign.mock.MockClient;
 import feign.mock.MockTarget;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
 
@@ -41,13 +44,11 @@ public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
     String get(String body);
   }
 
-
   public interface CompletableSource {
 
     @RequestLine("GET /get")
     CompletableFuture<String> get(String body);
   }
-
 
   protected MR metricsRegistry;
 
@@ -61,10 +62,11 @@ public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
   @Test
   final void addMetricsCapability() {
     final SimpleSource source =
-        customizeBuilder(Feign.builder()
-            .client(new MockClient().ok(HttpMethod.GET, "/get", "1234567890abcde"))
-            .addCapability(createMetricCapability()))
-                .target(new MockTarget<>(SimpleSource.class));
+        customizeBuilder(
+                Feign.builder()
+                    .client(new MockClient().ok(HttpMethod.GET, "/get", "1234567890abcde"))
+                    .addCapability(createMetricCapability()))
+            .target(new MockTarget<>(SimpleSource.class));
 
     source.get("0x3456789");
 
@@ -74,10 +76,11 @@ public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
   @Test
   final void addAsyncMetricsCapability() {
     final CompletableSource source =
-        customizeBuilder(AsyncFeign.builder()
-            .client(new MockClient().ok(HttpMethod.GET, "/get", "1234567890abcde"))
-            .addCapability(createMetricCapability()))
-                .target(new MockTarget<>(CompletableSource.class));
+        customizeBuilder(
+                AsyncFeign.builder()
+                    .client(new MockClient().ok(HttpMethod.GET, "/get", "1234567890abcde"))
+                    .addCapability(createMetricCapability()))
+            .target(new MockTarget<>(CompletableSource.class));
 
     source.get("0x3456789").join();
 
@@ -90,18 +93,24 @@ public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
     metrics
         .keySet()
         .forEach(
-            metricId -> assertThat(doesMetricIdIncludeClient(metricId))
-                .as("Expect all metric names to include client name:" + metricId).isTrue());
+            metricId ->
+                assertThat(doesMetricIdIncludeClient(metricId))
+                    .as("Expect all metric names to include client name:" + metricId)
+                    .isTrue());
     metrics
         .keySet()
         .forEach(
-            metricId -> assertThat(doesMetricIncludeVerb(metricId, "get"))
-                .as("Expect all metric names to include method name:" + metricId).isTrue());
+            metricId ->
+                assertThat(doesMetricIncludeVerb(metricId, "get"))
+                    .as("Expect all metric names to include method name:" + metricId)
+                    .isTrue());
     metrics
         .keySet()
         .forEach(
-            metricId -> assertThat(doesMetricIncludeHost(metricId))
-                .as("Expect all metric names to include host name:" + metricId).isTrue());
+            metricId ->
+                assertThat(doesMetricIncludeHost(metricId))
+                    .as("Expect all metric names to include host name:" + metricId)
+                    .isTrue());
 
     final Map<METRIC_ID, METRIC> clientMetrics;
     if (asyncClient) {
@@ -147,14 +156,15 @@ public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
     final AtomicReference<FeignException.NotFound> notFound = new AtomicReference<>();
 
     final SimpleSource source =
-        customizeBuilder(Feign.builder()
-            .client(
-                (request, options) -> {
-                  notFound.set(new FeignException.NotFound("test", request, null, null));
-                  throw notFound.get();
-                })
-            .addCapability(createMetricCapability()))
-                .target(new MockTarget<>(MicrometerCapabilityTest.SimpleSource.class));
+        customizeBuilder(
+                Feign.builder()
+                    .client(
+                        (request, options) -> {
+                          notFound.set(new FeignException.NotFound("test", request, null, null));
+                          throw notFound.get();
+                        })
+                    .addCapability(createMetricCapability()))
+            .target(new MockTarget<>(MicrometerCapabilityTest.SimpleSource.class));
 
     try {
       source.get("0x3456789");
@@ -163,8 +173,16 @@ public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
       assertThat(e).isSameAs(notFound.get());
     }
 
-    assertThat(getMetric("http_response_code", "http_status", "404", "status_group", "4xx",
-        "http_method", "GET")).isNotNull();
+    assertThat(
+            getMetric(
+                "http_response_code",
+                "http_status",
+                "404",
+                "status_group",
+                "4xx",
+                "http_method",
+                "GET"))
+        .isNotNull();
   }
 
   protected abstract METRIC getMetric(String suffix, String... tags);
@@ -174,15 +192,17 @@ public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
     final AtomicReference<FeignException.NotFound> notFound = new AtomicReference<>();
 
     final SimpleSource source =
-        customizeBuilder(Feign.builder()
-            .client(new MockClient().ok(HttpMethod.GET, "/get", "1234567890abcde"))
-            .decoder(
-                (response, type) -> {
-                  notFound.set(new FeignException.NotFound("test", response.request(), null, null));
-                  throw notFound.get();
-                })
-            .addCapability(createMetricCapability()))
-                .target(new MockTarget<>(MicrometerCapabilityTest.SimpleSource.class));
+        customizeBuilder(
+                Feign.builder()
+                    .client(new MockClient().ok(HttpMethod.GET, "/get", "1234567890abcde"))
+                    .decoder(
+                        (response, type) -> {
+                          notFound.set(
+                              new FeignException.NotFound("test", response.request(), null, null));
+                          throw notFound.get();
+                        })
+                    .addCapability(createMetricCapability()))
+            .target(new MockTarget<>(MicrometerCapabilityTest.SimpleSource.class));
 
     FeignException.NotFound thrown =
         assertThrows(FeignException.NotFound.class, () -> source.get("0x3456789"));
@@ -192,28 +212,38 @@ public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
   @Test
   void shouldMetricCollectionWithCustomException() {
     final SimpleSource source =
-        customizeBuilder(Feign.builder()
-            .client(
-                (request, options) -> {
-                  throw new RuntimeException("Test error");
-                })
-            .addCapability(createMetricCapability()))
-                .target(new MockTarget<>(MicrometerCapabilityTest.SimpleSource.class));
+        customizeBuilder(
+                Feign.builder()
+                    .client(
+                        (request, options) -> {
+                          throw new RuntimeException("Test error");
+                        })
+                    .addCapability(createMetricCapability()))
+            .target(new MockTarget<>(MicrometerCapabilityTest.SimpleSource.class));
 
     RuntimeException thrown = assertThrows(RuntimeException.class, () -> source.get("0x3456789"));
     assertThat(thrown.getMessage()).isEqualTo("Test error");
 
-    assertThat(getMetric("exception", "exception_name", "RuntimeException", "method", "get",
-        "root_cause_name", "RuntimeException")).isNotNull();
+    assertThat(
+            getMetric(
+                "exception",
+                "exception_name",
+                "RuntimeException",
+                "method",
+                "get",
+                "root_cause_name",
+                "RuntimeException"))
+        .isNotNull();
   }
 
   @Test
   void clientMetricsHaveUriLabel() {
     final SimpleSource source =
-        customizeBuilder(Feign.builder()
-            .client(new MockClient().ok(HttpMethod.GET, "/get", "1234567890abcde"))
-            .addCapability(createMetricCapability()))
-                .target(new MockTarget<>(SimpleSource.class));
+        customizeBuilder(
+                Feign.builder()
+                    .client(new MockClient().ok(HttpMethod.GET, "/get", "1234567890abcde"))
+                    .addCapability(createMetricCapability()))
+            .target(new MockTarget<>(SimpleSource.class));
 
     source.get("0x3456789");
 
@@ -225,8 +255,10 @@ public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
     clientMetrics
         .keySet()
         .forEach(
-            metricId -> assertThat(doesMetricIncludeUri(metricId, "/get"))
-                .as("Expect all Client metric names to include uri:" + metricId).isTrue());
+            metricId ->
+                assertThat(doesMetricIncludeUri(metricId, "/get"))
+                    .as("Expect all Client metric names to include uri:" + metricId)
+                    .isTrue());
   }
 
   public interface SourceWithPathExpressions {
@@ -238,10 +270,11 @@ public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
   @Test
   void clientMetricsHaveUriLabelWithPathExpression() {
     final SourceWithPathExpressions source =
-        customizeBuilder(Feign.builder()
-            .client(new MockClient().ok(HttpMethod.GET, "/get/123", "1234567890abcde"))
-            .addCapability(createMetricCapability()))
-                .target(new MockTarget<>(SourceWithPathExpressions.class));
+        customizeBuilder(
+                Feign.builder()
+                    .client(new MockClient().ok(HttpMethod.GET, "/get/123", "1234567890abcde"))
+                    .addCapability(createMetricCapability()))
+            .target(new MockTarget<>(SourceWithPathExpressions.class));
 
     source.get("123", "0x3456789");
 
@@ -253,10 +286,13 @@ public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
     clientMetrics
         .keySet()
         .forEach(
-            metricId -> assertThat(doesMetricIncludeUri(metricId, "/get/{id}"))
-                .as("Expect all Client metric names to include uri as aggregated path expression:"
-                    + metricId)
-                .isTrue());
+            metricId ->
+                assertThat(doesMetricIncludeUri(metricId, "/get/{id}"))
+                    .as(
+                        "Expect all Client metric names to include uri as aggregated path"
+                            + " expression:"
+                            + metricId)
+                    .isTrue());
   }
 
   @Test
@@ -264,15 +300,17 @@ public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
     final AtomicReference<FeignException.NotFound> notFound = new AtomicReference<>();
 
     final SourceWithPathExpressions source =
-        customizeBuilder(Feign.builder()
-            .client(new MockClient().ok(HttpMethod.GET, "/get/123", "1234567890abcde"))
-            .decoder(
-                (response, type) -> {
-                  notFound.set(new FeignException.NotFound("test", response.request(), null, null));
-                  throw notFound.get();
-                })
-            .addCapability(createMetricCapability()))
-                .target(new MockTarget<>(MicrometerCapabilityTest.SourceWithPathExpressions.class));
+        customizeBuilder(
+                Feign.builder()
+                    .client(new MockClient().ok(HttpMethod.GET, "/get/123", "1234567890abcde"))
+                    .decoder(
+                        (response, type) -> {
+                          notFound.set(
+                              new FeignException.NotFound("test", response.request(), null, null));
+                          throw notFound.get();
+                        })
+                    .addCapability(createMetricCapability()))
+            .target(new MockTarget<>(MicrometerCapabilityTest.SourceWithPathExpressions.class));
 
     FeignException.NotFound thrown =
         assertThrows(FeignException.NotFound.class, () -> source.get("123", "0x3456789"));
@@ -286,10 +324,13 @@ public abstract class AbstractMetricsTestBase<MR, METRIC_ID, METRIC> {
     decoderMetrics
         .keySet()
         .forEach(
-            metricId -> assertThat(doesMetricIncludeUri(metricId, "/get/{id}"))
-                .as("Expect all Decoder metric names to include uri as aggregated path expression:"
-                    + metricId)
-                .isTrue());
+            metricId ->
+                assertThat(doesMetricIncludeUri(metricId, "/get/{id}"))
+                    .as(
+                        "Expect all Decoder metric names to include uri as aggregated path"
+                            + " expression:"
+                            + metricId)
+                    .isTrue());
   }
 
   protected abstract boolean isClientMetric(METRIC_ID metricId);

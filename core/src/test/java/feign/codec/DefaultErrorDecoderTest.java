@@ -1,21 +1,29 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.codec;
 
 import static feign.Util.RETRY_AFTER;
 import static feign.Util.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import feign.FeignException;
+import feign.Request;
+import feign.Request.HttpMethod;
+import feign.Response;
+import feign.Util;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collection;
@@ -24,11 +32,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-import feign.FeignException;
-import feign.Request;
-import feign.Request.HttpMethod;
-import feign.Response;
-import feign.Util;
 
 @SuppressWarnings("deprecation")
 class DefaultErrorDecoderTest {
@@ -40,9 +43,14 @@ class DefaultErrorDecoderTest {
   @Test
   void throwsFeignException() throws Throwable {
 
-    Response response = Response.builder().status(500).reason("Internal server error")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(headers).build();
+    Response response =
+        Response.builder()
+            .status(500)
+            .reason("Internal server error")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(headers)
+            .build();
 
     Throwable exception = errorDecoder.decode("Service#foo()", response);
     assertThat(exception.getMessage())
@@ -51,9 +59,15 @@ class DefaultErrorDecoderTest {
 
   @Test
   void throwsFeignExceptionIncludingBody() throws Throwable {
-    Response response = Response.builder().status(500).reason("Internal server error")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(headers).body("hello world", UTF_8).build();
+    Response response =
+        Response.builder()
+            .status(500)
+            .reason("Internal server error")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(headers)
+            .body("hello world", UTF_8)
+            .build();
 
     try {
       throw errorDecoder.decode("Service#foo()", response);
@@ -68,17 +82,25 @@ class DefaultErrorDecoderTest {
   @Test
   void throwsFeignExceptionIncludingLongBody() throws Throwable {
     String actualBody = repeatString("hello world ", 200);
-    Response response = Response.builder().status(500).reason("Internal server error")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(headers).body(actualBody, UTF_8).build();
+    Response response =
+        Response.builder()
+            .status(500)
+            .reason("Internal server error")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(headers)
+            .body(actualBody, UTF_8)
+            .build();
     String expectedBody = repeatString("hello world ", 16) + "hello wo... (2400 bytes)";
 
     try {
       throw errorDecoder.decode("Service#foo()", response);
     } catch (FeignException e) {
-      assertThat(e.getMessage()).isEqualTo(
-          "[500 Internal server error] during [GET] to [/api] [Service#foo()]: [" + expectedBody
-              + "]");
+      assertThat(e.getMessage())
+          .isEqualTo(
+              "[500 Internal server error] during [GET] to [/api] [Service#foo()]: ["
+                  + expectedBody
+                  + "]");
       assertThat(e.contentUTF8()).isEqualTo(actualBody);
     }
   }
@@ -93,9 +115,14 @@ class DefaultErrorDecoderTest {
 
   @Test
   void feignExceptionIncludesStatus() {
-    Response response = Response.builder().status(400).reason("Bad request")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(headers).build();
+    Response response =
+        Response.builder()
+            .status(400)
+            .reason("Bad request")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(headers)
+            .build();
 
     Exception exception = errorDecoder.decode("Service#foo()", response);
 
@@ -107,9 +134,14 @@ class DefaultErrorDecoderTest {
   void retryAfterHeaderThrowsRetryableException() throws Throwable {
 
     headers.put(RETRY_AFTER, Collections.singletonList("Sat, 1 Jan 2000 00:00:00 GMT"));
-    Response response = Response.builder().status(503).reason("Service Unavailable")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(headers).build();
+    Response response =
+        Response.builder()
+            .status(503)
+            .reason("Service Unavailable")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(headers)
+            .build();
 
     Throwable exception = errorDecoder.decode("Service#foo()", response);
     assertThat(exception.getMessage())
@@ -129,22 +161,23 @@ class DefaultErrorDecoderTest {
   }
 
   private Response bigBodyResponse() {
-    String content = """
+    String content =
+        """
         I love a storm in early May
         When springtime’s boisterous, firstborn thunder
         Over the sky will gaily wander
         And growl and roar as though in play.
-        
+
         A peal, another — gleeful, cheering…
         Rain, raindust… On the trees, behold!-
         The drops hang, each a long pearl earring;
         Bright sunshine paints the thin threads gold.
-        
+
         A stream downhill goes rushing reckless,
         And in the woods the birds rejoice.
         Din. Clamour. Noise. All nature echoes
         The thunder’s youthful, merry voice.
-        
+
         You’ll say: ‘Tis laughing, carefree Hebe —
         She fed her father’s eagle, and
         The Storm Cup brimming with a seething
@@ -154,8 +187,16 @@ class DefaultErrorDecoderTest {
     InputStream inputStream = new ByteArrayInputStream(content.getBytes(UTF_8));
     Map<String, Collection<String>> headers = new HashMap<>();
     headers.put("Content-Type", Collections.singleton("text/plain"));
-    return Response.builder().status(400).request(Request.create(Request.HttpMethod.GET, "/home",
-        Collections.emptyMap(), "data".getBytes(Util.UTF_8), Util.UTF_8, null))
+    return Response.builder()
+        .status(400)
+        .request(
+            Request.create(
+                Request.HttpMethod.GET,
+                "/home",
+                Collections.emptyMap(),
+                "data".getBytes(Util.UTF_8),
+                Util.UTF_8,
+                null))
         .body(content, Util.UTF_8)
         .build();
   }

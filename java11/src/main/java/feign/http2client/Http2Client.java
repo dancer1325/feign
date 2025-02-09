@@ -1,17 +1,21 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.http2client;
+
+import static feign.Util.*;
 
 import feign.AsyncClient;
 import feign.Client;
@@ -50,7 +54,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import static feign.Util.enumForName;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
 
 public class Http2Client implements Client, AsyncClient<Object> {
 
@@ -60,26 +65,26 @@ public class Http2Client implements Client, AsyncClient<Object> {
 
   /**
    * Creates the new Http2Client using following defaults:
+   *
    * <ul>
-   * <li>Connect Timeout: 10 seconds, as {@link Request.Options#Options()} uses</li>
-   * <li>Follow all 3xx redirects</li>
-   * <li>HTTP 2</li>
+   *   <li>Connect Timeout: 10 seconds, as {@link Request.Options#Options()} uses
+   *   <li>Follow all 3xx redirects
+   *   <li>HTTP 2
    * </ul>
    *
    * @see Request.Options#Options()
    */
   public Http2Client() {
-    this(HttpClient.newBuilder()
-        .followRedirects(Redirect.ALWAYS)
-        .version(Version.HTTP_2)
-        .connectTimeout(Duration.ofMillis(10000))
-        .build());
+    this(
+        HttpClient.newBuilder()
+            .followRedirects(Redirect.ALWAYS)
+            .version(Version.HTTP_2)
+            .connectTimeout(Duration.ofMillis(10000))
+            .build());
   }
 
   public Http2Client(Options options) {
-    this(newClientBuilder(options)
-        .version(Version.HTTP_2)
-        .build());
+    this(newClientBuilder(options).version(Version.HTTP_2).build());
   }
 
   public Http2Client(HttpClient client) {
@@ -90,9 +95,7 @@ public class Http2Client implements Client, AsyncClient<Object> {
   public Response execute(Request request, Options options) throws IOException {
     final HttpRequest httpRequest;
     try {
-      httpRequest = newRequestBuilder(request, options)
-          .version(client.version())
-          .build();
+      httpRequest = newRequestBuilder(request, options).version(client.version()).build();
     } catch (URISyntaxException e) {
       throw new IOException("Invalid uri " + request.url(), e);
     }
@@ -110,9 +113,8 @@ public class Http2Client implements Client, AsyncClient<Object> {
   }
 
   @Override
-  public CompletableFuture<Response> execute(Request request,
-                                             Options options,
-                                             Optional<Object> requestContext) {
+  public CompletableFuture<Response> execute(
+      Request request, Options options, Optional<Object> requestContext) {
     HttpRequest httpRequest;
     try {
       httpRequest = newRequestBuilder(request, options).build();
@@ -129,9 +131,20 @@ public class Http2Client implements Client, AsyncClient<Object> {
   protected Response toFeignResponse(Request request, HttpResponse<InputStream> httpResponse) {
     final OptionalLong length = httpResponse.headers().firstValueAsLong("Content-Length");
 
+    InputStream body = httpResponse.body();
+
+    if (httpResponse.headers().allValues(CONTENT_ENCODING).contains(ENCODING_GZIP)) {
+      try {
+        body = new GZIPInputStream(body);
+      } catch (IOException ignored) {
+      }
+    } else if (httpResponse.headers().allValues(CONTENT_ENCODING).contains(ENCODING_DEFLATE)) {
+      body = new InflaterInputStream(body);
+    }
+
     return Response.builder()
         .protocolVersion(enumForName(ProtocolVersion.class, httpResponse.version()))
-        .body(httpResponse.body(), length.isPresent() ? (int) length.getAsLong() : null)
+        .body(body, length.isPresent() ? (int) length.getAsLong() : null)
         .reason(httpResponse.headers().firstValue("Reason-Phrase").orElse(null))
         .request(request)
         .status(httpResponse.statusCode())
@@ -150,10 +163,11 @@ public class Http2Client implements Client, AsyncClient<Object> {
           requestScopedSoftReference == null ? null : requestScopedSoftReference.get();
 
       if (requestScoped == null) {
-        java.net.http.HttpClient.Builder builder = newClientBuilder(options)
-            .sslContext(client.sslContext())
-            .sslParameters(client.sslParameters())
-            .version(client.version());
+        java.net.http.HttpClient.Builder builder =
+            newClientBuilder(options)
+                .sslContext(client.sslContext())
+                .sslParameters(client.sslParameters())
+                .version(client.version());
         client.authenticator().ifPresent(builder::authenticator);
         client.cookieHandler().ifPresent(builder::cookieHandler);
         client.executor().ifPresent(builder::executor);
@@ -170,15 +184,16 @@ public class Http2Client implements Client, AsyncClient<Object> {
     if ((client.followRedirects() == Redirect.ALWAYS) != options.isFollowRedirects()) {
       return true;
     }
-    return client.connectTimeout()
+    return client
+        .connectTimeout()
         .map(timeout -> timeout.toMillis() != options.connectTimeoutMillis())
         .orElse(true);
   }
 
   /**
-   * Creates integer key that represents {@link Options} settings based on
-   * {@link Http2Client#doesClientConfigurationDiffer(Options)} method
-   * 
+   * Creates integer key that represents {@link Options} settings based on {@link
+   * Http2Client#doesClientConfigurationDiffer(Options)} method
+   *
    * @param options value
    * @return integer key
    */
@@ -186,14 +201,13 @@ public class Http2Client implements Client, AsyncClient<Object> {
     int key = options.connectTimeoutMillis();
     if (options.isFollowRedirects()) {
       key |= 1 << 31; // connectTimeoutMillis always positive, so we can use first sign bit for
-                      // isFollowRedirects flag
+      // isFollowRedirects flag
     }
     return key;
   }
 
   private static java.net.http.HttpClient.Builder newClientBuilder(Options options) {
-    return HttpClient
-        .newBuilder()
+    return HttpClient.newBuilder()
         .followRedirects(options.isFollowRedirects() ? Redirect.ALWAYS : Redirect.NEVER)
         .connectTimeout(Duration.ofMillis(options.connectTimeoutMillis()));
   }
@@ -209,10 +223,11 @@ public class Http2Client implements Client, AsyncClient<Object> {
       body = BodyPublishers.ofByteArray(data);
     }
 
-    final Builder requestBuilder = HttpRequest.newBuilder()
-        .uri(uri)
-        .timeout(Duration.ofMillis(options.readTimeoutMillis()))
-        .version(client.version());
+    final Builder requestBuilder =
+        HttpRequest.newBuilder()
+            .uri(uri)
+            .timeout(Duration.ofMillis(options.readTimeoutMillis()))
+            .version(client.version());
 
     final Map<String, Collection<String>> headers = filterRestrictedHeaders(request.headers());
     if (!headers.isEmpty()) {
@@ -236,13 +251,12 @@ public class Http2Client implements Client, AsyncClient<Object> {
     DISALLOWED_HEADERS_SET = Collections.unmodifiableSet(treeSet);
   }
 
-  private Map<String, Collection<String>> filterRestrictedHeaders(Map<String, Collection<String>> headers) {
-    final Map<String, Collection<String>> filteredHeaders = headers.keySet()
-        .stream()
-        .filter(headerName -> !DISALLOWED_HEADERS_SET.contains(headerName))
-        .collect(Collectors.toMap(
-            Function.identity(),
-            headers::get));
+  private Map<String, Collection<String>> filterRestrictedHeaders(
+      Map<String, Collection<String>> headers) {
+    final Map<String, Collection<String>> filteredHeaders =
+        headers.keySet().stream()
+            .filter(headerName -> !DISALLOWED_HEADERS_SET.contains(headerName))
+            .collect(Collectors.toMap(Function.identity(), headers::get));
 
     filteredHeaders.computeIfAbsent("Accept", key -> List.of("*/*"));
 
@@ -257,11 +271,11 @@ public class Http2Client implements Client, AsyncClient<Object> {
 
   private String[] asString(Map<String, Collection<String>> headers) {
     return headers.entrySet().stream()
-        .flatMap(entry -> entry.getValue()
-            .stream()
-            .map(value -> Arrays.asList(entry.getKey(), value))
-            .flatMap(List::stream))
+        .flatMap(
+            entry ->
+                entry.getValue().stream()
+                    .map(value -> Arrays.asList(entry.getKey(), value))
+                    .flatMap(List::stream))
         .toArray(String[]::new);
   }
-
 }

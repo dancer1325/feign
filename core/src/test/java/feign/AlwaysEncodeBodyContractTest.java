@@ -1,20 +1,25 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import feign.codec.EncodeException;
+import feign.codec.Encoder;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -23,15 +28,12 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
-import feign.codec.EncodeException;
-import feign.codec.Encoder;
 
 class AlwaysEncodeBodyContractTest {
 
   @Retention(RUNTIME)
   @Target(ElementType.METHOD)
-  private @interface SampleMethodAnnotation {
-  }
+  private @interface SampleMethodAnnotation {}
 
   private static class SampleContract extends AlwaysEncodeBodyContract {
     SampleContract() {
@@ -78,11 +80,7 @@ class AlwaysEncodeBodyContractTest {
   private static class SampleClient implements Client {
     @Override
     public Response execute(Request request, Request.Options options) throws IOException {
-      return Response.builder()
-          .status(200)
-          .request(request)
-          .body(request.body())
-          .build();
+      return Response.builder().status(200).request(request).body(request.body()).build();
     }
   }
 
@@ -92,26 +90,28 @@ class AlwaysEncodeBodyContractTest {
    */
   @Test
   void alwaysEncodeBodyTrueTest() {
-    SampleTargetMultipleNonAnnotatedParameters sampleClient1 = Feign.builder()
-        .contract(new SampleContract())
-        .encoder(new AllParametersSampleEncoder())
-        .client(new SampleClient())
-        .target(SampleTargetMultipleNonAnnotatedParameters.class, "http://localhost");
+    SampleTargetMultipleNonAnnotatedParameters sampleClient1 =
+        Feign.builder()
+            .contract(new SampleContract())
+            .encoder(new AllParametersSampleEncoder())
+            .client(new SampleClient())
+            .target(SampleTargetMultipleNonAnnotatedParameters.class, "http://localhost");
     assertThat(sampleClient1.concatenate("foo", "bar", "char")).isEqualTo("foobarchar");
 
-    SampleTargetNoParameters sampleClient2 = Feign.builder()
-        .contract(new SampleContract())
-        .encoder(new AllParametersSampleEncoder())
-        .client(new SampleClient())
-        .target(SampleTargetNoParameters.class, "http://localhost");
+    SampleTargetNoParameters sampleClient2 =
+        Feign.builder()
+            .contract(new SampleContract())
+            .encoder(new AllParametersSampleEncoder())
+            .client(new SampleClient())
+            .target(SampleTargetNoParameters.class, "http://localhost");
     assertThat(sampleClient2.concatenate()).isEqualTo("");
 
-    SampleTargetOneParameter sampleClient3 = Feign.builder()
-        .contract(new SampleContract())
-        .encoder(new AllParametersSampleEncoder())
-        .client(new SampleClient())
-        .target(SampleTargetOneParameter.class, "http://localhost");
+    SampleTargetOneParameter sampleClient3 =
+        Feign.builder()
+            .contract(new SampleContract())
+            .encoder(new AllParametersSampleEncoder())
+            .client(new SampleClient())
+            .target(SampleTargetOneParameter.class, "http://localhost");
     assertThat(sampleClient3.concatenate("moo")).isEqualTo("moo");
   }
-
 }

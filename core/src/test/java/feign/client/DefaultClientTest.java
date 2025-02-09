@@ -1,41 +1,43 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import java.io.IOException;
-import java.net.*;
-import java.util.Collections;
-import org.junit.jupiter.api.Test;
+
 import feign.Client;
 import feign.Client.Proxied;
 import feign.Feign;
 import feign.Feign.Builder;
 import feign.RetryableException;
 import feign.assertj.MockWebServerAssertions;
+import java.io.IOException;
+import java.net.*;
+import java.util.Collections;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.SocketPolicy;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
-/**
- * Tests client-specific behavior, such as ensuring Content-Length is sent when specified.
- */
+/** Tests client-specific behavior, such as ensuring Content-Length is sent when specified. */
 public class DefaultClientTest extends AbstractClientTest {
 
-  protected Client disableHostnameVerification = new Client.Default(TrustingSSLSocketFactory.get(),
-      (s, sslSession) -> true);
+  protected Client disableHostnameVerification =
+      new Client.Default(TrustingSSLSocketFactory.get(), (s, sslSession) -> true);
 
   @Override
   public Builder newBuilder() {
@@ -79,17 +81,41 @@ public class DefaultClientTest extends AbstractClientTest {
     assertThat(exception).hasCauseInstanceOf(ProtocolException.class);
   }
 
+  @Test
   @Override
   public void noResponseBodyForPost() throws Exception {
     super.noResponseBodyForPost();
-    MockWebServerAssertions.assertThat(server.takeRequest()).hasMethod("POST")
+    MockWebServerAssertions.assertThat(server.takeRequest())
+        .hasMethod("POST")
+        .hasNoHeaderNamed("Content-Type");
+  }
+
+  @Test
+  @EnabledIfSystemProperty(named = "sun.net.http.allowRestrictedHeaders", matches = "true")
+  public void noRequestBodyForPostWithAllowRestrictedHeaders() throws Exception {
+    super.noResponseBodyForPost();
+    MockWebServerAssertions.assertThat(server.takeRequest())
+        .hasMethod("POST")
+        .hasNoHeaderNamed("Content-Type")
         .hasHeaders(entry("Content-Length", Collections.singletonList("0")));
   }
 
+  @Test
   @Override
   public void noResponseBodyForPut() throws Exception {
     super.noResponseBodyForPut();
-    MockWebServerAssertions.assertThat(server.takeRequest()).hasMethod("PUT")
+    MockWebServerAssertions.assertThat(server.takeRequest())
+        .hasMethod("PUT")
+        .hasNoHeaderNamed("Content-Type");
+  }
+
+  @Test
+  @EnabledIfSystemProperty(named = "sun.net.http.allowRestrictedHeaders", matches = "true")
+  public void noResponseBodyForPutWithAllowRestrictedHeaders() throws Exception {
+    super.noResponseBodyForPut();
+    MockWebServerAssertions.assertThat(server.takeRequest())
+        .hasMethod("PUT")
+        .hasNoHeaderNamed("Content-Type")
         .hasHeaders(entry("Content-Length", Collections.singletonList("0")));
   }
 
@@ -107,8 +133,9 @@ public class DefaultClientTest extends AbstractClientTest {
     server.enqueue(new MockResponse());
 
     TestInterface api =
-        Feign.builder().client(disableHostnameVerification).target(TestInterface.class,
-            "https://localhost:" + server.getPort());
+        Feign.builder()
+            .client(disableHostnameVerification)
+            .target(TestInterface.class, "https://localhost:" + server.getPort());
 
     api.post("foo");
   }
@@ -135,9 +162,13 @@ public class DefaultClientTest extends AbstractClientTest {
 
   @Test
   void canCreateWithExplicitCredentials() throws Exception {
-    Proxied proxied = new Proxied(TrustingSSLSocketFactory.get(), null,
-        new Proxy(Proxy.Type.HTTP, proxyAddress), "user",
-        "password");
+    Proxied proxied =
+        new Proxied(
+            TrustingSSLSocketFactory.get(),
+            null,
+            new Proxy(Proxy.Type.HTTP, proxyAddress),
+            "user",
+            "password");
     assertThat(proxied).isNotNull();
     assertThat(proxied.getCredentials()).isNotBlank();
 
@@ -145,5 +176,4 @@ public class DefaultClientTest extends AbstractClientTest {
         proxied.getConnection(URI.create("http://www.example.com").toURL());
     assertThat(connection).isNotNull().isInstanceOf(HttpURLConnection.class);
   }
-
 }

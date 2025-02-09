@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.ribbon;
 
@@ -21,7 +23,11 @@ import com.netflix.client.RequestSpecificRetryHandler;
 import com.netflix.client.config.CommonClientConfigKey;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.ILoadBalancer;
+import feign.Client;
+import feign.Request;
 import feign.Request.HttpMethod;
+import feign.Response;
+import feign.Util;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
@@ -31,13 +37,9 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import feign.Client;
-import feign.Request;
-import feign.Response;
-import feign.Util;
 
-public final class LBClient extends
-    AbstractLoadBalancerAwareClient<LBClient.RibbonRequest, LBClient.RibbonResponse> {
+public final class LBClient
+    extends AbstractLoadBalancerAwareClient<LBClient.RibbonRequest, LBClient.RibbonResponse> {
 
   private final int connectTimeout;
   private final int readTimeout;
@@ -82,8 +84,9 @@ public final class LBClient extends
               TimeUnit.MILLISECONDS,
               configOverride.get(CommonClientConfigKey.FollowRedirects, followRedirects));
     } else {
-      options = new Request.Options(connectTimeout, TimeUnit.MILLISECONDS, readTimeout,
-          TimeUnit.MILLISECONDS, true);
+      options =
+          new Request.Options(
+              connectTimeout, TimeUnit.MILLISECONDS, readTimeout, TimeUnit.MILLISECONDS, true);
     }
     Response response = request.client().execute(request.toRequest(), options);
     if (retryableStatusCodes.contains(response.status())) {
@@ -95,8 +98,7 @@ public final class LBClient extends
 
   @Override
   public RequestSpecificRetryHandler getRequestSpecificRetryHandler(
-                                                                    RibbonRequest request,
-                                                                    IClientConfig requestConfig) {
+      RibbonRequest request, IClientConfig requestConfig) {
     if (clientConfig.get(CommonClientConfigKey.OkToRetryOnAllOperations, false)) {
       return new RequestSpecificRetryHandler(true, true, this.getRetryHandler(), requestConfig);
     }
@@ -127,8 +129,8 @@ public final class LBClient extends
       Map<String, Collection<String>> headers = new LinkedHashMap<String, Collection<String>>();
       headers.putAll(request.headers());
       headers.put(Util.CONTENT_LENGTH, Collections.singletonList(String.valueOf(bodyLength)));
-      return Request.create(request.httpMethod(), getUri().toASCIIString(), headers, body,
-          request.charset());
+      return Request.create(
+          request.httpMethod(), getUri().toASCIIString(), headers, body, request.charset());
     }
 
     Client client() {
@@ -185,7 +187,5 @@ public final class LBClient extends
         response.body().close();
       }
     }
-
   }
-
 }

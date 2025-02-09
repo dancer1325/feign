@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
@@ -20,10 +22,8 @@ import java.util.Collection;
 /**
  * Various ways to encode collections in URL parameters.
  *
- * <p>
- * These specific cases are inspired by the <a href="http://swagger.io/specification/">OpenAPI
+ * <p>These specific cases are inspired by the <a href="http://swagger.io/specification/">OpenAPI
  * specification</a>.
- * </p>
  */
 public enum CollectionFormat {
   /** Comma separated values, eg foo=bar,baz */
@@ -47,25 +47,19 @@ public enum CollectionFormat {
   /**
    * Joins the field and possibly multiple values with the given separator.
    *
-   * <p>
-   * Calling EXPLODED.join("foo", ["bar"]) will return "foo=bar".
-   * </p>
+   * <p>Calling EXPLODED.join("foo", ["bar"]) will return "foo=bar".
    *
-   * <p>
-   * Calling CSV.join("foo", ["bar", "baz"]) will return "foo=bar,baz".
-   * </p>
+   * <p>Calling CSV.join("foo", ["bar", "baz"]) will return "foo=bar,baz".
    *
-   * <p>
-   * Null values are treated somewhat specially. With EXPLODED, the field is repeated without any
+   * <p>Null values are treated somewhat specially. With EXPLODED, the field is repeated without any
    * "=" for backwards compatibility. With all other formats, null values are not included in the
    * joined value list.
-   * </p>
    *
    * @param field The field name corresponding to these values.
    * @param values A collection of value strings for the given field.
    * @param charset to encode the sequence
    * @return The formatted char sequence of the field and joined values. If the value collection is
-   *         empty, an empty char sequence will be returned.
+   *     empty, an empty char sequence will be returned.
    */
   public CharSequence join(String field, Collection<String> values, Charset charset) {
     StringBuilder builder = new StringBuilder();

@@ -1,20 +1,23 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
-import java.util.List;
 import static feign.Util.checkNotNull;
+
+import java.util.List;
 
 public class MethodHandlerConfiguration {
 
@@ -72,12 +75,16 @@ public class MethodHandlerConfiguration {
     return propagationPolicy;
   }
 
-
-  public MethodHandlerConfiguration(MethodMetadata metadata, Target<?> target,
-      Retryer retryer, List<RequestInterceptor> requestInterceptors,
+  public MethodHandlerConfiguration(
+      MethodMetadata metadata,
+      Target<?> target,
+      Retryer retryer,
+      List<RequestInterceptor> requestInterceptors,
       Logger logger,
-      Logger.Level logLevel, RequestTemplate.Factory buildTemplateFromArgs,
-      Request.Options options, ExceptionPropagationPolicy propagationPolicy) {
+      Logger.Level logLevel,
+      RequestTemplate.Factory buildTemplateFromArgs,
+      Request.Options options,
+      ExceptionPropagationPolicy propagationPolicy) {
     this.target = checkNotNull(target, "target");
     this.retryer = checkNotNull(retryer, "retryer for %s", target);
     this.requestInterceptors =
@@ -88,6 +95,5 @@ public class MethodHandlerConfiguration {
     this.buildTemplateFromArgs = checkNotNull(buildTemplateFromArgs, "metadata for %s", target);
     this.options = checkNotNull(options, "options for %s", target);
     this.propagationPolicy = propagationPolicy;
-
   }
 }

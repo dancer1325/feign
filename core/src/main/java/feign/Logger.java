@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
@@ -18,6 +20,7 @@ import static feign.Util.decodeOrDefault;
 import static feign.Util.ensureClosed;
 import static feign.Util.valuesOrEmpty;
 import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -25,9 +28,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
-/**
- * Simple logging abstraction for debug messages. Adapted from {@code retrofit.RestAdapter.Log}.
- */
+/** Simple logging abstraction for debug messages. Adapted from {@code retrofit.RestAdapter.Log}. */
 public abstract class Logger {
 
   protected static String methodTag(String configKey) {
@@ -66,8 +67,7 @@ public abstract class Logger {
 
   protected void logRequest(String configKey, Level logLevel, Request request) {
     String protocolVersion = resolveProtocolVersion(request.protocolVersion());
-    log(configKey, "---> %s %s %s", request.httpMethod().name(), request.url(),
-        protocolVersion);
+    log(configKey, "---> %s %s %s", request.httpMethod().name(), request.url(), protocolVersion);
     if (logLevel.ordinal() >= Level.HEADERS.ordinal()) {
 
       for (String field : request.headers().keySet()) {
@@ -83,9 +83,7 @@ public abstract class Logger {
         bodyLength = request.length();
         if (logLevel.ordinal() >= Level.FULL.ordinal()) {
           String bodyText =
-              request.charset() != null
-                  ? new String(request.body(), request.charset())
-                  : null;
+              request.charset() != null ? new String(request.body(), request.charset()) : null;
           log(configKey, ""); // CRLF
           log(configKey, "%s", bodyText != null ? bodyText : "Binary data");
         }
@@ -98,14 +96,12 @@ public abstract class Logger {
     log(configKey, "---> RETRYING");
   }
 
-  protected Response logAndRebufferResponse(String configKey,
-                                            Level logLevel,
-                                            Response response,
-                                            long elapsedTime)
-      throws IOException {
+  protected Response logAndRebufferResponse(
+      String configKey, Level logLevel, Response response, long elapsedTime) throws IOException {
     String protocolVersion = resolveProtocolVersion(response.protocolVersion());
     String reason =
-        response.reason() != null && logLevel.compareTo(Level.NONE) > 0 ? " " + response.reason()
+        response.reason() != null && logLevel.compareTo(Level.NONE) > 0
+            ? " " + response.reason()
             : "";
     int status = response.status();
     log(configKey, "<--- %s %s%s (%sms)", protocolVersion, status, reason, elapsedTime);
@@ -141,11 +137,13 @@ public abstract class Logger {
     return response;
   }
 
-  protected IOException logIOException(String configKey,
-                                       Level logLevel,
-                                       IOException ioe,
-                                       long elapsedTime) {
-    log(configKey, "<--- ERROR %s: %s (%sms)", ioe.getClass().getSimpleName(), ioe.getMessage(),
+  protected IOException logIOException(
+      String configKey, Level logLevel, IOException ioe, long elapsedTime) {
+    log(
+        configKey,
+        "<--- ERROR %s: %s (%sms)",
+        ioe.getClass().getSimpleName(),
+        ioe.getMessage(),
         elapsedTime);
     if (logLevel.ordinal() >= Level.FULL.ordinal()) {
       StringWriter sw = new StringWriter();
@@ -163,31 +161,19 @@ public abstract class Logger {
     return "UNKNOWN";
   }
 
-  /**
-   * Controls the level of logging.
-   */
+  /** Controls the level of logging. */
   public enum Level {
-    /**
-     * No logging.
-     */
+    /** No logging. */
     NONE,
-    /**
-     * Log only the request method and URL and the response status code and execution time.
-     */
+    /** Log only the request method and URL and the response status code and execution time. */
     BASIC,
-    /**
-     * Log the basic information along with request and response headers.
-     */
+    /** Log the basic information along with request and response headers. */
     HEADERS,
-    /**
-     * Log the headers, body, and metadata for both requests and responses.
-     */
+    /** Log the headers, body, and metadata for both requests and responses. */
     FULL
   }
 
-  /**
-   * Logs to System.err.
-   */
+  /** Logs to System.err. */
   public static class ErrorLogger extends Logger {
     @Override
     protected void log(String configKey, String format, Object... args) {
@@ -195,24 +181,19 @@ public abstract class Logger {
     }
   }
 
-  /**
-   * Logs to the category {@link Logger} at {@link java.util.logging.Level#FINE}, if loggable.
-   */
+  /** Logs to the category {@link Logger} at {@link java.util.logging.Level#FINE}, if loggable. */
   public static class JavaLogger extends Logger {
 
     final java.util.logging.Logger logger;
 
     /**
      * @deprecated Use {@link #JavaLogger(String)} or {@link #JavaLogger(Class)} instead.
-     *
-     *             This constructor can be used to create just one logger. Example =
-     *             {@code Logger.JavaLogger().appendToFile("logs/first.log")}
-     *
-     *             If you create multiple loggers for multiple clients and provide different files
-     *             to write log - you'll have unexpected behavior - all clients will write same log
-     *             to each file.
-     *
-     *             That's why this constructor will be removed in future.
+     *     <p>This constructor can be used to create just one logger. Example = {@code
+     *     Logger.JavaLogger().appendToFile("logs/first.log")}
+     *     <p>If you create multiple loggers for multiple clients and provide different files to
+     *     write log - you'll have unexpected behavior - all clients will write same log to each
+     *     file.
+     *     <p>That's why this constructor will be removed in future.
      */
     @Deprecated
     public JavaLogger() {
@@ -223,8 +204,8 @@ public abstract class Logger {
      * Constructor for JavaLogger class
      *
      * @param loggerName a name for the logger. This should be a dot-separated name and should
-     *        normally be based on the package name or class name of the subsystem, such as java.net
-     *        or javax.swing
+     *     normally be based on the package name or class name of the subsystem, such as java.net or
+     *     javax.swing
      */
     public JavaLogger(String loggerName) {
       logger = java.util.logging.Logger.getLogger(loggerName);
@@ -247,11 +228,8 @@ public abstract class Logger {
     }
 
     @Override
-    protected Response logAndRebufferResponse(String configKey,
-                                              Level logLevel,
-                                              Response response,
-                                              long elapsedTime)
-        throws IOException {
+    protected Response logAndRebufferResponse(
+        String configKey, Level logLevel, Response response, long elapsedTime) throws IOException {
       if (logger.isLoggable(java.util.logging.Level.FINE)) {
         return super.logAndRebufferResponse(configKey, logLevel, response, elapsedTime);
       }
@@ -273,12 +251,13 @@ public abstract class Logger {
       logger.setLevel(java.util.logging.Level.FINE);
       try {
         FileHandler handler = new FileHandler(logfile, true);
-        handler.setFormatter(new SimpleFormatter() {
-          @Override
-          public String format(LogRecord record) {
-            return String.format("%s%n", record.getMessage()); // NOPMD
-          }
-        });
+        handler.setFormatter(
+            new SimpleFormatter() {
+              @Override
+              public String format(LogRecord record) {
+                return String.format("%s%n", record.getMessage()); // NOPMD
+              }
+            });
         logger.addHandler(handler);
       } catch (IOException e) {
         throw new IllegalStateException("Could not add file handler.", e);
@@ -293,11 +272,8 @@ public abstract class Logger {
     protected void logRequest(String configKey, Level logLevel, Request request) {}
 
     @Override
-    protected Response logAndRebufferResponse(String configKey,
-                                              Level logLevel,
-                                              Response response,
-                                              long elapsedTime)
-        throws IOException {
+    protected Response logAndRebufferResponse(
+        String configKey, Level logLevel, Response response, long elapsedTime) throws IOException {
       return response;
     }
 

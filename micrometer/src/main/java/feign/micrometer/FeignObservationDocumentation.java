@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.micrometer;
 
@@ -24,10 +26,10 @@ import io.micrometer.observation.docs.ObservationDocumentation;
  * @since 12.1
  */
 public enum FeignObservationDocumentation implements ObservationDocumentation {
-
   DEFAULT {
     @Override
-    public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
+    public Class<? extends ObservationConvention<? extends Observation.Context>>
+        getDefaultConvention() {
       return DefaultFeignObservationConvention.class;
     }
 
@@ -37,9 +39,7 @@ public enum FeignObservationDocumentation implements ObservationDocumentation {
     }
   };
 
-
   enum HttpClientTags implements KeyName {
-
     STATUS {
       @Override
       public String asString() {
@@ -82,7 +82,5 @@ public enum FeignObservationDocumentation implements ObservationDocumentation {
         return "clientName";
       }
     }
-
   }
-
 }

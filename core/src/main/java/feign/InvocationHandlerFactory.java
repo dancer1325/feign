@@ -1,27 +1,25 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
-import feign.codec.Decoder;
-import feign.codec.ErrorDecoder;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-/**
- * Controls reflective method dispatch.
- */
+/** Controls reflective method dispatch. */
 public interface InvocationHandlerFactory {
 
   InvocationHandler create(Target target, Map<Method, MethodHandler> dispatch);
@@ -35,9 +33,7 @@ public interface InvocationHandlerFactory {
     Object invoke(Object[] argv) throws Throwable;
 
     interface Factory<C> {
-      MethodHandler create(Target<?> target,
-                           MethodMetadata md,
-                           C requestContext);
+      MethodHandler create(Target<?> target, MethodMetadata md, C requestContext);
     }
   }
 

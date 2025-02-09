@@ -1,17 +1,23 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
+
+import static feign.ExceptionPropagationPolicy.UNWRAP;
+import static feign.FeignException.errorExecuting;
+import static feign.Util.checkNotNull;
 
 import feign.InvocationHandlerFactory.MethodHandler;
 import feign.Request.Options;
@@ -23,9 +29,6 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
-import static feign.ExceptionPropagationPolicy.UNWRAP;
-import static feign.FeignException.errorExecuting;
-import static feign.Util.checkNotNull;
 
 final class AsynchronousMethodHandler<C> implements MethodHandler {
 
@@ -35,8 +38,11 @@ final class AsynchronousMethodHandler<C> implements MethodHandler {
   private final MethodInfo methodInfo;
   private final MethodHandlerConfiguration methodHandlerConfiguration;
 
-  private AsynchronousMethodHandler(MethodHandlerConfiguration methodHandlerConfiguration,
-      AsyncClient<C> client, AsyncResponseHandler asyncResponseHandler, C requestContext,
+  private AsynchronousMethodHandler(
+      MethodHandlerConfiguration methodHandlerConfiguration,
+      AsyncClient<C> client,
+      AsyncResponseHandler asyncResponseHandler,
+      C requestContext,
       MethodInfo methodInfo) {
     this.methodHandlerConfiguration =
         checkNotNull(methodHandlerConfiguration, "methodHandlerConfiguration");
@@ -62,28 +68,29 @@ final class AsynchronousMethodHandler<C> implements MethodHandler {
     }
   }
 
-  private CompletableFuture<Object> executeAndDecode(RequestTemplate template,
-                                                     Options options,
-                                                     Retryer retryer) {
+  private CompletableFuture<Object> executeAndDecode(
+      RequestTemplate template, Options options, Retryer retryer) {
     CancellableFuture<Object> resultFuture = new CancellableFuture<>();
 
     executeAndDecode(template, options)
-        .whenComplete((response, throwable) -> {
-          if (throwable != null) {
-            if (!resultFuture.isDone() && shouldRetry(retryer, throwable, resultFuture)) {
-              if (methodHandlerConfiguration.getLogLevel() != Logger.Level.NONE) {
-                methodHandlerConfiguration.getLogger().logRetry(
-                    methodHandlerConfiguration.getMetadata().configKey(),
-                    methodHandlerConfiguration.getLogLevel());
-              }
+        .whenComplete(
+            (response, throwable) -> {
+              if (throwable != null) {
+                if (!resultFuture.isDone() && shouldRetry(retryer, throwable, resultFuture)) {
+                  if (methodHandlerConfiguration.getLogLevel() != Logger.Level.NONE) {
+                    methodHandlerConfiguration
+                        .getLogger()
+                        .logRetry(
+                            methodHandlerConfiguration.getMetadata().configKey(),
+                            methodHandlerConfiguration.getLogLevel());
+                  }
 
-              resultFuture.setInner(
-                  executeAndDecode(template, options, retryer));
-            }
-          } else {
-            resultFuture.complete(response);
-          }
-        });
+                  resultFuture.setInner(executeAndDecode(template, options, retryer));
+                }
+              } else {
+                resultFuture.complete(response);
+              }
+            });
 
     return resultFuture;
   }
@@ -105,7 +112,8 @@ final class AsynchronousMethodHandler<C> implements MethodHandler {
       return result;
     }
 
-    private static <T> BiConsumer<? super T, ? super Throwable> pipeTo(CompletableFuture<T> completableFuture) {
+    private static <T> BiConsumer<? super T, ? super Throwable> pipeTo(
+        CompletableFuture<T> completableFuture) {
       return (value, throwable) -> {
         if (completableFuture.isDone()) {
           return;
@@ -120,9 +128,8 @@ final class AsynchronousMethodHandler<C> implements MethodHandler {
     }
   }
 
-  private boolean shouldRetry(Retryer retryer,
-                              Throwable throwable,
-                              CompletableFuture<Object> resultFuture) {
+  private boolean shouldRetry(
+      Retryer retryer, Throwable throwable, CompletableFuture<Object> resultFuture) {
     if (throwable instanceof CompletionException) {
       throwable = throwable.getCause();
     }
@@ -151,44 +158,50 @@ final class AsynchronousMethodHandler<C> implements MethodHandler {
     Request request = targetRequest(template);
 
     if (methodHandlerConfiguration.getLogLevel() != Logger.Level.NONE) {
-      methodHandlerConfiguration.getLogger().logRequest(
-          methodHandlerConfiguration.getMetadata().configKey(),
-          methodHandlerConfiguration.getLogLevel(), request);
+      methodHandlerConfiguration
+          .getLogger()
+          .logRequest(
+              methodHandlerConfiguration.getMetadata().configKey(),
+              methodHandlerConfiguration.getLogLevel(),
+              request);
     }
 
     long start = System.nanoTime();
-    return client.execute(request, options, Optional.ofNullable(requestContext))
-        .thenApply(response ->
-        // TODO: remove in Feign 12
-        ensureRequestIsSet(response, template, request))
-        .exceptionally(throwable -> {
-          CompletionException completionException = throwable instanceof CompletionException
-              ? (CompletionException) throwable
-              : new CompletionException(throwable);
-          if (completionException.getCause() instanceof IOException) {
-            IOException ioException = (IOException) completionException.getCause();
-            if (methodHandlerConfiguration.getLogLevel() != Logger.Level.NONE) {
-              methodHandlerConfiguration.getLogger().logIOException(
-                  methodHandlerConfiguration.getMetadata().configKey(),
-                  methodHandlerConfiguration.getLogLevel(), ioException,
-                  elapsedTime(start));
-            }
+    return client
+        .execute(request, options, Optional.ofNullable(requestContext))
+        .thenApply(
+            response ->
+                // TODO: remove in Feign 12
+                ensureRequestIsSet(response, template, request))
+        .exceptionally(
+            throwable -> {
+              CompletionException completionException =
+                  throwable instanceof CompletionException
+                      ? (CompletionException) throwable
+                      : new CompletionException(throwable);
+              if (completionException.getCause() instanceof IOException) {
+                IOException ioException = (IOException) completionException.getCause();
+                if (methodHandlerConfiguration.getLogLevel() != Logger.Level.NONE) {
+                  methodHandlerConfiguration
+                      .getLogger()
+                      .logIOException(
+                          methodHandlerConfiguration.getMetadata().configKey(),
+                          methodHandlerConfiguration.getLogLevel(),
+                          ioException,
+                          elapsedTime(start));
+                }
 
-            throw errorExecuting(request, ioException);
-          } else {
-            throw completionException;
-          }
-        })
+                throw errorExecuting(request, ioException);
+              } else {
+                throw completionException;
+              }
+            })
         .thenCompose(response -> handleResponse(response, elapsedTime(start)));
   }
 
-  private static Response ensureRequestIsSet(Response response,
-                                             RequestTemplate template,
-                                             Request request) {
-    return response.toBuilder()
-        .request(request)
-        .requestTemplate(template)
-        .build();
+  private static Response ensureRequestIsSet(
+      Response response, RequestTemplate template, Request request) {
+    return response.toBuilder().request(request).requestTemplate(template).build();
   }
 
   private CompletableFuture<Object> handleResponse(Response response, long elapsedTime) {
@@ -232,9 +245,13 @@ final class AsynchronousMethodHandler<C> implements MethodHandler {
     private final RequestTemplateFactoryResolver requestTemplateFactoryResolver;
     private final Options options;
 
-    Factory(AsyncClient<C> client, Retryer retryer, List<RequestInterceptor> requestInterceptors,
+    Factory(
+        AsyncClient<C> client,
+        Retryer retryer,
+        List<RequestInterceptor> requestInterceptors,
         AsyncResponseHandler responseHandler,
-        Logger logger, Logger.Level logLevel,
+        Logger logger,
+        Logger.Level logLevel,
         ExceptionPropagationPolicy propagationPolicy,
         MethodInfoResolver methodInfoResolver,
         RequestTemplateFactoryResolver requestTemplateFactoryResolver,
@@ -253,17 +270,27 @@ final class AsynchronousMethodHandler<C> implements MethodHandler {
     }
 
     @Override
-    public MethodHandler create(Target<?> target,
-                                MethodMetadata metadata,
-                                C requestContext) {
+    public MethodHandler create(Target<?> target, MethodMetadata metadata, C requestContext) {
       final RequestTemplate.Factory buildTemplateFromArgs =
           requestTemplateFactoryResolver.resolve(target, metadata);
 
       MethodHandlerConfiguration methodHandlerConfiguration =
-          new MethodHandlerConfiguration(metadata, target, retryer, requestInterceptors, logger,
-              logLevel, buildTemplateFromArgs, options, propagationPolicy);
-      return new AsynchronousMethodHandler<C>(methodHandlerConfiguration, client, responseHandler,
-          requestContext, methodInfoResolver.resolve(target.type(), metadata.method()));
+          new MethodHandlerConfiguration(
+              metadata,
+              target,
+              retryer,
+              requestInterceptors,
+              logger,
+              logLevel,
+              buildTemplateFromArgs,
+              options,
+              propagationPolicy);
+      return new AsynchronousMethodHandler<C>(
+          methodHandlerConfiguration,
+          client,
+          responseHandler,
+          requestContext,
+          methodInfoResolver.resolve(target.type(), metadata.method()));
     }
   }
 }

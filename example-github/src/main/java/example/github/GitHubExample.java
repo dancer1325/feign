@@ -1,32 +1,32 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package example.github;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import feign.*;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
-/**
- * Inspired by {@code com.example.retrofit.GitHubClient}
- */
+/** Inspired by {@code com.example.retrofit.GitHubClient} */
 public class GitHubExample {
 
   public interface GitHub {
@@ -41,9 +41,7 @@ public class GitHubExample {
 
     public class Issue {
 
-      Issue() {
-
-      }
+      Issue() {}
 
       String title;
       String body;
@@ -79,18 +77,17 @@ public class GitHubExample {
           .errorDecoder(new GitHubErrorDecoder(decoder))
           .logger(new Logger.ErrorLogger())
           .logLevel(Logger.Level.BASIC)
-          .requestInterceptor(template -> {
-            template.header(
-                // not available when building PRs...
-                // https://docs.travis-ci.com/user/environment-variables/#defining-encrypted-variables-in-travisyml
-                "Authorization",
-                "token 383f1c1b474d8f05a21e7964976ab0d403fee071");
-          })
+          .requestInterceptor(
+              template -> {
+                template.header(
+                    // not available when building PRs...
+                    // https://docs.travis-ci.com/user/environment-variables/#defining-encrypted-variables-in-travisyml
+                    "Authorization", "token 383f1c1b474d8f05a21e7964976ab0d403fee071");
+              })
           .options(new Request.Options(10, TimeUnit.SECONDS, 60, TimeUnit.SECONDS, true))
           .target(GitHub.class, "https://api.github.com");
     }
   }
-
 
   static class GitHubClientError extends RuntimeException {
     private String message; // parsed from json

@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.reactive;
 
@@ -28,8 +30,7 @@ public abstract class ReactiveInvocationHandler implements InvocationHandler {
   private final Target<?> target;
   private final Map<Method, MethodHandler> dispatch;
 
-  public ReactiveInvocationHandler(Target<?> target,
-      Map<Method, MethodHandler> dispatch) {
+  public ReactiveInvocationHandler(Target<?> target, Map<Method, MethodHandler> dispatch) {
     this.target = target;
     this.dispatch = dispatch;
   }
@@ -87,9 +88,8 @@ public abstract class ReactiveInvocationHandler implements InvocationHandler {
    * @param arguments for the method
    * @return a reactive {@link Publisher} for the invocation.
    */
-  protected abstract Publisher invoke(Method method,
-                                      MethodHandler methodHandler,
-                                      Object[] arguments);
+  protected abstract Publisher invoke(
+      Method method, MethodHandler methodHandler, Object[] arguments);
 
   /**
    * Invoke the Method Handler as a Publisher.
@@ -99,43 +99,45 @@ public abstract class ReactiveInvocationHandler implements InvocationHandler {
    * @return a Publisher wrapper for the invocation.
    */
   Publisher<?> invokeMethod(MethodHandler methodHandler, Object[] arguments) {
-    return subscriber -> subscriber.onSubscribe(new Subscription() {
-      private final AtomicBoolean isTerminated = new AtomicBoolean(false);
+    return subscriber ->
+        subscriber.onSubscribe(
+            new Subscription() {
+              private final AtomicBoolean isTerminated = new AtomicBoolean(false);
 
-      @Override
-      public void request(long n) {
-        if (n <= 0 && !terminated()) {
-          subscriber.onError(new IllegalArgumentException("negative subscription request"));
-        }
-        if (!isTerminated()) {
-          try {
-            Object result = methodHandler.invoke(arguments);
-            if (null != result) {
-              subscriber.onNext(result);
-            }
-          } catch (Throwable th) {
-            if (!terminated()) {
-              subscriber.onError(th);
-            }
-          }
-        }
-        if (!terminated()) {
-          subscriber.onComplete();
-        }
-      }
+              @Override
+              public void request(long n) {
+                if (n <= 0 && !terminated()) {
+                  subscriber.onError(new IllegalArgumentException("negative subscription request"));
+                }
+                if (!isTerminated()) {
+                  try {
+                    Object result = methodHandler.invoke(arguments);
+                    if (null != result) {
+                      subscriber.onNext(result);
+                    }
+                  } catch (Throwable th) {
+                    if (!terminated()) {
+                      subscriber.onError(th);
+                    }
+                  }
+                }
+                if (!terminated()) {
+                  subscriber.onComplete();
+                }
+              }
 
-      @Override
-      public void cancel() {
-        isTerminated.set(true);
-      }
+              @Override
+              public void cancel() {
+                isTerminated.set(true);
+              }
 
-      private boolean isTerminated() {
-        return isTerminated.get();
-      }
+              private boolean isTerminated() {
+                return isTerminated.get();
+              }
 
-      private boolean terminated() {
-        return isTerminated.getAndSet(true);
-      }
-    });
+              private boolean terminated() {
+                return isTerminated.getAndSet(true);
+              }
+            });
   }
 }

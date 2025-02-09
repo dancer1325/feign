@@ -1,18 +1,29 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.hc5;
 
+import static feign.Util.enumForName;
+
+import feign.*;
+import feign.Request.Options;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.zip.GZIPOutputStream;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.client5.http.config.Configurable;
@@ -24,14 +35,6 @@ import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.io.CloseMode;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.*;
-import java.util.zip.GZIPOutputStream;
-import java.util.concurrent.CompletableFuture;
-import feign.*;
-import feign.Request.Options;
-import static feign.Util.enumForName;
 
 /**
  * This module directs Feign's http requests to Apache's
@@ -64,54 +67,54 @@ public final class AsyncApacheHttp5Client implements AsyncClient<HttpClientConte
   }
 
   @Override
-  public CompletableFuture<Response> execute(Request request,
-                                             Options options,
-                                             Optional<HttpClientContext> requestContext) {
+  public CompletableFuture<Response> execute(
+      Request request, Options options, Optional<HttpClientContext> requestContext) {
     final SimpleHttpRequest httpUriRequest = toClassicHttpRequest(request, options);
 
     final CompletableFuture<Response> result = new CompletableFuture<>();
-    final FutureCallback<SimpleHttpResponse> callback = new FutureCallback<SimpleHttpResponse>() {
+    final FutureCallback<SimpleHttpResponse> callback =
+        new FutureCallback<SimpleHttpResponse>() {
 
-      @Override
-      public void completed(SimpleHttpResponse httpResponse) {
-        result.complete(toFeignResponse(httpResponse, request));
-      }
+          @Override
+          public void completed(SimpleHttpResponse httpResponse) {
+            result.complete(toFeignResponse(httpResponse, request));
+          }
 
-      @Override
-      public void failed(Exception ex) {
-        result.completeExceptionally(ex);
-      }
+          @Override
+          public void failed(Exception ex) {
+            result.completeExceptionally(ex);
+          }
 
-      @Override
-      public void cancelled() {
-        result.cancel(false);
-      }
-    };
+          @Override
+          public void cancelled() {
+            result.cancel(false);
+          }
+        };
 
-    client.execute(httpUriRequest,
+    client.execute(
+        httpUriRequest,
         configureTimeoutsAndRedirection(options, requestContext.orElseGet(HttpClientContext::new)),
         callback);
 
     return result;
   }
 
-  protected HttpClientContext configureTimeoutsAndRedirection(Request.Options options,
-                                                              HttpClientContext context) {
+  protected HttpClientContext configureTimeoutsAndRedirection(
+      Request.Options options, HttpClientContext context) {
     // per request timeouts
     final RequestConfig requestConfig =
         (client instanceof Configurable
-            ? RequestConfig.copy(((Configurable) client).getConfig())
-            : RequestConfig.custom())
-                .setConnectTimeout(options.connectTimeout(), options.connectTimeoutUnit())
-                .setResponseTimeout(options.readTimeout(), options.readTimeoutUnit())
-                .setRedirectsEnabled(options.isFollowRedirects())
-                .build();
+                ? RequestConfig.copy(((Configurable) client).getConfig())
+                : RequestConfig.custom())
+            .setConnectTimeout(options.connectTimeout(), options.connectTimeoutUnit())
+            .setResponseTimeout(options.readTimeout(), options.readTimeoutUnit())
+            .setRedirectsEnabled(options.isFollowRedirects())
+            .build();
     context.setRequestConfig(requestConfig);
     return context;
   }
 
-  SimpleHttpRequest toClassicHttpRequest(Request request,
-                                         Request.Options options) {
+  SimpleHttpRequest toClassicHttpRequest(Request request, Request.Options options) {
     final SimpleHttpRequest httpRequest =
         new SimpleHttpRequest(request.httpMethod().name(), request.url());
 
@@ -219,5 +222,4 @@ public final class AsyncApacheHttp5Client implements AsyncClient<HttpClientConte
   public void close() throws Exception {
     client.close(CloseMode.GRACEFUL);
   }
-
 }

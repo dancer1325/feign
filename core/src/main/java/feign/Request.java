@@ -1,21 +1,24 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
 import static feign.Util.checkNotNull;
 import static feign.Util.getThreadIdentifier;
 import static feign.Util.valuesOrEmpty;
+
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
@@ -29,13 +32,19 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-/**
- * An immutable request to an http server.
- */
+/** An immutable request to an http server. */
 public final class Request implements Serializable {
 
   public enum HttpMethod {
-    GET, HEAD, POST(true), PUT(true), DELETE, CONNECT, OPTIONS, TRACE, PATCH(true);
+    GET,
+    HEAD,
+    POST(true),
+    PUT(true),
+    DELETE,
+    CONNECT,
+    OPTIONS,
+    TRACE,
+    PATCH(true);
 
     private final boolean withBody;
 
@@ -53,8 +62,10 @@ public final class Request implements Serializable {
   }
 
   public enum ProtocolVersion {
-
-    HTTP_1_0("HTTP/1.0"), HTTP_1_1("HTTP/1.1"), HTTP_2("HTTP/2.0"), MOCK;
+    HTTP_1_0("HTTP/1.0"),
+    HTTP_1_1("HTTP/1.1"),
+    HTTP_2("HTTP/2.0"),
+    MOCK;
 
     final String protocolVersion;
 
@@ -70,7 +81,6 @@ public final class Request implements Serializable {
     public String toString() {
       return protocolVersion;
     }
-
   }
 
   /**
@@ -80,11 +90,12 @@ public final class Request implements Serializable {
    * @deprecated {@link #create(HttpMethod, String, Map, byte[], Charset)}
    */
   @Deprecated
-  public static Request create(String method,
-                               String url,
-                               Map<String, Collection<String>> headers,
-                               byte[] body,
-                               Charset charset) {
+  public static Request create(
+      String method,
+      String url,
+      Map<String, Collection<String>> headers,
+      byte[] body,
+      Charset charset) {
     checkNotNull(method, "httpMethod of %s", method);
     final HttpMethod httpMethod = HttpMethod.valueOf(method.toUpperCase());
     return create(httpMethod, url, headers, body, charset, null);
@@ -101,11 +112,12 @@ public final class Request implements Serializable {
    * @return a Request
    */
   @Deprecated
-  public static Request create(HttpMethod httpMethod,
-                               String url,
-                               Map<String, Collection<String>> headers,
-                               byte[] body,
-                               Charset charset) {
+  public static Request create(
+      HttpMethod httpMethod,
+      String url,
+      Map<String, Collection<String>> headers,
+      byte[] body,
+      Charset charset) {
     return create(httpMethod, url, headers, Body.create(body, charset), null);
   }
 
@@ -119,12 +131,13 @@ public final class Request implements Serializable {
    * @param charset of the request, can be {@literal null}
    * @return a Request
    */
-  public static Request create(HttpMethod httpMethod,
-                               String url,
-                               Map<String, Collection<String>> headers,
-                               byte[] body,
-                               Charset charset,
-                               RequestTemplate requestTemplate) {
+  public static Request create(
+      HttpMethod httpMethod,
+      String url,
+      Map<String, Collection<String>> headers,
+      byte[] body,
+      Charset charset,
+      RequestTemplate requestTemplate) {
     return create(httpMethod, url, headers, Body.create(body, charset), requestTemplate);
   }
 
@@ -137,11 +150,12 @@ public final class Request implements Serializable {
    * @param body of the request, can be {@literal null}
    * @return a Request
    */
-  public static Request create(HttpMethod httpMethod,
-                               String url,
-                               Map<String, Collection<String>> headers,
-                               Body body,
-                               RequestTemplate requestTemplate) {
+  public static Request create(
+      HttpMethod httpMethod,
+      String url,
+      Map<String, Collection<String>> headers,
+      Body body,
+      RequestTemplate requestTemplate) {
     return new Request(httpMethod, url, headers, body, requestTemplate);
   }
 
@@ -161,7 +175,8 @@ public final class Request implements Serializable {
    * @param body for the request, optional.
    * @param requestTemplate used to build the request.
    */
-  Request(HttpMethod method,
+  Request(
+      HttpMethod method,
       String url,
       Map<String, Collection<String>> headers,
       Body body,
@@ -193,7 +208,6 @@ public final class Request implements Serializable {
   public HttpMethod httpMethod() {
     return this.httpMethod;
   }
-
 
   /**
    * URL for the request.
@@ -282,7 +296,12 @@ public final class Request implements Serializable {
   @Override
   public String toString() {
     final StringBuilder builder = new StringBuilder();
-    builder.append(httpMethod).append(' ').append(url).append(' ').append(protocolVersion)
+    builder
+        .append(httpMethod)
+        .append(' ')
+        .append(url)
+        .append(' ')
+        .append(protocolVersion)
         .append('\n');
     for (final String field : headers.keySet()) {
       for (final String value : valuesOrEmpty(headers, field)) {
@@ -310,7 +329,7 @@ public final class Request implements Serializable {
 
     /**
      * Get an Options by methodName
-     * 
+     *
      * @param methodName it's your FeignInterface method name.
      * @return method Options
      */
@@ -323,7 +342,7 @@ public final class Request implements Serializable {
 
     /**
      * Set methodOptions by methodKey and options
-     * 
+     *
      * @param methodName it's your FeignInterface method name.
      * @param options it's the Options for this method.
      */
@@ -342,13 +361,15 @@ public final class Request implements Serializable {
      * @param connectTimeoutMillis connection timeout in milliseconds.
      * @param readTimeoutMillis read timeout in milliseconds.
      * @param followRedirects if the request should follow 3xx redirections.
-     *
      * @deprecated please use {@link #Options(long, TimeUnit, long, TimeUnit, boolean)}
      */
     @Deprecated
     public Options(int connectTimeoutMillis, int readTimeoutMillis, boolean followRedirects) {
-      this(connectTimeoutMillis, TimeUnit.MILLISECONDS,
-          readTimeoutMillis, TimeUnit.MILLISECONDS,
+      this(
+          connectTimeoutMillis,
+          TimeUnit.MILLISECONDS,
+          readTimeoutMillis,
+          TimeUnit.MILLISECONDS,
           followRedirects);
     }
 
@@ -361,8 +382,11 @@ public final class Request implements Serializable {
      * @param readTimeoutUnit with the TimeUnit for the timeout value.
      * @param followRedirects if the request should follow 3xx redirections.
      */
-    public Options(long connectTimeout, TimeUnit connectTimeoutUnit,
-        long readTimeout, TimeUnit readTimeoutUnit,
+    public Options(
+        long connectTimeout,
+        TimeUnit connectTimeoutUnit,
+        long readTimeout,
+        TimeUnit readTimeoutUnit,
         boolean followRedirects) {
       super();
       this.connectTimeout = connectTimeout;
@@ -378,7 +402,6 @@ public final class Request implements Serializable {
      *
      * @param connectTimeoutMillis connection timeout in milliseconds.
      * @param readTimeoutMillis read timeout in milliseconds.
-     *
      * @deprecated please use {@link #Options(long, TimeUnit, long, TimeUnit, boolean)}
      */
     @Deprecated
@@ -394,16 +417,21 @@ public final class Request implements Serializable {
      * @param followRedirects if the request should follow 3xx redirections.
      */
     public Options(Duration connectTimeout, Duration readTimeout, boolean followRedirects) {
-      this(connectTimeout.toMillis(), TimeUnit.MILLISECONDS, readTimeout.toMillis(),
-          TimeUnit.MILLISECONDS, followRedirects);
+      this(
+          connectTimeout.toMillis(),
+          TimeUnit.MILLISECONDS,
+          readTimeout.toMillis(),
+          TimeUnit.MILLISECONDS,
+          followRedirects);
     }
 
     /**
      * Creates the new Options instance using the following defaults:
+     *
      * <ul>
-     * <li>Connect Timeout: 10 seconds</li>
-     * <li>Read Timeout: 60 seconds</li>
-     * <li>Follow all 3xx redirects</li>
+     *   <li>Connect Timeout: 10 seconds
+     *   <li>Read Timeout: 60 seconds
+     *   <li>Follow all 3xx redirects
      * </ul>
      */
     public Options() {
@@ -427,7 +455,6 @@ public final class Request implements Serializable {
     public int readTimeoutMillis() {
       return (int) readTimeoutUnit.toMillis(readTimeout);
     }
-
 
     /**
      * Defaults to true. {@code false} tells the client to not follow the redirections.
@@ -473,7 +500,6 @@ public final class Request implements Serializable {
     public TimeUnit readTimeoutUnit() {
       return readTimeoutUnit;
     }
-
   }
 
   @Experimental
@@ -483,9 +509,8 @@ public final class Request implements Serializable {
 
   /**
    * Request Body
-   * <p>
-   * Considered experimental, will most likely be made internal going forward.
-   * </p>
+   *
+   * <p>Considered experimental, will most likely be made internal going forward.
    */
   @Experimental
   public static class Body implements Serializable {
@@ -521,9 +546,7 @@ public final class Request implements Serializable {
     }
 
     public String asString() {
-      return !isBinary()
-          ? new String(data, encoding)
-          : "Binary data";
+      return !isBinary() ? new String(data, encoding) : "Binary data";
     }
 
     public boolean isBinary() {
@@ -551,8 +574,7 @@ public final class Request implements Serializable {
      *
      * @param data to be encoded.
      * @param charset to encode the data with. if {@literal null}, then data will be considered
-     *        binary and will not be encoded.
-     *
+     *     binary and will not be encoded.
      * @return a new Request.Body instance with the encoded data.
      * @deprecated please use {@link Request.Body#create(byte[], Charset)}
      */
@@ -564,6 +586,5 @@ public final class Request implements Serializable {
     public static Body empty() {
       return new Body();
     }
-
   }
 }

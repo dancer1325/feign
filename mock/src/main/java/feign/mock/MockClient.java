@@ -1,26 +1,29 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.mock;
 
 import static feign.Util.UTF_8;
+
+import feign.*;
+import feign.Request.ProtocolVersion;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import feign.*;
-import feign.Request.ProtocolVersion;
 
 public class MockClient implements Client, AsyncClient<Object> {
 
@@ -34,7 +37,6 @@ public class MockClient implements Client, AsyncClient<Object> {
       this.requestKey = requestKey;
       this.responseBuilder = responseBuilder;
     }
-
   }
 
   private final List<RequestResponse> responses = new ArrayList<>();
@@ -67,9 +69,8 @@ public class MockClient implements Client, AsyncClient<Object> {
   }
 
   @Override
-  public CompletableFuture<Response> execute(Request request,
-                                             Request.Options options,
-                                             Optional<Object> requestContext) {
+  public CompletableFuture<Response> execute(
+      Request request, Request.Options options, Optional<Object> requestContext) {
     RequestKey requestKey = RequestKey.create(request);
     Response.Builder responseBuilder;
     if (sequential) {
@@ -93,9 +94,8 @@ public class MockClient implements Client, AsyncClient<Object> {
 
     RequestResponse expectedRequestResponse = responseIterator.next();
     if (!expectedRequestResponse.requestKey.equalsExtended(requestKey)) {
-      throw new VerificationAssertionError("Expected: \n%s,\nbut was: \n%s",
-          expectedRequestResponse.requestKey,
-          requestKey);
+      throw new VerificationAssertionError(
+          "Expected: \n%s,\nbut was: \n%s", expectedRequestResponse.requestKey, requestKey);
     }
 
     responseBuilder = expectedRequestResponse.responseBuilder;
@@ -126,7 +126,9 @@ public class MockClient implements Client, AsyncClient<Object> {
     }
     if (responseBuilder == null) {
       responseBuilder =
-          Response.builder().status(HttpURLConnection.HTTP_NOT_FOUND).reason("Not mocker")
+          Response.builder()
+              .status(HttpURLConnection.HTTP_NOT_FOUND)
+              .reason("Not mocker")
               .headers(request.headers());
     }
     return responseBuilder;
@@ -183,10 +185,10 @@ public class MockClient implements Client, AsyncClient<Object> {
 
   /**
    * @param response
-   *        <ul>
-   *        <li>the status defaults to 0, not 200!</li>
-   *        <li>the internal feign-code requires the headers to be set</li>
-   *        </ul>
+   *     <ul>
+   *       <li>the status defaults to 0, not 200!
+   *       <li>the internal feign-code requires the headers to be set
+   *     </ul>
    */
   public MockClient add(HttpMethod method, String url, Response.Builder response) {
     return add(RequestKey.builder(method, url).build(), response);
@@ -202,8 +204,12 @@ public class MockClient implements Client, AsyncClient<Object> {
   }
 
   public MockClient add(RequestKey requestKey, int status, byte[] responseBody) {
-    return add(requestKey,
-        Response.builder().status(status).reason("Mocked").headers(RequestHeaders.EMPTY)
+    return add(
+        requestKey,
+        Response.builder()
+            .status(status)
+            .reason("Mocked")
+            .headers(RequestHeaders.EMPTY)
             .body(responseBody));
   }
 
@@ -248,15 +254,15 @@ public class MockClient implements Client, AsyncClient<Object> {
 
     RequestKey requestKey = RequestKey.builder(method, url).build();
     if (!requests.containsKey(requestKey)) {
-      throw new VerificationAssertionError("Wanted: '%s' but never invoked! Got: %s", requestKey,
-          requests.keySet());
+      throw new VerificationAssertionError(
+          "Wanted: '%s' but never invoked! Got: %s", requestKey, requests.keySet());
     }
 
     List<Request> result = requests.get(requestKey);
     if (result.size() != times) {
-      throw new VerificationAssertionError("Wanted: '%s' to be invoked: '%s' times but got: '%s'!",
-          requestKey,
-          times, result.size());
+      throw new VerificationAssertionError(
+          "Wanted: '%s' to be invoked: '%s' times but got: '%s'!",
+          requestKey, times, result.size());
     }
 
     return result;
@@ -279,14 +285,14 @@ public class MockClient implements Client, AsyncClient<Object> {
       }
     }
     if (result == null) {
-      throw new VerificationAssertionError("Wanted: '%s' but never invoked! Got: %s", requestKey,
-          requests.keySet());
+      throw new VerificationAssertionError(
+          "Wanted: '%s' but never invoked! Got: %s", requestKey, requests.keySet());
     }
 
     if (result.size() != times) {
-      throw new VerificationAssertionError("Wanted: '%s' to be invoked: '%s' times but got: '%s'!",
-          requestKey,
-          times, result.size());
+      throw new VerificationAssertionError(
+          "Wanted: '%s' to be invoked: '%s' times but got: '%s'!",
+          requestKey, times, result.size());
     }
 
     return result;
@@ -329,6 +335,4 @@ public class MockClient implements Client, AsyncClient<Object> {
   public void resetRequests() {
     requests.clear();
   }
-
-
 }

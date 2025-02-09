@@ -1,18 +1,23 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.querymap;
 
+import feign.Param;
+import feign.QueryMapEncoder;
+import feign.codec.EncodeException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,22 +26,18 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import feign.Param;
-import feign.QueryMapEncoder;
-import feign.codec.EncodeException;
 
 /**
  * the query map will be generated using member variable names as query parameter names.
  *
- * eg: "/uri?name={name}&number={number}"
+ * <p>eg: "/uri?name={name}&number={number}"
  *
- * order of included query parameters not guaranteed, and as usual, if any value is null, it will be
- * left out
+ * <p>order of included query parameters not guaranteed, and as usual, if any value is null, it will
+ * be left out
  */
 public class FieldQueryMapEncoder implements QueryMapEncoder {
 
-  private final Map<Class<?>, ObjectParamMetadata> classToMetadata =
-      new ConcurrentHashMap<>();
+  private final Map<Class<?>, ObjectParamMetadata> classToMetadata = new ConcurrentHashMap<>();
 
   @Override
   public Map<String, Object> encode(Object object) throws EncodeException {
@@ -49,9 +50,7 @@ public class FieldQueryMapEncoder implements QueryMapEncoder {
     return metadata.objectFields.stream()
         .map(field -> this.FieldValuePair(object, field))
         .filter(fieldObjectPair -> fieldObjectPair.right.isPresent())
-        .collect(Collectors.toMap(this::fieldName,
-            fieldObjectPair -> fieldObjectPair.right.get()));
-
+        .collect(Collectors.toMap(this::fieldName, fieldObjectPair -> fieldObjectPair.right.get()));
   }
 
   private String fieldName(Pair<Field, Optional<Object>> pair) {
@@ -78,15 +77,17 @@ public class FieldQueryMapEncoder implements QueryMapEncoder {
     private static ObjectParamMetadata parseObjectType(Class<?> type) {
       List<Field> allFields = new ArrayList();
 
-      for (Class currentClass = type; currentClass != null; currentClass =
-          currentClass.getSuperclass()) {
+      for (Class currentClass = type;
+          currentClass != null;
+          currentClass = currentClass.getSuperclass()) {
         Collections.addAll(allFields, currentClass.getDeclaredFields());
       }
 
-      return new ObjectParamMetadata(allFields.stream()
-          .filter(field -> !field.isSynthetic())
-          .peek(field -> field.setAccessible(true))
-          .collect(Collectors.toList()));
+      return new ObjectParamMetadata(
+          allFields.stream()
+              .filter(field -> !field.isSynthetic())
+              .peek(field -> field.setAccessible(true))
+              .collect(Collectors.toList()));
     }
   }
 
@@ -102,7 +103,5 @@ public class FieldQueryMapEncoder implements QueryMapEncoder {
     public static <T, U> Pair<T, U> pair(T left, U right) {
       return new Pair<>(left, right);
     }
-
   }
-
 }

@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
@@ -20,13 +22,13 @@ package feign;
  * immutable http request sent via {@link Client#execute(Request, feign.Request.Options)}. <br>
  * <br>
  * For example: <br>
- * 
+ *
  * <pre>
  * public void apply(RequestTemplate input) {
  *   input.header(&quot;X-Auth&quot;, currentToken);
  * }
  * </pre>
- * 
+ *
  * <br>
  * <br>
  * <b>Configuration</b><br>
@@ -35,10 +37,10 @@ package feign;
  * <br>
  * <b>Implementation notes</b><br>
  * <br>
- * Do not add parameters, such as {@code /path/{foo}/bar } in your implementation of
- * {@link #apply(RequestTemplate)}. <br>
- * Interceptors are applied after the template's parameters are
- * {@link RequestTemplate#resolve(java.util.Map) resolved}. This is to ensure that you can implement
+ * Do not add parameters, such as {@code /path/{foo}/bar } in your implementation of {@link
+ * #apply(RequestTemplate)}. <br>
+ * Interceptors are applied after the template's parameters are {@link
+ * RequestTemplate#resolve(java.util.Map) resolved}. This is to ensure that you can implement
  * signatures are interceptors. <br>
  * <br>
  * <br>
@@ -49,8 +51,6 @@ package feign;
  */
 public interface RequestInterceptor {
 
-  /**
-   * Called for every request. Add data using methods on the supplied {@link RequestTemplate}.
-   */
+  /** Called for every request. Add data using methods on the supplied {@link RequestTemplate}. */
   void apply(RequestTemplate template);
 }

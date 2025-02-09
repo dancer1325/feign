@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.micrometer;
 
@@ -22,6 +24,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.assertj.core.api.Assertions.assertThat;
+
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import feign.AsyncFeign;
@@ -57,7 +60,8 @@ class FeignHeaderInstrumentationTest {
 
   @BeforeEach
   void setup() {
-    observationRegistry.observationConfig()
+    observationRegistry
+        .observationConfig()
         .observationHandler(new DefaultMeterObservationHandler(meterRegistry));
     observationRegistry.observationConfig().observationHandler(new HeaderMutatingHandler());
   }
@@ -105,7 +109,8 @@ class FeignHeaderInstrumentationTest {
 
   private void assertMetricIdIncludesMethod(Id metricId) {
     String tag = metricId.getTag("http.method");
-    assertThat(tag).as("Expect all metric names to have tag 'http.method': " + metricId)
+    assertThat(tag)
+        .as("Expect all metric names to have tag 'http.method': " + metricId)
         .isNotNull();
     assertThat(tag).as("Expect method to be GET: " + metricId).isEqualTo("GET");
   }
@@ -113,13 +118,15 @@ class FeignHeaderInstrumentationTest {
   private void assertMetricIdIncludesURI(Id metricId) {
     String tag = metricId.getTag("http.url");
     assertThat(tag).as("Expect all metric names to have tag 'http.url': " + metricId).isNotNull();
-    assertThat(tag).as("Expect url to match path template: " + metricId)
+    assertThat(tag)
+        .as("Expect url to match path template: " + metricId)
         .isEqualTo("/customers/{customerId}/carts/{cartId}");
   }
 
   private void assertMetricIdIncludesStatus(Id metricId) {
     String tag = metricId.getTag("http.status_code");
-    assertThat(tag).as("Expect all metric names to have tag 'http.status_code': " + metricId)
+    assertThat(tag)
+        .as("Expect all metric names to have tag 'http.status_code': " + metricId)
         .isNotNull();
     assertThat(tag).as("Expect status to be 200: " + metricId).isEqualTo("200");
   }
@@ -127,7 +134,8 @@ class FeignHeaderInstrumentationTest {
   private void assertsMetricIdIncludesClientName(Id metricId) {
     String tag = metricId.getTag("clientName");
     assertThat(tag).as("Expect all metric names to have tag 'clientName': " + metricId).isNotNull();
-    assertThat(tag).as("Expect class to be present: " + metricId)
+    assertThat(tag)
+        .as("Expect class to be present: " + metricId)
         .startsWith("feign.micrometer.FeignHeaderInstrumentationTest$");
     assertThat(tag).endsWith("TestClient");
   }
@@ -152,14 +160,12 @@ class FeignHeaderInstrumentationTest {
     String templated(@Param("customerId") String customerId, @Param("cartId") String cartId);
   }
 
-
   public interface AsyncTestClient {
 
     @RequestLine("GET /customers/{customerId}/carts/{cartId}")
-    CompletableFuture<String> templated(@Param("customerId") String customerId,
-                                        @Param("cartId") String cartId);
+    CompletableFuture<String> templated(
+        @Param("customerId") String customerId, @Param("cartId") String cartId);
   }
-
 
   static class HeaderMutatingHandler
       implements ObservationHandler<RequestReplySenderContext<Request, Response>> {

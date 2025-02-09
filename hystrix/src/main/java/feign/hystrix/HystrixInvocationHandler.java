@@ -1,20 +1,27 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.hystrix;
 
+import static feign.Util.checkNotNull;
+
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommand.Setter;
+import feign.InvocationHandlerFactory.MethodHandler;
+import feign.Target;
+import feign.Util;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,13 +32,9 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import feign.InvocationHandlerFactory.MethodHandler;
-import feign.Target;
-import feign.Util;
 import rx.Completable;
 import rx.Observable;
 import rx.Single;
-import static feign.Util.checkNotNull;
 
 final class HystrixInvocationHandler implements InvocationHandler {
 
@@ -41,8 +44,11 @@ final class HystrixInvocationHandler implements InvocationHandler {
   private final Map<Method, Method> fallbackMethodMap;
   private final Map<Method, Setter> setterMethodMap;
 
-  HystrixInvocationHandler(Target<?> target, Map<Method, MethodHandler> dispatch,
-      SetterFactory setterFactory, FallbackFactory<?> fallbackFactory) {
+  HystrixInvocationHandler(
+      Target<?> target,
+      Map<Method, MethodHandler> dispatch,
+      SetterFactory setterFactory,
+      FallbackFactory<?> fallbackFactory) {
     this.target = checkNotNull(target, "target");
     this.dispatch = checkNotNull(dispatch, "dispatch");
     this.fallbackFactory = fallbackFactory;
@@ -68,12 +74,9 @@ final class HystrixInvocationHandler implements InvocationHandler {
     return result;
   }
 
-  /**
-   * Process all methods in the target so that appropriate setters are created.
-   */
-  static Map<Method, Setter> toSetters(SetterFactory setterFactory,
-                                       Target<?> target,
-                                       Set<Method> methods) {
+  /** Process all methods in the target so that appropriate setters are created. */
+  static Map<Method, Setter> toSetters(
+      SetterFactory setterFactory, Target<?> target, Set<Method> methods) {
     Map<Method, Setter> result = new LinkedHashMap<Method, Setter>();
     for (Method method : methods) {
       method.setAccessible(true);

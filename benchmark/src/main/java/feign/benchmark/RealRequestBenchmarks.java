@@ -1,29 +1,29 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.benchmark;
-
-
 
 import feign.Feign;
 import feign.Logger;
 import feign.Logger.Level;
 import feign.Response;
 import feign.Retryer;
+import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import io.netty.buffer.ByteBuf;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -55,19 +55,20 @@ public class RealRequestBenchmarks {
   @Setup
   public void setup() {
 
-    server = HttpServer.newServer(SERVER_PORT)
-        .start((request, response) -> null);
+    server = HttpServer.newServer(SERVER_PORT).start((request, response) -> null);
     client = new OkHttpClient();
     client.retryOnConnectionFailure();
-    okFeign = Feign.builder()
-        .client(new feign.okhttp.OkHttpClient(client))
-        .logLevel(Level.NONE)
-        .logger(new Logger.ErrorLogger())
-        .retryer(new Retryer.Default())
-        .target(FeignTestInterface.class, "http://localhost:" + SERVER_PORT);
-    queryRequest = new Request.Builder()
-        .url("http://localhost:" + SERVER_PORT + "/?Action=GetUser&Version=2010-05-08&limit=1")
-        .build();
+    okFeign =
+        Feign.builder()
+            .client(new feign.okhttp.OkHttpClient(client))
+            .logLevel(Level.NONE)
+            .logger(new Logger.ErrorLogger())
+            .retryer(new Retryer.Default())
+            .target(FeignTestInterface.class, "http://localhost:" + SERVER_PORT);
+    queryRequest =
+        new Request.Builder()
+            .url("http://localhost:" + SERVER_PORT + "/?Action=GetUser&Version=2010-05-08&limit=1")
+            .build();
   }
 
   @TearDown
@@ -75,9 +76,7 @@ public class RealRequestBenchmarks {
     server.shutdown();
   }
 
-  /**
-   * How fast can we execute get commands synchronously?
-   */
+  /** How fast can we execute get commands synchronously? */
   @Benchmark
   public okhttp3.Response query_baseCaseUsingOkHttp() throws IOException {
     okhttp3.Response result = client.newCall(queryRequest).execute();
@@ -85,9 +84,7 @@ public class RealRequestBenchmarks {
     return result;
   }
 
-  /**
-   * How fast can we execute get commands synchronously using Feign?
-   */
+  /** How fast can we execute get commands synchronously using Feign? */
   @Benchmark
   public boolean query_feignUsingOkHttp() {
     /* auto close the response */

@@ -1,26 +1,29 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.sax.examples;
 
 import static feign.Util.UTF_8;
+
+import feign.Request;
+import feign.RequestTemplate;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.time.Clock;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import feign.Request;
-import feign.RequestTemplate;
 
 // http://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 public class AWSSignatureVersion4 {
@@ -91,7 +94,6 @@ public class AWSSignatureVersion4 {
     toSign.append(hex(sha256(canonicalRequest)));
     return toSign.toString();
   }
-
 
   private static String hex(byte[] data) {
     StringBuilder result = new StringBuilder(data.length * 2);

@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.template;
 
@@ -69,9 +71,10 @@ public final class HeaderTemplate {
    */
   public static HeaderTemplate append(HeaderTemplate headerTemplate, Iterable<String> values) {
     LinkedHashSet<String> headerValues = new LinkedHashSet<>(headerTemplate.getValues());
-    headerValues.addAll(StreamSupport.stream(values.spliterator(), false)
-        .filter(Util::isNotBlank)
-        .collect(Collectors.toCollection(LinkedHashSet::new)));
+    headerValues.addAll(
+        StreamSupport.stream(values.spliterator(), false)
+            .filter(Util::isNotBlank)
+            .collect(Collectors.toCollection(LinkedHashSet::new)));
     return create(headerTemplate.getName(), headerValues);
   }
 
@@ -82,12 +85,13 @@ public final class HeaderTemplate {
    * @param values to append.
    * @return a new Header Template with the values added.
    */
-  public static HeaderTemplate appendLiteral(HeaderTemplate headerTemplate,
-                                             Iterable<String> values) {
+  public static HeaderTemplate appendLiteral(
+      HeaderTemplate headerTemplate, Iterable<String> values) {
     LinkedHashSet<String> headerValues = new LinkedHashSet<>(headerTemplate.getValues());
-    headerValues.addAll(StreamSupport.stream(values.spliterator(), false)
-        .filter(Util::isNotBlank)
-        .collect(Collectors.toCollection(LinkedHashSet::new)));
+    headerValues.addAll(
+        StreamSupport.stream(values.spliterator(), false)
+            .filter(Util::isNotBlank)
+            .collect(Collectors.toCollection(LinkedHashSet::new)));
     return literal(headerTemplate.getName(), headerValues);
   }
 
@@ -130,20 +134,14 @@ public final class HeaderTemplate {
       } else {
         this.values.add(
             new Template(
-                value,
-                ExpansionOptions.REQUIRED,
-                EncodingOptions.NOT_REQUIRED,
-                false,
-                charset));
+                value, ExpansionOptions.REQUIRED, EncodingOptions.NOT_REQUIRED, false, charset));
       }
     }
-
   }
 
   public Collection<String> getValues() {
-    return Collections.unmodifiableList(this.values.stream()
-        .map(Template::toString)
-        .collect(Collectors.toList()));
+    return Collections.unmodifiableList(
+        this.values.stream().map(Template::toString).collect(Collectors.toList()));
   }
 
   public List<String> getVariables() {

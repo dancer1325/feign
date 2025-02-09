@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
@@ -37,11 +39,10 @@ public abstract class Feign {
   /**
    * Configuration keys are formatted as unresolved <a href=
    * "http://docs.oracle.com/javase/6/docs/jdk/api/javadoc/doclet/com/sun/javadoc/SeeTag.html" >see
-   * tags</a>. This method exposes that format, in case you need to create the same value as
-   * {@link MethodMetadata#configKey()} for correlation purposes.
+   * tags</a>. This method exposes that format, in case you need to create the same value as {@link
+   * MethodMetadata#configKey()} for correlation purposes.
    *
-   * <p>
-   * Here are some sample encodings:
+   * <p>Here are some sample encodings:
    *
    * <pre>
    * <ul>
@@ -204,15 +205,28 @@ public abstract class Feign {
     @Override
     public Feign internalBuild() {
       final ResponseHandler responseHandler =
-          new ResponseHandler(logLevel, logger, decoder, errorDecoder,
-              dismiss404, closeAfterDecode, decodeVoid, responseInterceptorChain());
+          new ResponseHandler(
+              logLevel,
+              logger,
+              decoder,
+              errorDecoder,
+              dismiss404,
+              closeAfterDecode,
+              decodeVoid,
+              responseInterceptorChain());
       MethodHandler.Factory<Object> methodHandlerFactory =
-          new SynchronousMethodHandler.Factory(client, retryer, requestInterceptors,
-              responseHandler, logger, logLevel, propagationPolicy,
+          new SynchronousMethodHandler.Factory(
+              client,
+              retryer,
+              requestInterceptors,
+              responseHandler,
+              logger,
+              logLevel,
+              propagationPolicy,
               new RequestTemplateFactoryResolver(encoder, queryMapEncoder),
               options);
-      return new ReflectiveFeign<>(contract, methodHandlerFactory, invocationHandlerFactory,
-          () -> null);
+      return new ReflectiveFeign<>(
+          contract, methodHandlerFactory, invocationHandlerFactory, () -> null);
     }
   }
 

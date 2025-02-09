@@ -1,24 +1,26 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
+import feign.Param.Expander;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
-import feign.Param.Expander;
 
 public final class MethodMetadata implements Serializable {
 
@@ -42,9 +44,10 @@ public final class MethodMetadata implements Serializable {
   private transient Map<Integer, Expander> indexToExpander;
   private BitSet parameterToIgnore = new BitSet();
   private boolean ignored;
+  private boolean bodyRequired = true;
   private transient Class<?> targetType;
   private transient Method method;
-  private transient final List<String> warnings = new ArrayList<>();
+  private final transient List<String> warnings = new ArrayList<>();
 
   MethodMetadata() {
     template.methodMetadata(this);
@@ -130,9 +133,7 @@ public final class MethodMetadata implements Serializable {
     return this;
   }
 
-  /**
-   * Type corresponding to {@link #bodyIndex()}.
-   */
+  /** Type corresponding to {@link #bodyIndex()}. */
   public Type bodyType() {
     return bodyType;
   }
@@ -158,9 +159,7 @@ public final class MethodMetadata implements Serializable {
     return indexToEncoded;
   }
 
-  /**
-   * If {@link #indexToExpander} is null, classes here will be instantiated by newInstance.
-   */
+  /** If {@link #indexToExpander} is null, classes here will be instantiated by newInstance. */
   public Map<Integer, Class<? extends Expander>> indexToExpanderClass() {
     return indexToExpanderClass;
   }
@@ -174,9 +173,7 @@ public final class MethodMetadata implements Serializable {
     return this;
   }
 
-  /**
-   * When not null, this value will be used instead of {@link #indexToExpander()}.
-   */
+  /** When not null, this value will be used instead of {@link #indexToExpander()}. */
   public Map<Integer, Expander> indexToExpander() {
     return indexToExpander;
   }
@@ -209,8 +206,8 @@ public final class MethodMetadata implements Serializable {
 
   /**
    * @param index
-   * @return true if the parameter {@code index} was already consumed by a any
-   *         {@link MethodMetadata} holder
+   * @return true if the parameter {@code index} was already consumed by a any {@link
+   *     MethodMetadata} holder
    */
   public boolean isAlreadyProcessed(Integer index) {
     return index.equals(urlIndex)
@@ -230,6 +227,14 @@ public final class MethodMetadata implements Serializable {
 
   public boolean isIgnored() {
     return ignored;
+  }
+
+  public boolean isBodyRequired() {
+    return bodyRequired;
+  }
+
+  public void setBodyRequired(boolean bodyRequired) {
+    this.bodyRequired = bodyRequired;
   }
 
   @Experimental
@@ -259,8 +264,6 @@ public final class MethodMetadata implements Serializable {
   }
 
   public String warnings() {
-    return warnings.stream()
-        .collect(Collectors.joining("\n- ", "\nWarnings:\n- ", ""));
+    return warnings.stream().collect(Collectors.joining("\n- ", "\nWarnings:\n- ", ""));
   }
-
 }

@@ -1,18 +1,22 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.jaxrs;
 
+import feign.MethodMetadata;
+import feign.Response;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,12 +36,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import feign.MethodMetadata;
-import feign.Response;
 
 /**
- * Tests interfaces defined per {@link JAXRSContract} are interpreted into expected
- * {@link feign .RequestTemplate template} instances.
+ * Tests interfaces defined per {@link JAXRSContract} are interpreted into expected {@link feign
+ * .RequestTemplate template} instances.
  */
 public class JAXRSContractTest extends JAXRSContractTestSupport<JAXRSContract> {
 
@@ -64,8 +66,7 @@ public class JAXRSContractTest extends JAXRSContractTestSupport<JAXRSContract> {
     @Target({ElementType.METHOD})
     @Retention(RetentionPolicy.RUNTIME)
     @HttpMethod("PATCH")
-    public @interface PATCH {
-    }
+    public @interface PATCH {}
   }
 
   protected interface WithQueryParamsInPath {
@@ -180,8 +181,7 @@ public class JAXRSContractTest extends JAXRSContractTestSupport<JAXRSContract> {
     @GET
     @Path("regex/{param1:[0-9]*}/{  param2 : .+}")
     Response pathParamWithMultipleRegex(
-                                        @PathParam("param1") String param1,
-                                        @PathParam("param2") String param2);
+        @PathParam("param1") String param1, @PathParam("param2") String param2);
   }
 
   @Path("/{baseparam: [0-9]+}")
@@ -190,8 +190,7 @@ public class JAXRSContractTest extends JAXRSContractTestSupport<JAXRSContract> {
     @GET
     @Path("regex/{param1:[0-9]*}/{  param2 : .+}")
     Response pathParamWithMultipleRegex(
-                                        @PathParam("param1") String param1,
-                                        @PathParam("param2") String param2);
+        @PathParam("param1") String param1, @PathParam("param2") String param2);
   }
 
   protected interface WithURIParam {
@@ -206,9 +205,9 @@ public class JAXRSContractTest extends JAXRSContractTestSupport<JAXRSContract> {
     @GET
     @Path("/domains/{domainId}/records")
     Response recordsByNameAndType(
-                                  @PathParam("domainId") int id,
-                                  @QueryParam("name") String nameFilter,
-                                  @QueryParam("type") String typeFilter);
+        @PathParam("domainId") int id,
+        @QueryParam("name") String nameFilter,
+        @QueryParam("type") String typeFilter);
 
     @GET
     Response empty(@QueryParam("") String empty);
@@ -218,9 +217,9 @@ public class JAXRSContractTest extends JAXRSContractTestSupport<JAXRSContract> {
 
     @POST
     void login(
-               @FormParam("customer_name") String customer,
-               @FormParam("user_name") String user,
-               @FormParam("password") String password);
+        @FormParam("customer_name") String customer,
+        @FormParam("user_name") String user,
+        @FormParam("password") String password);
 
     @GET
     Response emptyFormParam(@FormParam("") String empty);
@@ -286,9 +285,9 @@ public class JAXRSContractTest extends JAXRSContractTestSupport<JAXRSContract> {
     @Path("/api/stuff?multiple=stuff")
     @Produces("application/json")
     Response getWithHeaders(
-                            @HeaderParam("Accept") String accept,
-                            @QueryParam("multiple") String multiple,
-                            @QueryParam("another") String another);
+        @HeaderParam("Accept") String accept,
+        @QueryParam("multiple") String multiple,
+        @QueryParam("another") String another);
   }
 
   @Override
@@ -298,10 +297,7 @@ public class JAXRSContractTest extends JAXRSContractTestSupport<JAXRSContract> {
 
   @Override
   protected MethodMetadata parseAndValidateMetadata(
-                                                    Class<?> targetType,
-                                                    String method,
-                                                    Class<?>... parameterTypes)
-      throws NoSuchMethodException {
+      Class<?> targetType, String method, Class<?>... parameterTypes) throws NoSuchMethodException {
     return contract.parseAndValidateMetadata(
         targetType, targetType.getMethod(method, parameterTypes));
   }

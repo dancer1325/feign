@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
@@ -21,6 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import feign.codec.Decoder;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -33,22 +37,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
-import feign.codec.Decoder;
 
 class UtilTest {
 
   @Test
   void removesEmptyStrings() {
     String[] values = new String[] {"", null};
-    assertThat(removeValues(values, value -> emptyToNull(value) == null, String.class))
-        .isEmpty();
+    assertThat(removeValues(values, value -> emptyToNull(value) == null, String.class)).isEmpty();
   }
 
   @Test
   void removesEvenNumbers() {
     Integer[] values = {22, 23};
-    assertThat(removeValues(values, number -> number % 2 == 0, Integer.class))
-        .containsExactly(23);
+    assertThat(removeValues(values, number -> number % 2 == 0, Integer.class)).containsExactly(23);
   }
 
   @Test
@@ -87,7 +88,6 @@ class UtilTest {
     assertThat(last).isEqualTo(listStringType);
   }
 
-
   @Test
   void fake() throws Exception {
     Type context =
@@ -114,7 +114,8 @@ class UtilTest {
   @Test
   void resolveLastTypeParameterWhenWildcard() throws Exception {
     Type context =
-        LastTypeParameter.class.getDeclaredField("PARAMETERIZED_WILDCARD_LIST_STRING")
+        LastTypeParameter.class
+            .getDeclaredField("PARAMETERIZED_WILDCARD_LIST_STRING")
             .getGenericType();
     Type listStringType = LastTypeParameter.class.getDeclaredField("LIST_STRING").getGenericType();
     Type last = resolveLastTypeParameter(context, Parameterized.class);
@@ -124,7 +125,8 @@ class UtilTest {
   @Test
   void resolveLastTypeParameterWhenParameterizedSubtype() throws Exception {
     Type context =
-        LastTypeParameter.class.getDeclaredField("PARAMETERIZED_DECODER_LIST_STRING")
+        LastTypeParameter.class
+            .getDeclaredField("PARAMETERIZED_DECODER_LIST_STRING")
             .getGenericType();
     Type listStringType = LastTypeParameter.class.getDeclaredField("LIST_STRING").getGenericType();
     Type last = resolveLastTypeParameter(context, ParameterizedDecoder.class);
@@ -141,27 +143,31 @@ class UtilTest {
 
   @Test
   void checkArgumentInputFalseNotNullNullOutputIllegalArgumentException() {
-    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-      // Arrange
-      final boolean expression = false;
-      final String errorMessageTemplate = "";
-      final Object[] errorMessageArgs = null;
-      Util.checkArgument(expression, errorMessageTemplate, errorMessageArgs);
-      // Method is not expected to return due to exception thrown
-    });
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () -> {
+              // Arrange
+              final boolean expression = false;
+              final String errorMessageTemplate = "";
+              final Object[] errorMessageArgs = null;
+              Util.checkArgument(expression, errorMessageTemplate, errorMessageArgs);
+              // Method is not expected to return due to exception thrown
+            });
     // Method is not expected to return due to exception thrown
   }
 
   @Test
   void checkNotNullInputNullNotNullNullOutputNullPointerException() {
-    assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> {
-      // Arrange
-      final Object reference = null;
-      final String errorMessageTemplate = "";
-      final Object[] errorMessageArgs = null;
-      Util.checkNotNull(reference, errorMessageTemplate, errorMessageArgs);
-      // Method is not expected to return due to exception thrown
-    });
+    assertThatExceptionOfType(NullPointerException.class)
+        .isThrownBy(
+            () -> {
+              // Arrange
+              final Object reference = null;
+              final String errorMessageTemplate = "";
+              final Object[] errorMessageArgs = null;
+              Util.checkNotNull(reference, errorMessageTemplate, errorMessageArgs);
+              // Method is not expected to return due to exception thrown
+            });
     // Method is not expected to return due to exception thrown
   }
 
@@ -179,14 +185,16 @@ class UtilTest {
 
   @Test
   void checkStateInputFalseNotNullNullOutputIllegalStateException() {
-    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-      // Arrange
-      final boolean expression = false;
-      final String errorMessageTemplate = "";
-      final Object[] errorMessageArgs = null;
-      Util.checkState(expression, errorMessageTemplate, errorMessageArgs);
-      // Method is not expected to return due to exception thrown
-    });
+    assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(
+            () -> {
+              // Arrange
+              final boolean expression = false;
+              final String errorMessageTemplate = "";
+              final Object[] errorMessageArgs = null;
+              Util.checkState(expression, errorMessageTemplate, errorMessageArgs);
+              // Method is not expected to return due to exception thrown
+            });
     // Method is not expected to return due to exception thrown
   }
 
@@ -261,15 +269,26 @@ class UtilTest {
     Map<String, Collection<String>> actualMap = caseInsensitiveCopyOf(sourceMap);
     // Assert result
     assertThat(actualMap)
-        .hasEntrySatisfying("First", value -> {
-          assertThat(value).contains("xyz", "abc", "qwerty");
-        }).hasEntrySatisfying("first", value -> {
-          assertThat(value).contains("xyz", "abc", "qwerty");
-        }).hasEntrySatisfying("CAMELCASE", value -> {
-          assertThat(value).contains("123");
-        }).hasEntrySatisfying("camelcase", value -> {
-          assertThat(value).contains("123");
-        });
+        .hasEntrySatisfying(
+            "First",
+            value -> {
+              assertThat(value).contains("xyz", "abc", "qwerty");
+            })
+        .hasEntrySatisfying(
+            "first",
+            value -> {
+              assertThat(value).contains("xyz", "abc", "qwerty");
+            })
+        .hasEntrySatisfying(
+            "CAMELCASE",
+            value -> {
+              assertThat(value).contains("123");
+            })
+        .hasEntrySatisfying(
+            "camelcase",
+            value -> {
+              assertThat(value).contains("123");
+            });
   }
 
   @Test
@@ -293,9 +312,7 @@ class UtilTest {
     // Act
     Map<String, Collection<String>> actualMap = caseInsensitiveCopyOf(null);
     // Assert result
-    assertThat(actualMap)
-        .isNotNull()
-        .isEmpty();
+    assertThat(actualMap).isNotNull().isEmpty();
   }
 
   interface LastTypeParameter {
@@ -306,15 +323,9 @@ class UtilTest {
     ParameterizedDecoder<?> PARAMETERIZED_DECODER_UNBOUND = null;
   }
 
-  interface ParameterizedDecoder<T extends List<String>> extends Decoder {
+  interface ParameterizedDecoder<T extends List<String>> extends Decoder {}
 
-  }
+  interface Parameterized<T> {}
 
-  interface Parameterized<T> {
-
-  }
-
-  static class ParameterizedSubtype implements Parameterized<String> {
-
-  }
+  static class ParameterizedSubtype implements Parameterized<String> {}
 }

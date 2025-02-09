@@ -1,35 +1,24 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.jackson;
 
 import static feign.Util.UTF_8;
 import static feign.assertj.FeignAssertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
-import java.io.Closeable;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -44,20 +33,44 @@ import feign.Request.HttpMethod;
 import feign.RequestTemplate;
 import feign.Response;
 import feign.Util;
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("deprecation")
 class JacksonCodecTest {
 
-  private String zonesJson = ""//
-      + "[" + System.lineSeparator() //
-      + "  {" + System.lineSeparator() //
-      + "    \"name\": \"denominator.io.\"" + System.lineSeparator()//
-      + "  }," + System.lineSeparator()//
-      + "  {" + System.lineSeparator()//
-      + "    \"name\": \"denominator.io.\"," + System.lineSeparator()//
-      + "    \"id\": \"ABCD\"" + System.lineSeparator()//
-      + "  }" + System.lineSeparator()//
-      + "]" + System.lineSeparator();
+  private String zonesJson =
+      "" //
+          + "["
+          + System.lineSeparator() //
+          + "  {"
+          + System.lineSeparator() //
+          + "    \"name\": \"denominator.io.\""
+          + System.lineSeparator() //
+          + "  },"
+          + System.lineSeparator() //
+          + "  {"
+          + System.lineSeparator() //
+          + "    \"name\": \"denominator.io.\","
+          + System.lineSeparator() //
+          + "    \"id\": \"ABCD\""
+          + System.lineSeparator() //
+          + "  }"
+          + System.lineSeparator() //
+          + "]"
+          + System.lineSeparator();
 
   @Test
   void encodesMapObjectNumericalValuesAsInteger() {
@@ -67,10 +80,14 @@ class JacksonCodecTest {
     RequestTemplate template = new RequestTemplate();
     new JacksonEncoder().encode(map, map.getClass(), template);
 
-    assertThat(template).hasBody(""//
-        + "{" + System.lineSeparator() //
-        + "  \"foo\" : 1" + System.lineSeparator() //
-        + "}");
+    assertThat(template)
+        .hasBody(
+            "" //
+                + "{"
+                + System.lineSeparator() //
+                + "  \"foo\" : 1"
+                + System.lineSeparator() //
+                + "}");
   }
 
   @Test
@@ -82,11 +99,16 @@ class JacksonCodecTest {
     RequestTemplate template = new RequestTemplate();
     new JacksonEncoder().encode(form, new TypeReference<Map<String, ?>>() {}.getType(), template);
 
-    assertThat(template).hasBody(""//
-        + "{" + System.lineSeparator() //
-        + "  \"foo\" : 1," + System.lineSeparator() //
-        + "  \"bar\" : [ 2, 3 ]" + System.lineSeparator() //
-        + "}");
+    assertThat(template)
+        .hasBody(
+            "" //
+                + "{"
+                + System.lineSeparator() //
+                + "  \"foo\" : 1,"
+                + System.lineSeparator() //
+                + "  \"bar\" : [ 2, 3 ]"
+                + System.lineSeparator() //
+                + "}");
   }
 
   @Test
@@ -95,65 +117,74 @@ class JacksonCodecTest {
     zones.add(new Zone("denominator.io."));
     zones.add(new Zone("denominator.io.", "ABCD"));
 
-    Response response = Response.builder()
-        .status(200)
-        .reason("OK")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(Collections.emptyMap())
-        .body(zonesJson, UTF_8)
-        .build();
+    Response response =
+        Response.builder()
+            .status(200)
+            .reason("OK")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(Collections.emptyMap())
+            .body(zonesJson, UTF_8)
+            .build();
     assertThat(new JacksonDecoder().decode(response, new TypeReference<List<Zone>>() {}.getType()))
         .isEqualTo(zones);
   }
 
   @Test
   void nullBodyDecodesToNull() throws Exception {
-    Response response = Response.builder()
-        .status(204)
-        .reason("OK")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(Collections.emptyMap())
-        .build();
+    Response response =
+        Response.builder()
+            .status(204)
+            .reason("OK")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(Collections.emptyMap())
+            .build();
     assertThat(new JacksonDecoder().decode(response, String.class)).isNull();
   }
 
   @Test
   void emptyBodyDecodesToNull() throws Exception {
-    Response response = Response.builder()
-        .status(204)
-        .reason("OK")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(Collections.emptyMap())
-        .body(new byte[0])
-        .build();
+    Response response =
+        Response.builder()
+            .status(204)
+            .reason("OK")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(Collections.emptyMap())
+            .body(new byte[0])
+            .build();
     assertThat(new JacksonDecoder().decode(response, String.class)).isNull();
   }
 
   @Test
   void customDecoder() throws Exception {
-    JacksonDecoder decoder = new JacksonDecoder(
-        Arrays.asList(
-            new SimpleModule().addDeserializer(Zone.class, new ZoneDeserializer())));
+    JacksonDecoder decoder =
+        new JacksonDecoder(
+            Arrays.asList(new SimpleModule().addDeserializer(Zone.class, new ZoneDeserializer())));
 
     List<Zone> zones = new LinkedList<>();
     zones.add(new Zone("DENOMINATOR.IO."));
     zones.add(new Zone("DENOMINATOR.IO.", "ABCD"));
 
-    Response response = Response.builder()
-        .status(200)
-        .reason("OK")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(Collections.emptyMap())
-        .body(zonesJson, UTF_8)
-        .build();
+    Response response =
+        Response.builder()
+            .status(200)
+            .reason("OK")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(Collections.emptyMap())
+            .body(zonesJson, UTF_8)
+            .build();
     assertThat(decoder.decode(response, new TypeReference<List<Zone>>() {}.getType()))
         .isEqualTo(zones);
   }
 
   @Test
   void customEncoder() {
-    JacksonEncoder encoder = new JacksonEncoder(
-        Arrays.asList(new SimpleModule().addSerializer(Zone.class, new ZoneSerializer())));
+    JacksonEncoder encoder =
+        new JacksonEncoder(
+            Arrays.asList(new SimpleModule().addSerializer(Zone.class, new ZoneSerializer())));
 
     List<Zone> zones = new LinkedList<>();
     zones.add(new Zone("denominator.io."));
@@ -162,13 +193,20 @@ class JacksonCodecTest {
     RequestTemplate template = new RequestTemplate();
     encoder.encode(zones, new TypeReference<List<Zone>>() {}.getType(), template);
 
-    assertThat(template).hasBody("" //
-        + "[ {" + System.lineSeparator()
-        + "  \"name\" : \"DENOMINATOR.IO.\"" + System.lineSeparator()
-        + "}, {" + System.lineSeparator()
-        + "  \"name\" : \"DENOMINATOR.IO.\"," + System.lineSeparator()
-        + "  \"id\" : \"ABCD\"" + System.lineSeparator()
-        + "} ]");
+    assertThat(template)
+        .hasBody(
+            "" //
+                + "[ {"
+                + System.lineSeparator()
+                + "  \"name\" : \"DENOMINATOR.IO.\""
+                + System.lineSeparator()
+                + "}, {"
+                + System.lineSeparator()
+                + "  \"name\" : \"DENOMINATOR.IO.\","
+                + System.lineSeparator()
+                + "  \"id\" : \"ABCD\""
+                + System.lineSeparator()
+                + "} ]");
   }
 
   @Test
@@ -178,20 +216,28 @@ class JacksonCodecTest {
     Map<String, Collection<String>> headers = new HashMap<>();
     headers.put("Content-Type", Arrays.asList("application/json;charset=ISO-8859-1"));
 
-    Response response = Response.builder()
-        .status(200)
-        .reason("OK")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(headers)
-        .body(new String("" //
-            + "{" + System.lineSeparator()
-            + "  \"name\" : \"DENOMINATOR.IO.\"," + System.lineSeparator()
-            + "  \"id\" : \"ÁÉÍÓÚÀÈÌÒÙÄËÏÖÜÑ\"" + System.lineSeparator()
-            + "}").getBytes(StandardCharsets.ISO_8859_1))
-        .build();
+    Response response =
+        Response.builder()
+            .status(200)
+            .reason("OK")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(headers)
+            .body(
+                new String(
+                        "" //
+                            + "{"
+                            + System.lineSeparator()
+                            + "  \"name\" : \"DENOMINATOR.IO.\","
+                            + System.lineSeparator()
+                            + "  \"id\" : \"ÁÉÍÓÚÀÈÌÒÙÄËÏÖÜÑ\""
+                            + System.lineSeparator()
+                            + "}")
+                    .getBytes(StandardCharsets.ISO_8859_1))
+            .build();
     assertThat(
-        ((Zone) new JacksonDecoder().decode(response, new TypeReference<Zone>() {}.getType())))
-            .containsEntry("id", zone.get("id"));
+            ((Zone) new JacksonDecoder().decode(response, new TypeReference<Zone>() {}.getType())))
+        .containsEntry("id", zone.get("id"));
   }
 
   @Test
@@ -200,15 +246,18 @@ class JacksonCodecTest {
     zones.add(new Zone("denominator.io."));
     zones.add(new Zone("denominator.io.", "ABCD"));
 
-    Response response = Response.builder()
-        .status(200)
-        .reason("OK")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(Collections.emptyMap())
-        .body(zonesJson, UTF_8)
-        .build();
-    Object decoded = JacksonIteratorDecoder.create().decode(response,
-        new TypeReference<Iterator<Zone>>() {}.getType());
+    Response response =
+        Response.builder()
+            .status(200)
+            .reason("OK")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(Collections.emptyMap())
+            .body(zonesJson, UTF_8)
+            .build();
+    Object decoded =
+        JacksonIteratorDecoder.create()
+            .decode(response, new TypeReference<Iterator<Zone>>() {}.getType());
     assertThat(Iterator.class.isAssignableFrom(decoded.getClass())).isTrue();
     assertThat(Closeable.class.isAssignableFrom(decoded.getClass())).isTrue();
     assertThat(asList((Iterator<?>) decoded)).isEqualTo(zones);
@@ -224,24 +273,28 @@ class JacksonCodecTest {
 
   @Test
   void nullBodyDecodesToEmptyIterator() throws Exception {
-    Response response = Response.builder()
-        .status(204)
-        .reason("OK")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(Collections.emptyMap())
-        .build();
+    Response response =
+        Response.builder()
+            .status(204)
+            .reason("OK")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(Collections.emptyMap())
+            .build();
     assertThat((byte[]) JacksonIteratorDecoder.create().decode(response, byte[].class)).isEmpty();
   }
 
   @Test
   void emptyBodyDecodesToEmptyIterator() throws Exception {
-    Response response = Response.builder()
-        .status(204)
-        .reason("OK")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(Collections.emptyMap())
-        .body(new byte[0])
-        .build();
+    Response response =
+        Response.builder()
+            .status(204)
+            .reason("OK")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(Collections.emptyMap())
+            .body(new byte[0])
+            .build();
     assertThat((byte[]) JacksonIteratorDecoder.create().decode(response, byte[].class)).isEmpty();
   }
 
@@ -307,24 +360,28 @@ class JacksonCodecTest {
   /** Enabled via {@link feign.Feign.Builder#dismiss404()} */
   @Test
   void notFoundDecodesToEmpty() throws Exception {
-    Response response = Response.builder()
-        .status(404)
-        .reason("NOT FOUND")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(Collections.emptyMap())
-        .build();
+    Response response =
+        Response.builder()
+            .status(404)
+            .reason("NOT FOUND")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(Collections.emptyMap())
+            .build();
     assertThat((byte[]) new JacksonDecoder().decode(response, byte[].class)).isEmpty();
   }
 
   /** Enabled via {@link feign.Feign.Builder#dismiss404()} */
   @Test
   void notFoundDecodesToEmptyIterator() throws Exception {
-    Response response = Response.builder()
-        .status(404)
-        .reason("NOT FOUND")
-        .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(Collections.emptyMap())
-        .build();
+    Response response =
+        Response.builder()
+            .status(404)
+            .reason("NOT FOUND")
+            .request(
+                Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
+            .headers(Collections.emptyMap())
+            .build();
     assertThat((byte[]) JacksonIteratorDecoder.create().decode(response, byte[].class)).isEmpty();
   }
 }

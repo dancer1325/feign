@@ -1,19 +1,23 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
 import static feign.Util.checkNotNull;
+
+import feign.InvocationHandlerFactory.MethodHandler;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -22,7 +26,6 @@ import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import feign.InvocationHandlerFactory.MethodHandler;
 
 public class ReflectiveFeign<C> extends Feign {
 
@@ -55,8 +58,10 @@ public class ReflectiveFeign<C> extends Feign {
     Map<Method, MethodHandler> methodToHandler =
         targetToHandlersByName.apply(target, requestContext);
     InvocationHandler handler = factory.create(target, methodToHandler);
-    T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(),
-        new Class<?>[] {target.type()}, handler);
+    T proxy =
+        (T)
+            Proxy.newProxyInstance(
+                target.type().getClassLoader(), new Class<?>[] {target.type()}, handler);
 
     for (MethodHandler methodHandler : methodToHandler.values()) {
       if (methodHandler instanceof DefaultMethodHandler) {
@@ -124,9 +129,7 @@ public class ReflectiveFeign<C> extends Feign {
     private final Contract contract;
     private final MethodHandler.Factory<C> factory;
 
-    ParseHandlersByName(
-        Contract contract,
-        MethodHandler.Factory<C> factory) {
+    ParseHandlersByName(Contract contract, MethodHandler.Factory<C> factory) {
       this.contract = contract;
       this.factory = factory;
     }
@@ -155,9 +158,8 @@ public class ReflectiveFeign<C> extends Feign {
       return result;
     }
 
-    private MethodHandler createMethodHandler(final Target<?> target,
-                                              final MethodMetadata md,
-                                              final C requestContext) {
+    private MethodHandler createMethodHandler(
+        final Target<?> target, final MethodMetadata md, final C requestContext) {
       if (md.isIgnored()) {
         return args -> {
           throw new IllegalStateException(md.configKey() + " is not a method handled by feign");
@@ -183,15 +185,16 @@ public class ReflectiveFeign<C> extends Feign {
         }
 
         if (retType != CompletableFuture.class) {
-          throw new IllegalArgumentException("Method return type is not CompleteableFuture: "
-              + getFullMethodName(type, retType, m));
+          throw new IllegalArgumentException(
+              "Method return type is not CompleteableFuture: "
+                  + getFullMethodName(type, retType, m));
         }
 
         final Type genRetType = m.getGenericReturnType();
 
         if (!(genRetType instanceof ParameterizedType)) {
-          throw new IllegalArgumentException("Method return type is not parameterized: "
-              + getFullMethodName(type, genRetType, m));
+          throw new IllegalArgumentException(
+              "Method return type is not parameterized: " + getFullMethodName(type, genRetType, m));
         }
 
         if (((ParameterizedType) genRetType).getActualTypeArguments()[0] instanceof WildcardType) {

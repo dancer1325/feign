@@ -1,25 +1,27 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.template;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import feign.CollectionFormat;
+import feign.Util;
 import java.util.Arrays;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
-import feign.CollectionFormat;
-import feign.Util;
 
 class QueryTemplateTest {
 
@@ -51,8 +53,8 @@ class QueryTemplateTest {
   void expandCollectionWithBlanks() {
     QueryTemplate template =
         QueryTemplate.create("people", Collections.singletonList("{people}"), Util.UTF_8);
-    String expanded = template.expand(
-        Collections.singletonMap("people", Arrays.asList("", "Jason", "James")));
+    String expanded =
+        template.expand(Collections.singletonMap("people", Arrays.asList("", "Jason", "James")));
     assertThat(expanded).isEqualToIgnoringCase("people=&people=Jason&people=James");
   }
 
@@ -107,8 +109,8 @@ class QueryTemplateTest {
   @Test
   void collectionFormat() {
     QueryTemplate template =
-        QueryTemplate
-            .create("name", Arrays.asList("James", "Jason"), Util.UTF_8, CollectionFormat.CSV);
+        QueryTemplate.create(
+            "name", Arrays.asList("James", "Jason"), Util.UTF_8, CollectionFormat.CSV);
     String expanded = template.expand(Collections.emptyMap());
     assertThat(expanded).isEqualToIgnoringCase("name=James%2CJason");
   }
@@ -123,8 +125,7 @@ class QueryTemplateTest {
 
   @Test
   void expandPureParameter() {
-    QueryTemplate template =
-        QueryTemplate.create("{name}", Collections.emptyList(), Util.UTF_8);
+    QueryTemplate template = QueryTemplate.create("{name}", Collections.emptyList(), Util.UTF_8);
     String expanded = template.expand(Collections.singletonMap("name", "firsts"));
     assertThat(expanded).isEqualToIgnoringCase("firsts");
   }
@@ -148,8 +149,7 @@ class QueryTemplateTest {
   @Test
   void expandSingleValueWithComma() {
     QueryTemplate template =
-        QueryTemplate.create("collection",
-            Collections.singletonList("{collection}"), Util.UTF_8);
+        QueryTemplate.create("collection", Collections.singletonList("{collection}"), Util.UTF_8);
     String expanded = template.expand(Collections.singletonMap("collection", "one,two,three"));
     assertThat(expanded).isEqualToIgnoringCase("collection=one%2Ctwo%2Cthree");
   }
@@ -157,8 +157,7 @@ class QueryTemplateTest {
   @Test
   void expandSingleValueWithPipe() {
     QueryTemplate template =
-        QueryTemplate.create("collection",
-            Collections.singletonList("{collection}"), Util.UTF_8);
+        QueryTemplate.create("collection", Collections.singletonList("{collection}"), Util.UTF_8);
     String expanded = template.expand(Collections.singletonMap("collection", "one|two|three"));
     assertThat(expanded).isEqualToIgnoringCase("collection=one%7Ctwo%7Cthree");
   }
@@ -166,8 +165,7 @@ class QueryTemplateTest {
   @Test
   void expandSingleValueWithSpace() {
     QueryTemplate template =
-        QueryTemplate.create("collection",
-            Collections.singletonList("{collection}"), Util.UTF_8);
+        QueryTemplate.create("collection", Collections.singletonList("{collection}"), Util.UTF_8);
     String expanded = template.expand(Collections.singletonMap("collection", "one two three"));
     assertThat(expanded).isEqualToIgnoringCase("collection=one%20two%20three");
   }
@@ -175,8 +173,7 @@ class QueryTemplateTest {
   @Test
   void expandSingleValueWithTab() {
     QueryTemplate template =
-        QueryTemplate.create("collection",
-            Collections.singletonList("{collection}"), Util.UTF_8);
+        QueryTemplate.create("collection", Collections.singletonList("{collection}"), Util.UTF_8);
     String expanded = template.expand(Collections.singletonMap("collection", "one\ttwo\tthree"));
     assertThat(expanded).isEqualToIgnoringCase("collection=one%09two%09three");
   }
@@ -185,20 +182,23 @@ class QueryTemplateTest {
   void expandSingleValueWithJson() {
     QueryTemplate template =
         QueryTemplate.create("json", Collections.singletonList("{json}"), Util.UTF_8);
-    String expanded = template.expand(
-        Collections.singletonMap("json", "{\"name\":\"feign\",\"version\": \"10\"}"));
-    assertThat(expanded).isEqualToIgnoringCase(
-        "json=%7B%22name%22%3A%22feign%22%2C%22version%22%3A%20%2210%22%7D");
+    String expanded =
+        template.expand(
+            Collections.singletonMap("json", "{\"name\":\"feign\",\"version\": \"10\"}"));
+    assertThat(expanded)
+        .isEqualToIgnoringCase("json=%7B%22name%22%3A%22feign%22%2C%22version%22%3A%20%2210%22%7D");
   }
-
 
   @Test
   void expandCollectionValueWithBrackets() {
     QueryTemplate template =
-        QueryTemplate.create("collection[]", Collections.singletonList("{collection[]}"),
-            Util.UTF_8, CollectionFormat.CSV);
-    String expanded = template.expand(Collections.singletonMap("collection[]",
-        Arrays.asList("1", "2")));
+        QueryTemplate.create(
+            "collection[]",
+            Collections.singletonList("{collection[]}"),
+            Util.UTF_8,
+            CollectionFormat.CSV);
+    String expanded =
+        template.expand(Collections.singletonMap("collection[]", Arrays.asList("1", "2")));
     /* brackets will be pct-encoded */
     assertThat(expanded).isEqualToIgnoringCase("collection%5B%5D=1%2C2");
   }
@@ -206,10 +206,13 @@ class QueryTemplateTest {
   @Test
   void expandCollectionValueWithDollar() {
     QueryTemplate template =
-        QueryTemplate.create("$collection", Collections.singletonList("{$collection}"),
-            Util.UTF_8, CollectionFormat.CSV);
-    String expanded = template.expand(Collections.singletonMap("$collection",
-        Arrays.asList("1", "2")));
+        QueryTemplate.create(
+            "$collection",
+            Collections.singletonList("{$collection}"),
+            Util.UTF_8,
+            CollectionFormat.CSV);
+    String expanded =
+        template.expand(Collections.singletonMap("$collection", Arrays.asList("1", "2")));
     /* dollar will be pct-encoded */
     assertThat(expanded).isEqualToIgnoringCase("%24collection=1%2C2");
   }

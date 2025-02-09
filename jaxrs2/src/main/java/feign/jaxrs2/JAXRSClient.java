@@ -1,18 +1,22 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.jaxrs2;
 
+import feign.Client;
+import feign.Request.Options;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -29,8 +33,6 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Variant;
-import feign.Client;
-import feign.Request.Options;
 
 /**
  * This module directs Feign's http requests to javax.ws.rs.client.Client . Ex:
@@ -54,18 +56,20 @@ public class JAXRSClient implements Client {
 
   @Override
   public feign.Response execute(feign.Request request, Options options) throws IOException {
-    final Response response = clientBuilder
-        .connectTimeout(options.connectTimeoutMillis(), TimeUnit.MILLISECONDS)
-        .readTimeout(options.readTimeoutMillis(), TimeUnit.MILLISECONDS)
-        .build()
-        .target(request.url())
-        .request()
-        .headers(toMultivaluedMap(request.headers()))
-        .method(request.httpMethod().name(), createRequestEntity(request));
+    final Response response =
+        clientBuilder
+            .connectTimeout(options.connectTimeoutMillis(), TimeUnit.MILLISECONDS)
+            .readTimeout(options.readTimeoutMillis(), TimeUnit.MILLISECONDS)
+            .build()
+            .target(request.url())
+            .request()
+            .headers(toMultivaluedMap(request.headers()))
+            .method(request.httpMethod().name(), createRequestEntity(request));
 
     return feign.Response.builder()
         .request(request)
-        .body(response.readEntity(InputStream.class),
+        .body(
+            response.readEntity(InputStream.class),
             integerHeader(response, HttpHeaders.CONTENT_LENGTH))
         .headers(toMap(response.getStringHeaders()))
         .status(response.getStatus())
@@ -80,8 +84,8 @@ public class JAXRSClient implements Client {
 
     return Entity.entity(
         request.body(),
-        new Variant(mediaType(request.headers()), locale(request.headers()),
-            encoding(request.charset())));
+        new Variant(
+            mediaType(request.headers()), locale(request.headers()), encoding(request.charset())));
   }
 
   private Integer integerHeader(Response response, String header) {
@@ -99,22 +103,19 @@ public class JAXRSClient implements Client {
   }
 
   private String encoding(Charset charset) {
-    if (charset == null)
-      return null;
+    if (charset == null) return null;
 
     return charset.name();
   }
 
   private String locale(Map<String, Collection<String>> headers) {
-    if (!headers.containsKey(HttpHeaders.CONTENT_LANGUAGE))
-      return null;
+    if (!headers.containsKey(HttpHeaders.CONTENT_LANGUAGE)) return null;
 
     return headers.get(HttpHeaders.CONTENT_LANGUAGE).iterator().next();
   }
 
   private MediaType mediaType(Map<String, Collection<String>> headers) {
-    if (!headers.containsKey(HttpHeaders.CONTENT_TYPE))
-      return null;
+    if (!headers.containsKey(HttpHeaders.CONTENT_TYPE)) return null;
 
     return MediaType.valueOf(headers.get(HttpHeaders.CONTENT_TYPE).iterator().next());
   }
@@ -122,18 +123,12 @@ public class JAXRSClient implements Client {
   private MultivaluedMap<String, Object> toMultivaluedMap(Map<String, Collection<String>> headers) {
     final MultivaluedHashMap<String, Object> mvHeaders = new MultivaluedHashMap<>();
 
-    headers.forEach((key, value1) -> value1
-        .forEach(value -> mvHeaders.add(key, value)));
+    headers.forEach((key, value1) -> value1.forEach(value -> mvHeaders.add(key, value)));
 
     return mvHeaders;
   }
 
   private Map<String, Collection<String>> toMap(MultivaluedMap<String, String> headers) {
-    return headers.entrySet().stream()
-        .collect(Collectors.toMap(
-            Entry::getKey,
-            Entry::getValue));
+    return headers.entrySet().stream().collect(Collectors.toMap(Entry::getKey, Entry::getValue));
   }
-
 }
-

@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.apttestgenerator;
 
@@ -33,9 +35,7 @@ import javax.lang.model.type.WildcardType;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
-@SupportedAnnotationTypes({
-    "feign.RequestLine"
-})
+@SupportedAnnotationTypes({"feign.RequestLine"})
 @AutoService(Processor.class)
 public class GenerateTestStubAPT extends AbstractProcessor {
 
@@ -44,17 +44,21 @@ public class GenerateTestStubAPT extends AbstractProcessor {
     System.out.println(annotations);
     System.out.println(roundEnv);
 
-    final Map<TypeElement, List<ExecutableElement>> clientsToGenerate = annotations.stream()
-        .map(roundEnv::getElementsAnnotatedWith)
-        .flatMap(Set::stream)
-        .map(ExecutableElement.class::cast)
-        .collect(Collectors.toMap(
-            annotatedMethod -> TypeElement.class.cast(annotatedMethod.getEnclosingElement()),
-            ImmutableList::of,
-            (list1, list2) -> ImmutableList.<ExecutableElement>builder()
-                .addAll(list1)
-                .addAll(list2)
-                .build()));
+    final Map<TypeElement, List<ExecutableElement>> clientsToGenerate =
+        annotations.stream()
+            .map(roundEnv::getElementsAnnotatedWith)
+            .flatMap(Set::stream)
+            .map(ExecutableElement.class::cast)
+            .collect(
+                Collectors.toMap(
+                    annotatedMethod ->
+                        TypeElement.class.cast(annotatedMethod.getEnclosingElement()),
+                    ImmutableList::of,
+                    (list1, list2) ->
+                        ImmutableList.<ExecutableElement>builder()
+                            .addAll(list1)
+                            .addAll(list2)
+                            .build()));
 
     System.out.println("Count: " + clientsToGenerate.size());
     System.out.println("clientsToGenerate: " + clientsToGenerate);
@@ -70,63 +74,67 @@ public class GenerateTestStubAPT extends AbstractProcessor {
       throw new IOError(e);
     }
 
+    clientsToGenerate.forEach(
+        (type, executables) -> {
+          try {
+            final String jPackage = readPackage(type);
+            final String className = type.getSimpleName().toString();
+            final JavaFileObject builderFile =
+                processingEnv.getFiler().createSourceFile(jPackage + "." + className + "Stub");
 
-    clientsToGenerate.forEach((type, executables) -> {
-      try {
-        final String jPackage = readPackage(type);
-        final String className = type.getSimpleName().toString();
-        final JavaFileObject builderFile = processingEnv.getFiler()
-            .createSourceFile(jPackage + "." + className + "Stub");
+            final ClientDefinition client =
+                new ClientDefinition(jPackage, className, type.toString());
 
-        final ClientDefinition client = new ClientDefinition(
-            jPackage,
-            className,
-            type.toString());
+            final List<MethodDefinition> methods =
+                executables.stream()
+                    .map(
+                        method -> {
+                          final String methodName = method.getSimpleName().toString();
 
-        final List<MethodDefinition> methods = executables.stream()
-            .map(method -> {
-              final String methodName = method.getSimpleName().toString();
+                          final List<ArgumentDefinition> args =
+                              method.getParameters().stream()
+                                  .map(
+                                      var ->
+                                          new ArgumentDefinition(
+                                              var.getSimpleName().toString(),
+                                              var.asType().toString()))
+                                  .collect(Collectors.toList());
+                          return new MethodDefinition(
+                              methodName,
+                              method.getReturnType().toString(),
+                              method.getReturnType().getKind() == TypeKind.VOID,
+                              args);
+                        })
+                    .collect(Collectors.toList());
 
-              final List<ArgumentDefinition> args = method.getParameters()
-                  .stream()
-                  .map(var -> new ArgumentDefinition(var.getSimpleName().toString(),
-                      var.asType().toString()))
-                  .collect(Collectors.toList());
-              return new MethodDefinition(
-                  methodName,
-                  method.getReturnType().toString(),
-                  method.getReturnType().getKind() == TypeKind.VOID,
-                  args);
-            })
-            .collect(Collectors.toList());
+            final Context context =
+                Context.newBuilder(template)
+                    .combine("client", client)
+                    .combine("methods", methods)
+                    .resolver(
+                        JavaBeanValueResolver.INSTANCE,
+                        MapValueResolver.INSTANCE,
+                        FieldValueResolver.INSTANCE)
+                    .build();
+            final String stubSource = template.apply(context);
+            System.out.println(stubSource);
 
-        final Context context = Context.newBuilder(template)
-            .combine("client", client)
-            .combine("methods", methods)
-            .resolver(JavaBeanValueResolver.INSTANCE, MapValueResolver.INSTANCE,
-                FieldValueResolver.INSTANCE)
-            .build();
-        final String stubSource = template.apply(context);
-        System.out.println(stubSource);
-
-        builderFile.openWriter().append(stubSource).close();
-      } catch (final Exception e) {
-        e.printStackTrace();
-        processingEnv.getMessager().printMessage(Kind.ERROR,
-            "Unable to generate factory for " + type);
-      }
-    });
+            builderFile.openWriter().append(stubSource).close();
+          } catch (final Exception e) {
+            e.printStackTrace();
+            processingEnv
+                .getMessager()
+                .printMessage(Kind.ERROR, "Unable to generate factory for " + type);
+          }
+        });
 
     return true;
   }
 
-
-
   private Type toJavaType(TypeMirror type) {
     outType(type.getClass());
-    if (type instanceof WildcardType) {
+    if (type instanceof WildcardType) {}
 
-    }
     return Object.class;
   }
 
@@ -139,20 +147,15 @@ public class GenerateTestStubAPT extends AbstractProcessor {
     Arrays.stream(class1.getInterfaces()).forEach(this::outType);
   }
 
-
-
   private String readPackage(Element type) {
     if (type.getKind() == ElementKind.PACKAGE) {
       return type.toString();
     }
 
-    if (type.getKind() == ElementKind.CLASS
-        || type.getKind() == ElementKind.INTERFACE) {
+    if (type.getKind() == ElementKind.CLASS || type.getKind() == ElementKind.INTERFACE) {
       return readPackage(type.getEnclosingElement());
     }
 
     return null;
   }
-
 }
-

@@ -1,37 +1,39 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.querymap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import feign.Param;
+import feign.QueryMapEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-import feign.Param;
-import feign.QueryMapEncoder;
 
-/**
- * Test for {@link FieldQueryMapEncoder}
- */
+/** Test for {@link FieldQueryMapEncoder} */
 class FieldQueryMapEncoderTest {
 
   private final QueryMapEncoder encoder = new FieldQueryMapEncoder();
 
   @Test
   void defaultEncoder_acceptNullValue() {
-    assertThat(encoder.encode(null)).as("Empty map should be returned")
+    assertThat(encoder.encode(null))
+        .as("Empty map should be returned")
         .isEqualTo(Collections.EMPTY_MAP);
   }
 
@@ -53,7 +55,8 @@ class FieldQueryMapEncoderTest {
 
     final Map<String, Object> encodedMap = encoder.encode(normalObject);
 
-    assertThat(encodedMap.isEmpty()).as("Non-empty map generated from null getter: " + encodedMap)
+    assertThat(encodedMap.isEmpty())
+        .as("Non-empty map generated from null getter: " + encodedMap)
         .isTrue();
   }
 
@@ -90,7 +93,7 @@ class FieldQueryMapEncoderTest {
 
     @Param("fooAlias")
     private final String foo;
+
     private final String bar;
   }
-
 }

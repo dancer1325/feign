@@ -1,17 +1,21 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.error;
+
+import static feign.Util.checkState;
 
 import feign.Request;
 import feign.Response;
@@ -27,7 +31,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import static feign.Util.checkState;
 
 class ExceptionGenerator {
 
@@ -37,13 +40,15 @@ class ExceptionGenerator {
     Map<String, Collection<String>> testHeaders = new HashMap<String, Collection<String>>();
     testHeaders.put("TestHeader", Arrays.asList("header-value"));
 
-    TEST_RESPONSE = Response.builder()
-        .status(500)
-        .body((Response.Body) null)
-        .headers(testHeaders)
-        .request(Request.create(Request.HttpMethod.GET, "http://test", testHeaders,
-            Request.Body.empty(), null))
-        .build();
+    TEST_RESPONSE =
+        Response.builder()
+            .status(500)
+            .body((Response.Body) null)
+            .headers(testHeaders)
+            .request(
+                Request.create(
+                    Request.HttpMethod.GET, "http://test", testHeaders, Request.Body.empty(), null))
+            .build();
   }
 
   private final Integer bodyIndex;
@@ -54,9 +59,14 @@ class ExceptionGenerator {
   private final Class<? extends Exception> exceptionType;
   private final Decoder bodyDecoder;
 
-  ExceptionGenerator(Integer bodyIndex, Integer requestIndex, Integer headerMapIndex,
-      Integer numOfParams, Type bodyType,
-      Class<? extends Exception> exceptionType, Decoder bodyDecoder) {
+  ExceptionGenerator(
+      Integer bodyIndex,
+      Integer requestIndex,
+      Integer headerMapIndex,
+      Integer numOfParams,
+      Type bodyType,
+      Class<? extends Exception> exceptionType,
+      Decoder bodyDecoder) {
     this.bodyIndex = bodyIndex;
     this.requestIndex = requestIndex;
     this.headerMapIndex = headerMapIndex;
@@ -66,9 +76,11 @@ class ExceptionGenerator {
     this.bodyDecoder = bodyDecoder;
   }
 
-
-  Exception createException(Response response) throws InvocationTargetException,
-      NoSuchMethodException, InstantiationException, IllegalAccessException {
+  Exception createException(Response response)
+      throws InvocationTargetException,
+          NoSuchMethodException,
+          InstantiationException,
+          IllegalAccessException {
 
     Class<?>[] paramClasses = new Class[numOfParams];
     Object[] paramValues = new Object[numOfParams];
@@ -84,9 +96,7 @@ class ExceptionGenerator {
       paramValues[headerMapIndex] = response.headers();
       paramClasses[headerMapIndex] = Map.class;
     }
-    return exceptionType.getConstructor(paramClasses)
-        .newInstance(paramValues);
-
+    return exceptionType.getConstructor(paramClasses).newInstance(paramValues);
   }
 
   Class<? extends Exception> getExceptionType() {
@@ -138,10 +148,12 @@ class ExceptionGenerator {
         boolean foundAnnotation = false;
         for (Annotation annotation : paramAnnotations) {
           if (annotation.annotationType().equals(ResponseHeaders.class)) {
-            checkState(headerMapIndex == -1,
-                "Cannot have two parameters tagged with @ResponseHeaders");
-            checkState(Types.getRawType(parameterTypes[i]).equals(Map.class),
-                "Response Header map must be of type Map, but was %s", parameterTypes[i]);
+            checkState(
+                headerMapIndex == -1, "Cannot have two parameters tagged with @ResponseHeaders");
+            checkState(
+                Types.getRawType(parameterTypes[i]).equals(Map.class),
+                "Response Header map must be of type Map, but was %s",
+                parameterTypes[i]);
             headerMapIndex = i;
             foundAnnotation = true;
             break;
@@ -149,26 +161,31 @@ class ExceptionGenerator {
         }
         if (!foundAnnotation) {
           if (parameterTypes[i].equals(Request.class)) {
-            checkState(requestIndex == -1,
-                "Cannot have two parameters either without annotations or with object of type feign.Request");
+            checkState(
+                requestIndex == -1,
+                "Cannot have two parameters either without annotations or with object of type"
+                    + " feign.Request");
             requestIndex = i;
           } else {
-            checkState(bodyIndex == -1,
-                "Cannot have two parameters either without annotations or with @ResponseBody annotation");
+            checkState(
+                bodyIndex == -1,
+                "Cannot have two parameters either without annotations or with @ResponseBody"
+                    + " annotation");
             bodyIndex = i;
             bodyType = parameterTypes[i];
           }
         }
       }
 
-      ExceptionGenerator generator = new ExceptionGenerator(
-          bodyIndex,
-          requestIndex,
-          headerMapIndex,
-          numOfParams,
-          bodyType,
-          exceptionType,
-          responseBodyDecoder);
+      ExceptionGenerator generator =
+          new ExceptionGenerator(
+              bodyIndex,
+              requestIndex,
+              headerMapIndex,
+              numOfParams,
+              bodyType,
+              exceptionType,
+              responseBodyDecoder);
 
       validateGeneratorCanBeUsedToGenerateExceptions(generator);
       return generator;
@@ -179,12 +196,15 @@ class ExceptionGenerator {
         generator.createException(TEST_RESPONSE);
       } catch (Exception e) {
         throw new IllegalStateException(
-            "Cannot generate exception - check constructor parameter types (are headers Map<String,Collection<String>> or is something causing an exception on construction?)",
+            "Cannot generate exception - check constructor parameter types (are headers"
+                + " Map<String,Collection<String>> or is something causing an exception on"
+                + " construction?)",
             e);
       }
     }
 
-    private Constructor<? extends Exception> getConstructor(Class<? extends Exception> exceptionClass) {
+    private Constructor<? extends Exception> getConstructor(
+        Class<? extends Exception> exceptionClass) {
       Constructor<? extends Exception> preferredConstructor = null;
       for (Constructor<?> constructor : exceptionClass.getConstructors()) {
 
@@ -210,8 +230,10 @@ class ExceptionGenerator {
           return exceptionClass.getConstructor();
         } catch (NoSuchMethodException e) {
           throw new IllegalStateException(
-              "Cannot find any suitable constructor in class [" + exceptionClass.getName()
-                  + "] - did you forget to mark one with @FeignExceptionConstructor or at least have a public default constructor?",
+              "Cannot find any suitable constructor in class ["
+                  + exceptionClass.getName()
+                  + "] - did you forget to mark one with @FeignExceptionConstructor or at least"
+                  + " have a public default constructor?",
               e);
         }
       }

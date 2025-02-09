@@ -1,26 +1,23 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.json;
 
 import static feign.Util.toByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
-import java.io.IOException;
-import java.io.InputStream;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
 import feign.Feign;
 import feign.Param;
 import feign.Request;
@@ -28,7 +25,12 @@ import feign.RequestLine;
 import feign.mock.HttpMethod;
 import feign.mock.MockClient;
 import feign.mock.MockTarget;
-
+import java.io.IOException;
+import java.io.InputStream;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 interface GitHub {
 
@@ -36,12 +38,9 @@ interface GitHub {
   JSONArray contributors(@Param("owner") String owner, @Param("repo") String repo);
 
   @RequestLine("POST /repos/{owner}/{repo}/contributors")
-  JSONObject create(@Param("owner") String owner,
-                    @Param("repo") String repo,
-                    JSONObject contributor);
-
+  JSONObject create(
+      @Param("owner") String owner, @Param("repo") String repo, JSONObject contributor);
 }
-
 
 class JsonCodecTest {
 
@@ -51,11 +50,12 @@ class JsonCodecTest {
   @BeforeEach
   void setUp() {
     mockClient = new MockClient();
-    github = Feign.builder()
-        .decoder(new JsonDecoder())
-        .encoder(new JsonEncoder())
-        .client(mockClient)
-        .target(new MockTarget<>(GitHub.class));
+    github =
+        Feign.builder()
+            .decoder(new JsonDecoder())
+            .encoder(new JsonEncoder())
+            .client(mockClient)
+            .target(new MockTarget<>(GitHub.class));
   }
 
   @Test
@@ -74,7 +74,9 @@ class JsonCodecTest {
     JSONObject contributor = new JSONObject();
     contributor.put("login", "radio-rogal");
     contributor.put("contributions", 0);
-    mockClient.ok(HttpMethod.POST, "/repos/openfeign/feign/contributors",
+    mockClient.ok(
+        HttpMethod.POST,
+        "/repos/openfeign/feign/contributors",
         "{\"login\":\"radio-rogal\",\"contributions\":0}");
     JSONObject response = github.create("openfeign", "feign", contributor);
     Request request = mockClient.verifyOne(HttpMethod.POST, "/repos/openfeign/feign/contributors");
@@ -85,5 +87,4 @@ class JsonCodecTest {
     assertThat(response.getString("login")).isEqualTo("radio-rogal");
     assertThat(response.getInt("contributions")).isEqualTo(0);
   }
-
 }

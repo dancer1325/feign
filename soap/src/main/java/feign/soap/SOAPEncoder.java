@@ -1,18 +1,24 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.soap;
 
+import feign.RequestTemplate;
+import feign.codec.EncodeException;
+import feign.codec.Encoder;
+import feign.jaxb.JAXBContextFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -34,17 +40,11 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
-import feign.RequestTemplate;
-import feign.codec.EncodeException;
-import feign.codec.Encoder;
-import feign.jaxb.JAXBContextFactory;
-
 
 /**
  * Encodes requests using SOAPMessage and JAXB for the body part. <br>
- * <p>
- * Basic example with with Feign.Builder:
- * </p>
+ *
+ * <p>Basic example with with Feign.Builder:
  *
  * <pre>
  *
@@ -79,9 +79,8 @@ import feign.jaxb.JAXBContextFactory;
  * }
  * </pre>
  *
- * <p>
- * The JAXBContextFactory should be reused across requests as it caches the created JAXB contexts.
- * </p>
+ * <p>The JAXBContextFactory should be reused across requests as it caches the created JAXB
+ * contexts.
  */
 public class SOAPEncoder implements Encoder {
 
@@ -120,8 +119,8 @@ public class SOAPEncoder implements Encoder {
       Marshaller marshaller = jaxbContextFactory.createMarshaller((Class<?>) bodyType);
       marshaller.marshal(object, document);
       SOAPMessage soapMessage = MessageFactory.newInstance(soapProtocol).createMessage();
-      soapMessage.setProperty(SOAPMessage.WRITE_XML_DECLARATION,
-          Boolean.toString(writeXmlDeclaration));
+      soapMessage.setProperty(
+          SOAPMessage.WRITE_XML_DECLARATION, Boolean.toString(writeXmlDeclaration));
       soapMessage.setProperty(SOAPMessage.CHARACTER_SET_ENCODING, charsetEncoding.displayName());
       soapMessage.getSOAPBody().addDocument(document);
 
@@ -137,8 +136,12 @@ public class SOAPEncoder implements Encoder {
         soapMessage.writeTo(bos);
       }
       template.body(new String(bos.toByteArray()));
-    } catch (SOAPException | JAXBException | ParserConfigurationException | IOException
-        | TransformerFactoryConfigurationError | TransformerException e) {
+    } catch (SOAPException
+        | JAXBException
+        | ParserConfigurationException
+        | IOException
+        | TransformerFactoryConfigurationError
+        | TransformerException e) {
       throw new EncodeException(e.toString(), e);
     }
   }
@@ -167,9 +170,7 @@ public class SOAPEncoder implements Encoder {
     return soapMessage;
   }
 
-  /**
-   * Creates instances of {@link SOAPEncoder}.
-   */
+  /** Creates instances of {@link SOAPEncoder}. */
   public static class Builder {
 
     private JAXBContextFactory jaxbContextFactory;
@@ -206,7 +207,6 @@ public class SOAPEncoder implements Encoder {
      * The protocol used to create message factory. Default is "SOAP 1.1 Protocol".
      *
      * @param soapProtocol a string constant representing the MessageFactory protocol.
-     *
      * @see SOAPConstants#SOAP_1_1_PROTOCOL
      * @see SOAPConstants#SOAP_1_2_PROTOCOL
      * @see SOAPConstants#DYNAMIC_SOAP_PROTOCOL

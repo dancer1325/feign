@@ -1,35 +1,36 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.hc5;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.zip.GZIPInputStream;
-import org.junit.jupiter.api.Test;
+
 import feign.Feign;
 import feign.Feign.Builder;
 import feign.RequestLine;
 import feign.client.AbstractClientTest;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.zip.GZIPInputStream;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.junit.jupiter.api.Test;
 
-/**
- * Tests that 'Content-Encoding: gzip' is handled correctly
- */
+/** Tests that 'Content-Encoding: gzip' is handled correctly */
 public class GzipHttp5ClientTest extends AbstractClientTest {
 
   @Override
@@ -52,7 +53,6 @@ public class GzipHttp5ClientTest extends AbstractClientTest {
     byte[] uncompressed = new GZIPInputStream(bodyContentIs).readAllBytes();
 
     assertEquals("bar", new String(uncompressed, StandardCharsets.UTF_8));
-
   }
 
   @Test
@@ -68,13 +68,11 @@ public class GzipHttp5ClientTest extends AbstractClientTest {
     assertEquals("bar", request1.getBody().readString(StandardCharsets.UTF_8));
   }
 
-
   private TestInterface buildTestInterface(boolean compress) {
     return newBuilder()
         .requestInterceptor(req -> req.header("Content-Encoding", compress ? "gzip" : ""))
         .target(TestInterface.class, "http://localhost:" + server.getPort());
   }
-
 
   @Override
   public void veryLongResponseNullLength() {
@@ -90,6 +88,5 @@ public class GzipHttp5ClientTest extends AbstractClientTest {
 
     @RequestLine("POST /test")
     String withBody(String body);
-
   }
 }

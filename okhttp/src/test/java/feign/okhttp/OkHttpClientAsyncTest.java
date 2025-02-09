@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.okhttp;
 
@@ -20,30 +22,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 import static org.assertj.core.data.MapEntry.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import feign.AsyncClient;
@@ -77,9 +56,33 @@ import feign.codec.ErrorDecoder;
 import feign.codec.StringDecoder;
 import feign.querymap.BeanQueryMapEncoder;
 import feign.querymap.FieldQueryMapEncoder;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okio.Buffer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 public class OkHttpClientAsyncTest {
   public final MockWebServer server = new MockWebServer();
@@ -88,8 +91,7 @@ public class OkHttpClientAsyncTest {
   void iterableQueryParams() throws Exception {
     server.enqueue(new MockResponse().setBody("foo"));
 
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     api.queryParams("user", Arrays.asList("apple", "pear"));
 
@@ -100,21 +102,21 @@ public class OkHttpClientAsyncTest {
   void postTemplateParamsResolve() throws Exception {
     server.enqueue(new MockResponse().setBody("foo"));
 
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     api.login("netflix", "denominator", "password");
 
-    assertThat(server.takeRequest()).hasBody(
-        "{\"customer_name\": \"netflix\", \"user_name\": \"denominator\", \"password\": \"password\"}");
+    assertThat(server.takeRequest())
+        .hasBody(
+            "{\"customer_name\": \"netflix\", \"user_name\": \"denominator\", \"password\":"
+                + " \"password\"}");
   }
 
   @Test
   void responseCoercesToStringBody() throws Throwable {
     server.enqueue(new MockResponse().setBody("foo"));
 
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final Response response = unwrap(api.response());
     assertThat(response.body().isRepeatable()).isTrue();
@@ -125,8 +127,7 @@ public class OkHttpClientAsyncTest {
   void postFormParams() throws Exception {
     server.enqueue(new MockResponse().setBody("foo"));
 
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final CompletableFuture<?> cf = api.form("netflix", "denominator", "password");
 
@@ -141,8 +142,7 @@ public class OkHttpClientAsyncTest {
   void postBodyParam() throws Exception {
     server.enqueue(new MockResponse().setBody("foo"));
 
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final CompletableFuture<?> cf = api.body(Arrays.asList("netflix", "denominator", "password"));
 
@@ -162,12 +162,16 @@ public class OkHttpClientAsyncTest {
     server.enqueue(new MockResponse().setBody("foo"));
 
     final AtomicReference<Type> encodedType = new AtomicReference<>();
-    final TestInterfaceAsync api = newAsyncBuilder().encoder(new Encoder.Default() {
-      @Override
-      public void encode(Object object, Type bodyType, RequestTemplate template) {
-        encodedType.set(bodyType);
-      }
-    }).target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api =
+        newAsyncBuilder()
+            .encoder(
+                new Encoder.Default() {
+                  @Override
+                  public void encode(Object object, Type bodyType, RequestTemplate template) {
+                    encodedType.set(bodyType);
+                  }
+                })
+            .target("http://localhost:" + server.getPort());
 
     final CompletableFuture<?> cf = api.body(Arrays.asList("netflix", "denominator", "password"));
 
@@ -183,7 +187,8 @@ public class OkHttpClientAsyncTest {
     server.enqueue(new MockResponse().setBody("foo"));
 
     final TestInterfaceAsync api =
-        newAsyncBuilder().requestInterceptor(new ForwardedForInterceptor())
+        newAsyncBuilder()
+            .requestInterceptor(new ForwardedForInterceptor())
             .target("http://localhost:" + server.getPort());
 
     final CompletableFuture<?> cf = api.post();
@@ -199,15 +204,17 @@ public class OkHttpClientAsyncTest {
     server.enqueue(new MockResponse().setBody("foo"));
 
     final TestInterfaceAsync api =
-        newAsyncBuilder().requestInterceptor(new ForwardedForInterceptor())
+        newAsyncBuilder()
+            .requestInterceptor(new ForwardedForInterceptor())
             .requestInterceptor(new UserAgentInterceptor())
             .target("http://localhost:" + server.getPort());
 
     final CompletableFuture<?> cf = api.post();
 
-    assertThat(server.takeRequest()).hasHeaders(
-        entry("X-Forwarded-For", Collections.singletonList("origin.host.com")),
-        entry("User-Agent", Collections.singletonList("Feign")));
+    assertThat(server.takeRequest())
+        .hasHeaders(
+            entry("X-Forwarded-For", Collections.singletonList("origin.host.com")),
+            entry("User-Agent", Collections.singletonList("Feign")));
 
     checkCFCompletedSoon(cf);
   }
@@ -216,8 +223,7 @@ public class OkHttpClientAsyncTest {
   void customExpander() throws Exception {
     server.enqueue(new MockResponse());
 
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final CompletableFuture<?> cf = api.expand(new TestClock(1234l));
 
@@ -230,8 +236,7 @@ public class OkHttpClientAsyncTest {
   void customExpanderListParam() throws Exception {
     server.enqueue(new MockResponse());
 
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final CompletableFuture<?> cf =
         api.expandList(Arrays.asList(new TestClock(1234l), new TestClock(12345l)));
@@ -245,8 +250,7 @@ public class OkHttpClientAsyncTest {
   void customExpanderNullParam() throws Exception {
     server.enqueue(new MockResponse());
 
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final CompletableFuture<?> cf = api.expandList(Arrays.asList(new TestClock(1234l), null));
 
@@ -259,16 +263,17 @@ public class OkHttpClientAsyncTest {
   void headerMap() throws Exception {
     server.enqueue(new MockResponse());
 
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final Map<String, Object> headerMap = new LinkedHashMap<>();
     headerMap.put("Content-Type", "myContent");
     headerMap.put("Custom-Header", "fooValue");
     final CompletableFuture<?> cf = api.headerMap(headerMap);
 
-    assertThat(server.takeRequest()).hasHeaders(entry("Content-Type", Arrays.asList("myContent")),
-        entry("Custom-Header", Arrays.asList("fooValue")));
+    assertThat(server.takeRequest())
+        .hasHeaders(
+            entry("Content-Type", Arrays.asList("myContent")),
+            entry("Custom-Header", Arrays.asList("fooValue")));
 
     checkCFCompletedSoon(cf);
   }
@@ -277,16 +282,17 @@ public class OkHttpClientAsyncTest {
   void headerMapWithHeaderAnnotations() throws Exception {
     server.enqueue(new MockResponse());
 
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final Map<String, Object> headerMap = new LinkedHashMap<>();
     headerMap.put("Custom-Header", "fooValue");
     api.headerMapWithHeaderAnnotations(headerMap);
 
     // header map should be additive for headers provided by annotations
-    assertThat(server.takeRequest()).hasHeaders(entry("Content-Encoding", Arrays.asList("deflate")),
-        entry("Custom-Header", Arrays.asList("fooValue")));
+    assertThat(server.takeRequest())
+        .hasHeaders(
+            entry("Content-Encoding", Arrays.asList("deflate")),
+            entry("Custom-Header", Arrays.asList("fooValue")));
 
     server.enqueue(new MockResponse());
     headerMap.put("Content-Encoding", "overrideFromMap");
@@ -297,9 +303,10 @@ public class OkHttpClientAsyncTest {
      * @HeaderMap map values no longer override @Header parameters. This caused confusion as it is
      * valid to have more than one value for a header.
      */
-    assertThat(server.takeRequest()).hasHeaders(
-        entry("Content-Encoding", Arrays.asList("deflate", "overrideFromMap")),
-        entry("Custom-Header", Arrays.asList("fooValue")));
+    assertThat(server.takeRequest())
+        .hasHeaders(
+            entry("Content-Encoding", Arrays.asList("deflate", "overrideFromMap")),
+            entry("Custom-Header", Arrays.asList("fooValue")));
 
     checkCFCompletedSoon(cf);
   }
@@ -308,8 +315,7 @@ public class OkHttpClientAsyncTest {
   void queryMap() throws Exception {
     server.enqueue(new MockResponse());
 
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final Map<String, Object> queryMap = new LinkedHashMap<>();
     queryMap.put("name", "alice");
@@ -325,8 +331,7 @@ public class OkHttpClientAsyncTest {
   void queryMapIterableValuesExpanded() throws Exception {
     server.enqueue(new MockResponse());
 
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final Map<String, Object> queryMap = new LinkedHashMap<>();
     queryMap.put("name", Arrays.asList("Alice", "Bob"));
@@ -343,8 +348,7 @@ public class OkHttpClientAsyncTest {
 
   @Test
   void queryMapWithQueryParams() throws Exception {
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     server.enqueue(new MockResponse());
     Map<String, Object> queryMap = new LinkedHashMap<>();
@@ -370,8 +374,7 @@ public class OkHttpClientAsyncTest {
 
   @Test
   void queryMapValueStartingWithBrace() throws Exception {
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     server.enqueue(new MockResponse());
     Map<String, Object> queryMap = new LinkedHashMap<>();
@@ -400,8 +403,7 @@ public class OkHttpClientAsyncTest {
 
   @Test
   void queryMapPojoWithFullParams() throws Exception {
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final CustomPojo customPojo = new CustomPojo("Name", 3);
 
@@ -413,8 +415,7 @@ public class OkHttpClientAsyncTest {
 
   @Test
   void queryMapPojoWithPartialParams() throws Exception {
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final CustomPojo customPojo = new CustomPojo("Name", null);
 
@@ -427,8 +428,7 @@ public class OkHttpClientAsyncTest {
 
   @Test
   void queryMapPojoWithEmptyParams() throws Exception {
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final CustomPojo customPojo = new CustomPojo(null, null);
 
@@ -439,12 +439,16 @@ public class OkHttpClientAsyncTest {
 
   @Test
   void configKeyFormatsAsExpected() throws Exception {
-    assertThat(Feign.configKey(TestInterfaceAsync.class,
-        TestInterfaceAsync.class.getDeclaredMethod("post"))).isEqualTo("TestInterfaceAsync#post()");
-    assertThat(Feign.configKey(TestInterfaceAsync.class,
-        TestInterfaceAsync.class.getDeclaredMethod("uriParam", String.class, URI.class,
-            String.class)))
-                .isEqualTo("TestInterfaceAsync#uriParam(String,URI,String)");
+    assertThat(
+            Feign.configKey(
+                TestInterfaceAsync.class, TestInterfaceAsync.class.getDeclaredMethod("post")))
+        .isEqualTo("TestInterfaceAsync#post()");
+    assertThat(
+            Feign.configKey(
+                TestInterfaceAsync.class,
+                TestInterfaceAsync.class.getDeclaredMethod(
+                    "uriParam", String.class, URI.class, String.class)))
+        .isEqualTo("TestInterfaceAsync#uriParam(String,URI,String)");
   }
 
   @Test
@@ -466,7 +470,8 @@ public class OkHttpClientAsyncTest {
     server.enqueue(new MockResponse().setResponseCode(400).setBody("foo"));
 
     final TestInterfaceAsync api =
-        newAsyncBuilder().errorDecoder(new IllegalArgumentExceptionOn400())
+        newAsyncBuilder()
+            .errorDecoder(new IllegalArgumentExceptionOn400())
             .target("http://localhost:" + server.getPort());
 
     Throwable exception = assertThrows(IllegalArgumentException.class, () -> unwrap(api.post()));
@@ -477,8 +482,10 @@ public class OkHttpClientAsyncTest {
   void overrideTypeSpecificDecoder() throws Throwable {
     server.enqueue(new MockResponse().setBody("success!"));
 
-    final TestInterfaceAsync api = newAsyncBuilder()
-        .decoder((response, type) -> "fail").target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api =
+        newAsyncBuilder()
+            .decoder((response, type) -> "fail")
+            .target("http://localhost:" + server.getPort());
 
     assertThat(unwrap(api.post())).isEqualTo("fail");
   }
@@ -487,9 +494,13 @@ public class OkHttpClientAsyncTest {
   void doesntRetryAfterResponseIsSent() throws Throwable {
     server.enqueue(new MockResponse().setBody("success!"));
 
-    final TestInterfaceAsync api = newAsyncBuilder().decoder((response, type) -> {
-      throw new IOException("timeout");
-    }).target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api =
+        newAsyncBuilder()
+            .decoder(
+                (response, type) -> {
+                  throw new IOException("timeout");
+                })
+            .target("http://localhost:" + server.getPort());
 
     final CompletableFuture<?> cf = api.post();
     server.takeRequest();
@@ -501,9 +512,13 @@ public class OkHttpClientAsyncTest {
   void throwsFeignExceptionIncludingBody() throws Throwable {
     server.enqueue(new MockResponse().setBody("success!"));
 
-    final TestInterfaceAsync api = newAsyncBuilder().decoder((response, type) -> {
-      throw new IOException("timeout");
-    }).target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api =
+        newAsyncBuilder()
+            .decoder(
+                (response, type) -> {
+                  throw new IOException("timeout");
+                })
+            .target("http://localhost:" + server.getPort());
 
     final CompletableFuture<?> cf = api.body("Request body");
     server.takeRequest();
@@ -522,9 +537,13 @@ public class OkHttpClientAsyncTest {
   void throwsFeignExceptionWithoutBody() {
     server.enqueue(new MockResponse().setBody("success!"));
 
-    final TestInterfaceAsync api = newAsyncBuilder().decoder((response, type) -> {
-      throw new IOException("timeout");
-    }).target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api =
+        newAsyncBuilder()
+            .decoder(
+                (response, type) -> {
+                  throw new IOException("timeout");
+                })
+            .target("http://localhost:" + server.getPort());
 
     try {
       api.noContent();
@@ -540,19 +559,24 @@ public class OkHttpClientAsyncTest {
   void whenReturnTypeIsResponseNoErrorHandling() throws Throwable {
     final Map<String, Collection<String>> headers = new LinkedHashMap<>();
     headers.put("Location", Arrays.asList("http://bar.com"));
-    final Response response = Response.builder().status(302).reason("Found").headers(headers)
-        .request(Request.create(HttpMethod.GET, "/", Collections.emptyMap(), null, Util.UTF_8))
-        .body(new byte[0]).build();
+    final Response response =
+        Response.builder()
+            .status(302)
+            .reason("Found")
+            .headers(headers)
+            .request(Request.create(HttpMethod.GET, "/", Collections.emptyMap(), null, Util.UTF_8))
+            .body(new byte[0])
+            .build();
 
     final ExecutorService execs = Executors.newSingleThreadExecutor();
 
     // fake client as Client.Default follows redirects.
-    final TestInterfaceAsync api = AsyncFeign.<Void>builder()
-        .client(new AsyncClient.Default<>((request, options) -> response, execs))
-        .target(TestInterfaceAsync.class, "http://localhost:" + server.getPort());
+    final TestInterfaceAsync api =
+        AsyncFeign.<Void>builder()
+            .client(new AsyncClient.Default<>((request, options) -> response, execs))
+            .target(TestInterfaceAsync.class, "http://localhost:" + server.getPort());
 
-    assertThat(unwrap(api.response()).headers().get("Location"))
-        .contains("http://bar.com");
+    assertThat(unwrap(api.response()).headers().get("Location")).contains("http://bar.com");
 
     execs.shutdown();
   }
@@ -561,9 +585,13 @@ public class OkHttpClientAsyncTest {
   void okIfDecodeRootCauseHasNoMessage() throws Throwable {
     server.enqueue(new MockResponse().setBody("success!"));
 
-    final TestInterfaceAsync api = newAsyncBuilder().decoder((response, type) -> {
-      throw new RuntimeException();
-    }).target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api =
+        newAsyncBuilder()
+            .decoder(
+                (response, type) -> {
+                  throw new RuntimeException();
+                })
+            .target("http://localhost:" + server.getPort());
 
     assertThrows(DecodeException.class, () -> unwrap(api.post()));
   }
@@ -573,10 +601,14 @@ public class OkHttpClientAsyncTest {
     server.enqueue(new MockResponse().setResponseCode(404));
 
     final TestInterfaceAsync api =
-        newAsyncBuilder().dismiss404().decoder((response, type) -> {
-          assertEquals(404, response.status());
-          throw new NoSuchElementException();
-        }).target("http://localhost:" + server.getPort());
+        newAsyncBuilder()
+            .dismiss404()
+            .decoder(
+                (response, type) -> {
+                  assertEquals(404, response.status());
+                  throw new NoSuchElementException();
+                })
+            .target("http://localhost:" + server.getPort());
 
     DecodeException exception = assertThrows(DecodeException.class, () -> unwrap(api.post()));
     assertThat(exception).hasCauseInstanceOf(NoSuchElementException.class);
@@ -584,17 +616,22 @@ public class OkHttpClientAsyncTest {
 
   @Test
   void decodingDoesNotSwallow404ErrorsInDismiss404Mode() throws Throwable {
-    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-      server.enqueue(new MockResponse().setResponseCode(404));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () -> {
+              server.enqueue(new MockResponse().setResponseCode(404));
 
-      final TestInterfaceAsync api = newAsyncBuilder().dismiss404()
-          .errorDecoder(new IllegalArgumentExceptionOn404())
-          .target("http://localhost:" + server.getPort());
+              final TestInterfaceAsync api =
+                  newAsyncBuilder()
+                      .dismiss404()
+                      .errorDecoder(new IllegalArgumentExceptionOn404())
+                      .target("http://localhost:" + server.getPort());
 
-      final CompletableFuture<Void> cf = api.queryMap(Collections.<String, Object>emptyMap());
-      server.takeRequest();
-      unwrap(cf);
-    });
+              final CompletableFuture<Void> cf =
+                  api.queryMap(Collections.<String, Object>emptyMap());
+              server.takeRequest();
+              unwrap(cf);
+            });
   }
 
   @Test
@@ -602,9 +639,12 @@ public class OkHttpClientAsyncTest {
     server.enqueue(new MockResponse().setBody("success!"));
 
     final TestInterfaceAsync api =
-        newAsyncBuilder().encoder((object, bodyType, template) -> {
-          throw new RuntimeException();
-        }).target("http://localhost:" + server.getPort());
+        newAsyncBuilder()
+            .encoder(
+                (object, bodyType, template) -> {
+                  throw new RuntimeException();
+                })
+            .target("http://localhost:" + server.getPort());
 
     assertThrows(EncodeException.class, () -> unwrap(api.body(Arrays.asList("foo"))));
   }
@@ -612,14 +652,11 @@ public class OkHttpClientAsyncTest {
   @Test
   void equalsHashCodeAndToStringWork() {
     final Target<TestInterfaceAsync> t1 =
-        new HardCodedTarget<>(TestInterfaceAsync.class,
-            "http://localhost:8080");
+        new HardCodedTarget<>(TestInterfaceAsync.class, "http://localhost:8080");
     final Target<TestInterfaceAsync> t2 =
-        new HardCodedTarget<>(TestInterfaceAsync.class,
-            "http://localhost:8888");
+        new HardCodedTarget<>(TestInterfaceAsync.class, "http://localhost:8888");
     final Target<OtherTestInterfaceAsync> t3 =
-        new HardCodedTarget<>(OtherTestInterfaceAsync.class,
-            "http://localhost:8080");
+        new HardCodedTarget<>(OtherTestInterfaceAsync.class, "http://localhost:8080");
     final TestInterfaceAsync i1 = newAsyncBuilder().target(t1);
     final TestInterfaceAsync i2 = newAsyncBuilder().target(t1);
     final TestInterfaceAsync i3 = newAsyncBuilder().target(t2);
@@ -627,10 +664,14 @@ public class OkHttpClientAsyncTest {
 
     assertThat(i1).isEqualTo(i2).isNotEqualTo(i3).isNotEqualTo(i4);
 
-    assertThat(i1.hashCode()).isEqualTo(i2.hashCode()).isNotEqualTo(i3.hashCode())
+    assertThat(i1.hashCode())
+        .isEqualTo(i2.hashCode())
+        .isNotEqualTo(i3.hashCode())
         .isNotEqualTo(i4.hashCode());
 
-    assertThat(i1.toString()).isEqualTo(i2.toString()).isNotEqualTo(i3.toString())
+    assertThat(i1.toString())
+        .isEqualTo(i2.toString())
+        .isNotEqualTo(i3.toString())
         .isNotEqualTo(i4.toString());
 
     assertThat(t1).isNotEqualTo(i1);
@@ -647,9 +688,10 @@ public class OkHttpClientAsyncTest {
     server.enqueue(new MockResponse().setBody(new Buffer().write(expectedResponse)));
 
     final OtherTestInterfaceAsync api =
-        newAsyncBuilder().target(new HardCodedTarget<>(
-            OtherTestInterfaceAsync.class,
-            "http://localhost:" + server.getPort()));
+        newAsyncBuilder()
+            .target(
+                new HardCodedTarget<>(
+                    OtherTestInterfaceAsync.class, "http://localhost:" + server.getPort()));
 
     assertThat(unwrap(api.binaryResponseBody())).containsExactly(expectedResponse);
   }
@@ -660,9 +702,11 @@ public class OkHttpClientAsyncTest {
     server.enqueue(new MockResponse());
 
     final OtherTestInterfaceAsync api =
-        newAsyncBuilder().encoder(new Encoder.Default()).target(new HardCodedTarget<>(
-            OtherTestInterfaceAsync.class,
-            "http://localhost:" + server.getPort()));
+        newAsyncBuilder()
+            .encoder(new Encoder.Default())
+            .target(
+                new HardCodedTarget<>(
+                    OtherTestInterfaceAsync.class, "http://localhost:" + server.getPort()));
 
     final CompletableFuture<?> cf = api.binaryRequestBody(expectedRequest);
 
@@ -675,8 +719,7 @@ public class OkHttpClientAsyncTest {
   void encodedQueryParam() throws Exception {
     server.enqueue(new MockResponse());
 
-    final TestInterfaceAsync api =
-        newAsyncBuilder().target("http://localhost:" + server.getPort());
+    final TestInterfaceAsync api = newAsyncBuilder().target("http://localhost:" + server.getPort());
 
     final CompletableFuture<?> cf = api.encodedQueryParam("5.2FSi+");
 
@@ -722,9 +765,12 @@ public class OkHttpClientAsyncTest {
 
   @SuppressWarnings("deprecation")
   private Response responseWithText(String text) {
-    return Response.builder().body(text, Util.UTF_8).status(200)
+    return Response.builder()
+        .body(text, Util.UTF_8)
+        .status(200)
         .request(Request.create(HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-        .headers(new HashMap<>()).build();
+        .headers(new HashMap<>())
+        .build();
   }
 
   @Test
@@ -732,7 +778,8 @@ public class OkHttpClientAsyncTest {
     server.enqueue(new MockResponse().setBody("response!"));
 
     final TestInterfaceAsync api =
-        AsyncFeign.builder().mapAndDecode(upperCaseResponseMapper(), new StringDecoder())
+        AsyncFeign.builder()
+            .mapAndDecode(upperCaseResponseMapper(), new StringDecoder())
             .target(TestInterfaceAsync.class, "http://localhost:" + server.getPort());
 
     assertThat(unwrap(api.post())).isEqualTo("RESPONSE!");
@@ -741,7 +788,8 @@ public class OkHttpClientAsyncTest {
   @Test
   void beanQueryMapEncoderWithPrivateGetterIgnored() throws Exception {
     final TestInterfaceAsync api =
-        newAsyncBuilder().queryMapEndcoder(new BeanQueryMapEncoder())
+        newAsyncBuilder()
+            .queryMapEndcoder(new BeanQueryMapEncoder())
             .target("http://localhost:" + server.getPort());
 
     final PropertyPojo.ChildPojoClass propertyPojo = new PropertyPojo.ChildPojoClass();
@@ -758,7 +806,8 @@ public class OkHttpClientAsyncTest {
   @Test
   void queryMap_with_child_pojo() throws Exception {
     final TestInterfaceAsync api =
-        newAsyncBuilder().queryMapEndcoder(new FieldQueryMapEncoder())
+        newAsyncBuilder()
+            .queryMapEndcoder(new FieldQueryMapEncoder())
             .target("http://localhost:" + server.getPort());
 
     final ChildPojo childPojo = new ChildPojo();
@@ -768,16 +817,19 @@ public class OkHttpClientAsyncTest {
 
     server.enqueue(new MockResponse());
     final CompletableFuture<?> cf = api.queryMapPropertyInheritence(childPojo);
-    assertThat(server.takeRequest()).hasQueryParams("parentPublicProperty=third",
-        "parentProtectedProperty=second",
-        "childPrivateProperty=first");
+    assertThat(server.takeRequest())
+        .hasQueryParams(
+            "parentPublicProperty=third",
+            "parentProtectedProperty=second",
+            "childPrivateProperty=first");
     checkCFCompletedSoon(cf);
   }
 
   @Test
   void beanQueryMapEncoderWithNullValueIgnored() throws Exception {
     final TestInterfaceAsync api =
-        newAsyncBuilder().queryMapEndcoder(new BeanQueryMapEncoder())
+        newAsyncBuilder()
+            .queryMapEndcoder(new BeanQueryMapEncoder())
             .target("http://localhost:" + server.getPort());
 
     final PropertyPojo.ChildPojoClass propertyPojo = new PropertyPojo.ChildPojoClass();
@@ -795,7 +847,8 @@ public class OkHttpClientAsyncTest {
   @Test
   void beanQueryMapEncoderWithEmptyParams() throws Exception {
     final TestInterfaceAsync api =
-        newAsyncBuilder().queryMapEndcoder(new BeanQueryMapEncoder())
+        newAsyncBuilder()
+            .queryMapEndcoder(new BeanQueryMapEncoder())
             .target("http://localhost:" + server.getPort());
 
     final PropertyPojo.ChildPojoClass propertyPojo = new PropertyPojo.ChildPojoClass();
@@ -816,10 +869,13 @@ public class OkHttpClientAsyncTest {
     CompletableFuture<String> post() throws TestInterfaceException;
 
     @RequestLine("POST /")
-    @Body("%7B\"customer_name\": \"{customer_name}\", \"user_name\": \"{user_name}\", \"password\": \"{password}\"%7D")
-    CompletableFuture<Void> login(@Param("customer_name") String customer,
-                                  @Param("user_name") String user,
-                                  @Param("password") String password);
+    @Body(
+        "%7B\"customer_name\": \"{customer_name}\", \"user_name\": \"{user_name}\", \"password\":"
+            + " \"{password}\"%7D")
+    CompletableFuture<Void> login(
+        @Param("customer_name") String customer,
+        @Param("user_name") String user,
+        @Param("password") String password);
 
     @RequestLine("POST /")
     CompletableFuture<Void> body(List<String> contents);
@@ -839,37 +895,38 @@ public class OkHttpClientAsyncTest {
     CompletableFuture<Void> deflateBody(List<String> contents);
 
     @RequestLine("POST /")
-    CompletableFuture<Void> form(@Param("customer_name") String customer,
-                                 @Param("user_name") String user,
-                                 @Param("password") String password);
+    CompletableFuture<Void> form(
+        @Param("customer_name") String customer,
+        @Param("user_name") String user,
+        @Param("password") String password);
 
     @RequestLine("GET /{1}/{2}")
-    CompletableFuture<Response> uriParam(@Param("1") String one,
-                                         URI endpoint,
-                                         @Param("2") String two);
+    CompletableFuture<Response> uriParam(
+        @Param("1") String one, URI endpoint, @Param("2") String two);
 
     @RequestLine("GET /?1={1}&2={2}")
-    CompletableFuture<Response> queryParams(@Param("1") String one,
-                                            @Param("2") Iterable<String> twos);
+    CompletableFuture<Response> queryParams(
+        @Param("1") String one, @Param("2") Iterable<String> twos);
 
     @RequestLine("POST /?clock={clock}")
-    CompletableFuture<Void> expand(@Param(value = "clock",
-        expander = ClockToMillis.class) Clock clock);
+    CompletableFuture<Void> expand(
+        @Param(value = "clock", expander = ClockToMillis.class) Clock clock);
 
     @RequestLine("GET /?clock={clock}")
-    CompletableFuture<Void> expandList(@Param(value = "clock",
-        expander = ClockToMillis.class) List<Clock> clocks);
+    CompletableFuture<Void> expandList(
+        @Param(value = "clock", expander = ClockToMillis.class) List<Clock> clocks);
 
     @RequestLine("GET /?clock={clock}")
-    CompletableFuture<Void> expandArray(@Param(value = "clock",
-        expander = ClockToMillis.class) Clock[] clocks);
+    CompletableFuture<Void> expandArray(
+        @Param(value = "clock", expander = ClockToMillis.class) Clock[] clocks);
 
     @RequestLine("GET /")
     CompletableFuture<Void> headerMap(@HeaderMap Map<String, Object> headerMap);
 
     @RequestLine("GET /")
     @Headers("Content-Encoding: deflate")
-    CompletableFuture<Void> headerMapWithHeaderAnnotations(@HeaderMap Map<String, Object> headerMap);
+    CompletableFuture<Void> headerMapWithHeaderAnnotations(
+        @HeaderMap Map<String, Object> headerMap);
 
     @RequestLine("GET /")
     CompletableFuture<Void> queryMap(@QueryMap Map<String, Object> queryMap);
@@ -878,8 +935,8 @@ public class OkHttpClientAsyncTest {
     CompletableFuture<Void> queryMapEncoded(@QueryMap(encoded = true) Map<String, Object> queryMap);
 
     @RequestLine("GET /?name={name}")
-    CompletableFuture<Void> queryMapWithQueryParams(@Param("name") String name,
-                                                    @QueryMap Map<String, Object> queryMap);
+    CompletableFuture<Void> queryMapWithQueryParams(
+        @Param("name") String name, @QueryMap Map<String, Object> queryMap);
 
     @RequestLine("GET /?trim={trim}")
     CompletableFuture<Void> encodedQueryParam(@Param(value = "trim", encoded = true) String trim);
@@ -965,13 +1022,15 @@ public class OkHttpClientAsyncTest {
     private final AsyncFeign.AsyncBuilder<Object> delegate =
         AsyncFeign.builder()
             .client(new OkHttpClient())
-            .decoder(new Decoder.Default()).encoder((object, bodyType, template) -> {
-              if (object instanceof Map) {
-                template.body(new Gson().toJson(object));
-              } else {
-                template.body(object.toString());
-              }
-            });
+            .decoder(new Decoder.Default())
+            .encoder(
+                (object, bodyType, template) -> {
+                  if (object instanceof Map) {
+                    template.body(new Gson().toJson(object));
+                  } else {
+                    template.body(object.toString());
+                  }
+                });
 
     TestInterfaceAsyncBuilder requestInterceptor(RequestInterceptor requestInterceptor) {
       delegate.requestInterceptor(requestInterceptor);
@@ -1012,9 +1071,7 @@ public class OkHttpClientAsyncTest {
     }
   }
 
-  static final class ExtendedCF<T> extends CompletableFuture<T> {
-
-  }
+  static final class ExtendedCF<T> extends CompletableFuture<T> {}
 
   class TestClock extends Clock {
 
@@ -1044,5 +1101,4 @@ public class OkHttpClientAsyncTest {
   void afterEachTest() throws IOException {
     server.close();
   }
-
 }

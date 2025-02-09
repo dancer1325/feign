@@ -1,26 +1,29 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
 import static feign.assertj.MockWebServerAssertions.assertThat;
+
+import feign.Target.HardCodedTarget;
 import java.io.IOException;
 import java.net.URI;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import feign.Target.HardCodedTarget;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("deprecation")
 public class TargetTest {
@@ -53,18 +56,20 @@ public class TargetTest {
     server.enqueue(new MockResponse());
 
     String baseUrl = server.url("/default").toString();
-    Target<TestQuery> custom = new HardCodedTarget<>(TestQuery.class, baseUrl) {
+    Target<TestQuery> custom =
+        new HardCodedTarget<>(TestQuery.class, baseUrl) {
 
-      @Override
-      public Request apply(RequestTemplate input) {
-        Request urlEncoded = super.apply(input);
-        return Request.create(
-            urlEncoded.httpMethod(),
-            urlEncoded.url().replace("%2F", "/"),
-            urlEncoded.headers(),
-            urlEncoded.body(), urlEncoded.charset());
-      }
-    };
+          @Override
+          public Request apply(RequestTemplate input) {
+            Request urlEncoded = super.apply(input);
+            return Request.create(
+                urlEncoded.httpMethod(),
+                urlEncoded.url().replace("%2F", "/"),
+                urlEncoded.headers(),
+                urlEncoded.body(),
+                urlEncoded.charset());
+          }
+        };
 
     Feign.builder().target(custom).get("slash/foo", "slash/bar");
 
@@ -81,8 +86,7 @@ public class TargetTest {
   void emptyTarget() throws InterruptedException {
     server.enqueue(new MockResponse());
 
-    UriTarget uriTarget = Feign.builder()
-        .target(Target.EmptyTarget.create(UriTarget.class));
+    UriTarget uriTarget = Feign.builder().target(Target.EmptyTarget.create(UriTarget.class));
 
     String host = server.getHostName();
     int port = server.getPort();
@@ -100,8 +104,7 @@ public class TargetTest {
     int port = server.getPort();
     String base = "http://" + host + ":" + port;
 
-    UriTarget uriTarget = Feign.builder()
-        .target(UriTarget.class, base);
+    UriTarget uriTarget = Feign.builder().target(UriTarget.class, base);
 
     uriTarget.get(URI.create("http://" + host + ":" + port + "/path?query=param"));
 

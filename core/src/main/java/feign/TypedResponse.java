@@ -1,22 +1,25 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
+
+import static feign.Util.*;
 
 import feign.Request.ProtocolVersion;
 import java.util.Collection;
 import java.util.Map;
-import static feign.Util.*;
 
 public final class TypedResponse<T> {
 
@@ -63,25 +66,33 @@ public final class TypedResponse<T> {
       this.protocolVersion = source.protocolVersion();
     }
 
-    /** @see TypedResponse#status */
+    /**
+     * @see TypedResponse#status
+     */
     public Builder status(int status) {
       this.status = status;
       return this;
     }
 
-    /** @see TypedResponse#reason */
+    /**
+     * @see TypedResponse#reason
+     */
     public Builder reason(String reason) {
       this.reason = reason;
       return this;
     }
 
-    /** @see TypedResponse#headers */
+    /**
+     * @see TypedResponse#headers
+     */
     public Builder headers(Map<String, Collection<String>> headers) {
       this.headers = headers;
       return this;
     }
 
-    /** @see TypedResponse#body */
+    /**
+     * @see TypedResponse#body
+     */
     public Builder body(T body) {
       this.body = body;
       return this;
@@ -96,9 +107,7 @@ public final class TypedResponse<T> {
       return this;
     }
 
-    /**
-     * HTTP protocol version
-     */
+    /** HTTP protocol version */
     public Builder protocolVersion(ProtocolVersion protocolVersion) {
       this.protocolVersion = protocolVersion;
       return this;
@@ -112,7 +121,7 @@ public final class TypedResponse<T> {
   /**
    * status code. ex {@code 200}
    *
-   * See <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html" >rfc2616</a>
+   * <p>See <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html" >rfc2616</a>
    */
   public int status() {
     return status;
@@ -121,29 +130,23 @@ public final class TypedResponse<T> {
   /**
    * Nullable and not set when using http/2
    *
-   * See https://github.com/http2/http2-spec/issues/202
+   * <p>See https://github.com/http2/http2-spec/issues/202
    */
   public String reason() {
     return reason;
   }
 
-  /**
-   * Returns a case-insensitive mapping of header names to their values.
-   */
+  /** Returns a case-insensitive mapping of header names to their values. */
   public Map<String, Collection<String>> headers() {
     return headers;
   }
 
-  /**
-   * if present, the response had a body
-   */
+  /** if present, the response had a body */
   public T body() {
     return body;
   }
 
-  /**
-   * the request that generated this response
-   */
+  /** the request that generated this response */
   public Request request() {
     return request;
   }
@@ -161,17 +164,14 @@ public final class TypedResponse<T> {
   public String toString() {
     StringBuilder builder =
         new StringBuilder(protocolVersion.toString()).append(" ").append(status);
-    if (reason != null)
-      builder.append(' ').append(reason);
+    if (reason != null) builder.append(' ').append(reason);
     builder.append('\n');
     for (String field : headers.keySet()) {
       for (String value : valuesOrEmpty(headers, field)) {
         builder.append(field).append(": ").append(value).append('\n');
       }
     }
-    if (body != null)
-      builder.append('\n').append(body);
+    if (body != null) builder.append('\n').append(body);
     return builder.toString();
   }
-
 }

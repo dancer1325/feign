@@ -1,20 +1,33 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.spring;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import feign.Feign;
+import feign.Param;
+import feign.Request;
+import feign.Response;
+import feign.ResponseMapper;
+import feign.jackson.JacksonDecoder;
+import feign.jackson.JacksonEncoder;
+import feign.mock.HttpMethod;
+import feign.mock.MockClient;
+import feign.mock.MockTarget;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Type;
@@ -42,16 +55,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import feign.Feign;
-import feign.Param;
-import feign.Request;
-import feign.Response;
-import feign.ResponseMapper;
-import feign.jackson.JacksonDecoder;
-import feign.jackson.JacksonEncoder;
-import feign.mock.HttpMethod;
-import feign.mock.MockClient;
-import feign.mock.MockTarget;
 
 class SpringContractTest {
 
@@ -60,32 +63,37 @@ class SpringContractTest {
 
   @BeforeEach
   void setup() throws IOException {
-    Response.Builder response = Response.builder()
-        .status(200)
-        .body("hello world", StandardCharsets.UTF_8)
-        .headers(Collections.singletonMap("Content-Type",
-            Collections.singletonList("text/plain")));
-    mockClient = new MockClient()
-        .noContent(HttpMethod.GET, "/health")
-        .noContent(HttpMethod.GET, "/health/1")
-        .noContent(HttpMethod.GET, "/health/optional")
-        .noContent(HttpMethod.GET, "/health/optional?param=value")
-        .noContent(HttpMethod.GET, "/health/optional?param")
-        .noContent(HttpMethod.GET, "/health/1?deep=true")
-        .noContent(HttpMethod.GET, "/health/1?deep=true&dryRun=true")
-        .noContent(HttpMethod.GET, "/health/name?deep=true&dryRun=true")
-        .noContent(HttpMethod.POST, "/health/part/1")
-        .noContent(HttpMethod.GET, "/health/header")
-        .noContent(HttpMethod.GET, "/health/header/map")
-        .noContent(HttpMethod.GET, "/health/header/pojo")
-        .ok(HttpMethod.GET, "/health/generic", "{}")
-        .add(HttpMethod.POST, "/health/text", response);
-    resource = Feign.builder()
-        .contract(new SpringContract())
-        .encoder(new JacksonEncoder())
-        .mapAndDecode(new TextResponseMapper(), new JacksonDecoder())
-        .client(mockClient)
-        .target(new MockTarget<>(HealthResource.class));
+    Response.Builder response =
+        Response.builder()
+            .status(200)
+            .body("hello world", StandardCharsets.UTF_8)
+            .headers(
+                Collections.singletonMap("Content-Type", Collections.singletonList("text/plain")));
+    mockClient =
+        new MockClient()
+            .noContent(HttpMethod.GET, "/health")
+            .noContent(HttpMethod.GET, "/health/1")
+            .noContent(HttpMethod.GET, "/health/optional")
+            .noContent(HttpMethod.GET, "/health/optional?param=value")
+            .noContent(HttpMethod.GET, "/health/optional?param")
+            .noContent(HttpMethod.POST, "/health/withNonRequiredRequestBody")
+            .noContent(HttpMethod.POST, "/health/withRequiredRequestBody")
+            .noContent(HttpMethod.GET, "/health/1?deep=true")
+            .noContent(HttpMethod.GET, "/health/1?deep=true&dryRun=true")
+            .noContent(HttpMethod.GET, "/health/name?deep=true&dryRun=true")
+            .noContent(HttpMethod.POST, "/health/part/1")
+            .noContent(HttpMethod.GET, "/health/header")
+            .noContent(HttpMethod.GET, "/health/header/map")
+            .noContent(HttpMethod.GET, "/health/header/pojo")
+            .ok(HttpMethod.GET, "/health/generic", "{}")
+            .add(HttpMethod.POST, "/health/text", response);
+    resource =
+        Feign.builder()
+            .contract(new SpringContract())
+            .encoder(new JacksonEncoder())
+            .mapAndDecode(new TextResponseMapper(), new JacksonDecoder())
+            .client(mockClient)
+            .target(new MockTarget<>(HealthResource.class));
   }
 
   class TextResponseMapper implements ResponseMapper {
@@ -161,12 +169,38 @@ class SpringContractTest {
   }
 
   @Test
+  void requiredRequestBodyIsNull() {
+    Throwable exception =
+        assertThrows(
+            IllegalArgumentException.class, () -> resource.checkWithRequiredRequestBody(null));
+    assertThat(exception.getMessage()).contains("Body parameter 0 was null");
+  }
+
+  @Test
+  void nonRequiredRequestBodyIsNull() {
+    resource.checkWithNonRequiredRequestBody(null);
+
+    Request request = mockClient.verifyOne(HttpMethod.POST, "/health/withNonRequiredRequestBody");
+    assertThat(request.requestTemplate().body()).asString().isEqualTo("null");
+  }
+
+  @Test
+  void nonRequiredRequestBodyIsObject() {
+    UserObject object = new UserObject();
+    object.setName("hello");
+    resource.checkWithNonRequiredRequestBody(object);
+
+    Request request = mockClient.verifyOne(HttpMethod.POST, "/health/withNonRequiredRequestBody");
+    assertThat(request.requestTemplate().body()).asString().contains("\"name\" : \"hello\"");
+  }
+
+  @Test
   void requestPart() {
     resource.checkRequestPart("1", "hello", "6");
 
     final Request request = mockClient.verifyOne(HttpMethod.POST, "/health/part/1");
-    assertThat(request.requestTemplate().methodMetadata().formParams()).containsExactly("name1",
-        "grade1");
+    assertThat(request.requestTemplate().methodMetadata().formParams())
+        .containsExactly("name1", "grade1");
   }
 
   @Test
@@ -251,7 +285,6 @@ class SpringContractTest {
 
     @RequestMapping(value = "generic", method = RequestMethod.GET)
     public @ResponseBody DTO getData(@RequestBody DTO input);
-
   }
 
   @RestController
@@ -261,58 +294,82 @@ class SpringContractTest {
     @RequestMapping(method = RequestMethod.GET)
     public @ResponseBody String getStatus();
 
-    @RequestMapping(method = RequestMethod.POST, value = "/text",
-        produces = MediaType.TEXT_PLAIN_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(
+        method = RequestMethod.POST,
+        value = "/text",
+        produces = MediaType.TEXT_PLAIN_VALUE,
+        consumes = MediaType.APPLICATION_JSON_VALUE)
     public String produceText(@RequestBody Map<String, Object> data);
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public void check(
-                      @PathVariable("id") String campaignId,
-                      @RequestParam(value = "deep", defaultValue = "false") boolean deepCheck);
+        @PathVariable("id") String campaignId,
+        @RequestParam(value = "deep", defaultValue = "false") boolean deepCheck);
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public void check(
-                      @PathVariable("id") String campaignId,
-                      @RequestParam(value = "deep", defaultValue = "false") boolean deepCheck,
-                      @RequestParam(value = "dryRun", defaultValue = "false") boolean dryRun);
+        @PathVariable("id") String campaignId,
+        @RequestParam(value = "deep", defaultValue = "false") boolean deepCheck,
+        @RequestParam(value = "dryRun", defaultValue = "false") boolean dryRun);
 
     @GetMapping(value = "/{id}")
     public void check(@PathVariable("id") String campaignId);
 
-    @ResponseStatus(value = HttpStatus.NOT_FOUND,
+    @ResponseStatus(
+        value = HttpStatus.NOT_FOUND,
         reason = "This customer is not found in the system")
     @ExceptionHandler(MissingResourceException.class)
     void missingResourceExceptionHandler();
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     void checkWithName(
-                       @PathVariable(name = "id") String campaignId,
-                       @RequestParam(name = "deep", defaultValue = "false") boolean deepCheck,
-                       @RequestParam(name = "dryRun", defaultValue = "false") boolean dryRun);
+        @PathVariable(name = "id") String campaignId,
+        @RequestParam(name = "deep", defaultValue = "false") boolean deepCheck,
+        @RequestParam(name = "dryRun", defaultValue = "false") boolean dryRun);
 
     @RequestMapping(value = "/optional", method = RequestMethod.GET)
     void checkWithOptional(@RequestParam(name = "param") Optional<String> param);
 
+    @RequestMapping(value = "/withNonRequiredRequestBody", method = RequestMethod.POST)
+    void checkWithNonRequiredRequestBody(@RequestBody(required = false) UserObject obj);
+
+    @RequestMapping(value = "/withRequiredRequestBody", method = RequestMethod.POST)
+    void checkWithRequiredRequestBody(@RequestBody() UserObject obj);
+
     @RequestMapping(value = "/part/{id}", method = RequestMethod.POST)
-    void checkRequestPart(@PathVariable(name = "id") String campaignId,
-                          @RequestPart(name = "name1") String name,
-                          @RequestPart(name = "grade1") String grade);
+    void checkRequestPart(
+        @PathVariable(name = "id") String campaignId,
+        @RequestPart(name = "name1") String name,
+        @RequestPart(name = "grade1") String grade);
 
     @RequestMapping(value = "/header", method = RequestMethod.GET)
-    void checkRequestHeader(@RequestHeader(name = "name1") String name,
-                            @RequestHeader(name = "grade1") String grade);
+    void checkRequestHeader(
+        @RequestHeader(name = "name1") String name, @RequestHeader(name = "grade1") String grade);
 
     @RequestMapping(value = "/header/map", method = RequestMethod.GET)
     void checkRequestHeaderMap(@RequestHeader Map<String, String> headerMap);
 
     @RequestMapping(value = "/header/pojo", method = RequestMethod.GET)
     void checkRequestHeaderPojo(@RequestHeader HeaderMapUserObject object);
+  }
 
+  class UserObject {
+    @Param("name1")
+    private String name;
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
   }
 
   class HeaderMapUserObject {
     @Param("name1")
     private String name;
+
     @Param("grade1")
     private String grade;
 

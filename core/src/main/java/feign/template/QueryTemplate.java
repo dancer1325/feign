@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.template;
 
@@ -29,9 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-/**
- * Template for a Query String parameter.
- */
+/** Template for a Query String parameter. */
 public final class QueryTemplate {
 
   private static final String UNDEF = "undef";
@@ -52,10 +52,8 @@ public final class QueryTemplate {
     return create(name, values, charset, CollectionFormat.EXPLODED, true);
   }
 
-  public static QueryTemplate create(String name,
-                                     Iterable<String> values,
-                                     Charset charset,
-                                     CollectionFormat collectionFormat) {
+  public static QueryTemplate create(
+      String name, Iterable<String> values, Charset charset, CollectionFormat collectionFormat) {
     return create(name, values, charset, collectionFormat, true);
   }
 
@@ -69,11 +67,12 @@ public final class QueryTemplate {
    * @param decodeSlash if slash characters should be decoded
    * @return a QueryTemplate
    */
-  public static QueryTemplate create(String name,
-                                     Iterable<String> values,
-                                     Charset charset,
-                                     CollectionFormat collectionFormat,
-                                     boolean decodeSlash) {
+  public static QueryTemplate create(
+      String name,
+      Iterable<String> values,
+      Charset charset,
+      CollectionFormat collectionFormat,
+      boolean decodeSlash) {
     if (Util.isBlank(name)) {
       throw new IllegalArgumentException("name is required.");
     }
@@ -83,9 +82,10 @@ public final class QueryTemplate {
     }
 
     /* remove all empty values from the array */
-    Collection<String> remaining = StreamSupport.stream(values.spliterator(), false)
-        .filter(Util::isNotBlank)
-        .collect(Collectors.toList());
+    Collection<String> remaining =
+        StreamSupport.stream(values.spliterator(), false)
+            .filter(Util::isNotBlank)
+            .collect(Collectors.toList());
 
     return new QueryTemplate(name, remaining, charset, collectionFormat, decodeSlash);
   }
@@ -97,16 +97,22 @@ public final class QueryTemplate {
    * @param values to append.
    * @return a new QueryTemplate with value appended.
    */
-  public static QueryTemplate append(QueryTemplate queryTemplate,
-                                     Iterable<String> values,
-                                     CollectionFormat collectionFormat,
-                                     boolean decodeSlash) {
+  public static QueryTemplate append(
+      QueryTemplate queryTemplate,
+      Iterable<String> values,
+      CollectionFormat collectionFormat,
+      boolean decodeSlash) {
     List<String> queryValues = new ArrayList<>(queryTemplate.getValues());
-    queryValues.addAll(StreamSupport.stream(values.spliterator(), false)
-        .filter(Util::isNotBlank)
-        .collect(Collectors.toList()));
-    return create(queryTemplate.getName(), queryValues, StandardCharsets.UTF_8,
-        collectionFormat, decodeSlash);
+    queryValues.addAll(
+        StreamSupport.stream(values.spliterator(), false)
+            .filter(Util::isNotBlank)
+            .collect(Collectors.toList()));
+    return create(
+        queryTemplate.getName(),
+        queryValues,
+        StandardCharsets.UTF_8,
+        collectionFormat,
+        decodeSlash);
   }
 
   /**
@@ -123,8 +129,13 @@ public final class QueryTemplate {
       CollectionFormat collectionFormat,
       boolean decodeSlash) {
     this.values = new CopyOnWriteArrayList<>();
-    this.name = new Template(name, ExpansionOptions.ALLOW_UNRESOLVED, EncodingOptions.REQUIRED,
-        !decodeSlash, charset);
+    this.name =
+        new Template(
+            name,
+            ExpansionOptions.ALLOW_UNRESOLVED,
+            EncodingOptions.REQUIRED,
+            !decodeSlash,
+            charset);
     this.collectionFormat = collectionFormat;
 
     /* parse each value into a template chunk for resolution later */
@@ -136,24 +147,18 @@ public final class QueryTemplate {
 
       this.values.add(
           new Template(
-              value,
-              ExpansionOptions.REQUIRED,
-              EncodingOptions.REQUIRED,
-              !decodeSlash,
-              charset));
+              value, ExpansionOptions.REQUIRED, EncodingOptions.REQUIRED, !decodeSlash, charset));
     }
 
     if (this.values.isEmpty()) {
       /* in this case, we have a pure parameter */
       this.pure = true;
-
     }
   }
 
   public List<String> getValues() {
-    return Collections.unmodifiableList(this.values.stream()
-        .map(Template::toString)
-        .collect(Collectors.toList()));
+    return Collections.unmodifiableList(
+        this.values.stream().map(Template::toString).collect(Collectors.toList()));
   }
 
   public List<String> getVariables() {
@@ -209,7 +214,6 @@ public final class QueryTemplate {
     return this.queryString(name, Collections.unmodifiableList(expanded));
   }
 
-
   private String queryString(String name, List<String> values) {
     if (this.pure) {
       return name;
@@ -222,5 +226,4 @@ public final class QueryTemplate {
     /* nothing to return, all values are unresolved */
     return null;
   }
-
 }

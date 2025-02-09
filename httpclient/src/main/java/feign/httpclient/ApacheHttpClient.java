@@ -1,18 +1,38 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.httpclient;
 
+import static feign.Util.UTF_8;
+
+import feign.Client;
+import feign.Request;
+import feign.Response;
+import feign.Util;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -28,23 +48,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.Charset;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import feign.Client;
-import feign.Request;
-import feign.Response;
-import feign.Util;
-import static feign.Util.UTF_8;
 
 /**
  * This module directs Feign's http requests to Apache's
@@ -88,12 +91,13 @@ public final class ApacheHttpClient implements Client {
 
     // per request timeouts
     RequestConfig requestConfig =
-        (client instanceof Configurable ? RequestConfig.copy(((Configurable) client).getConfig())
-            : RequestConfig.custom())
-                .setConnectTimeout(options.connectTimeoutMillis())
-                .setSocketTimeout(options.readTimeoutMillis())
-                .setRedirectsEnabled(options.isFollowRedirects())
-                .build();
+        (client instanceof Configurable
+                ? RequestConfig.copy(((Configurable) client).getConfig())
+                : RequestConfig.custom())
+            .setConnectTimeout(options.connectTimeoutMillis())
+            .setSocketTimeout(options.readTimeoutMillis())
+            .setRedirectsEnabled(options.isFollowRedirects())
+            .build();
     requestBuilder.setConfig(requestConfig);
 
     URI uri = new URIBuilder(request.url()).build();
@@ -101,8 +105,7 @@ public final class ApacheHttpClient implements Client {
     requestBuilder.setUri(uri.getScheme() + "://" + uri.getAuthority() + uri.getRawPath());
 
     // request query params
-    List<NameValuePair> queryParams =
-        URLEncodedUtils.parse(uri, requestBuilder.getCharset());
+    List<NameValuePair> queryParams = URLEncodedUtils.parse(uri, requestBuilder.getCharset());
     for (NameValuePair queryParam : queryParams) {
       requestBuilder.addParameter(queryParam);
     }

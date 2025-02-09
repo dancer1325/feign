@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.kotlin;
 
@@ -70,9 +72,8 @@ public class CoroutineFeign<C> {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
       if ("equals".equals(method.getName()) && method.getParameterCount() == 1) {
         try {
-          final Object otherHandler = args.length > 0 && args[0] != null
-              ? Proxy.getInvocationHandler(args[0])
-              : null;
+          final Object otherHandler =
+              args.length > 0 && args[0] != null ? Proxy.getInvocationHandler(args[0]) : null;
           return equals(otherHandler);
         } catch (final IllegalArgumentException e) {
           return false;
@@ -116,8 +117,9 @@ public class CoroutineFeign<C> {
       extends BaseBuilder<CoroutineBuilder<C>, CoroutineFeign<C>> {
 
     private AsyncContextSupplier<C> defaultContextSupplier = () -> null;
-    private AsyncClient<C> client = new AsyncClient.Default<>(
-        new Client.Default(null, null), LazyInitializedExecutorService.instance);
+    private AsyncClient<C> client =
+        new AsyncClient.Default<>(
+            new Client.Default(null, null), LazyInitializedExecutorService.instance);
     private MethodInfoResolver methodInfoResolver = KotlinMethodInfo::createInstance;
 
     @Deprecated
@@ -160,23 +162,25 @@ public class CoroutineFeign<C> {
     @Override
     @SuppressWarnings("unchecked")
     public CoroutineFeign<C> internalBuild() {
-      AsyncFeign<C> asyncFeign = (AsyncFeign<C>) AsyncFeign.builder()
-          .logLevel(logLevel)
-          .client((AsyncClient<Object>) client)
-          .decoder(decoder)
-          .errorDecoder(errorDecoder)
-          .contract(contract)
-          .retryer(retryer)
-          .logger(logger)
-          .encoder(encoder)
-          .queryMapEncoder(queryMapEncoder)
-          .options(options)
-          .requestInterceptors(requestInterceptors)
-          .responseInterceptors(responseInterceptors)
-          .invocationHandlerFactory(invocationHandlerFactory)
-          .defaultContextSupplier((AsyncContextSupplier<Object>) defaultContextSupplier)
-          .methodInfoResolver(methodInfoResolver)
-          .build();
+      AsyncFeign<C> asyncFeign =
+          (AsyncFeign<C>)
+              AsyncFeign.builder()
+                  .logLevel(logLevel)
+                  .client((AsyncClient<Object>) client)
+                  .decoder(decoder)
+                  .errorDecoder(errorDecoder)
+                  .contract(contract)
+                  .retryer(retryer)
+                  .logger(logger)
+                  .encoder(encoder)
+                  .queryMapEncoder(queryMapEncoder)
+                  .options(options)
+                  .requestInterceptors(requestInterceptors)
+                  .responseInterceptors(responseInterceptors)
+                  .invocationHandlerFactory(invocationHandlerFactory)
+                  .defaultContextSupplier((AsyncContextSupplier<Object>) defaultContextSupplier)
+                  .methodInfoResolver(methodInfoResolver)
+                  .build();
       return new CoroutineFeign<>(asyncFeign);
     }
   }

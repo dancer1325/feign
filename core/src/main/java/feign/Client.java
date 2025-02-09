@@ -1,20 +1,22 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
-import static feign.Util.CONTENT_ENCODING;
 import static feign.Util.ACCEPT_ENCODING;
+import static feign.Util.CONTENT_ENCODING;
 import static feign.Util.CONTENT_LENGTH;
 import static feign.Util.ENCODING_DEFLATE;
 import static feign.Util.ENCODING_GZIP;
@@ -23,6 +25,7 @@ import static feign.Util.checkNotNull;
 import static feign.Util.isNotBlank;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
+
 import feign.Request.Options;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,9 +47,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
-/**
- * Submits HTTP {@link Request requests}. Implementations are expected to be thread-safe.
- */
+/** Submits HTTP {@link Request requests}. Implementations are expected to be thread-safe. */
 public interface Client {
 
   /**
@@ -90,10 +91,12 @@ public interface Client {
      *
      * @param sslContextFactory SSLSocketFactory for secure https URL connections.
      * @param hostnameVerifier the host name verifier.
-     * @param disableRequestBuffering Disable the request body internal buffering for
-     *        {@code HttpURLConnection}.
+     * @param disableRequestBuffering Disable the request body internal buffering for {@code
+     *     HttpURLConnection}.
      */
-    public Default(SSLSocketFactory sslContextFactory, HostnameVerifier hostnameVerifier,
+    public Default(
+        SSLSocketFactory sslContextFactory,
+        HostnameVerifier hostnameVerifier,
         boolean disableRequestBuffering) {
       super();
       this.sslContextFactory = sslContextFactory;
@@ -112,8 +115,10 @@ public interface Client {
       String reason = connection.getResponseMessage();
 
       if (status < 0) {
-        throw new IOException(format("Invalid status(%s) executing %s %s", status,
-            connection.getRequestMethod(), connection.getURL()));
+        throw new IOException(
+            format(
+                "Invalid status(%s) executing %s %s",
+                status, connection.getRequestMethod(), connection.getURL()));
       }
 
       Map<String, Collection<String>> headers = new TreeMap<>(CASE_INSENSITIVE_ORDER);
@@ -201,19 +206,14 @@ public interface Client {
         connection.addRequestProperty("Accept", "*/*");
       }
 
-      boolean hasEmptyBody = false;
       byte[] body = request.body();
-      if (body == null && request.httpMethod().isWithBody()) {
-        body = new byte[0];
-        hasEmptyBody = true;
-      }
 
       if (body != null) {
         /*
          * Ignore disableRequestBuffering flag if the empty body was set, to ensure that internal
          * retry logic applies to such requests.
          */
-        if (disableRequestBuffering && !hasEmptyBody) {
+        if (disableRequestBuffering) {
           if (contentLength != null) {
             connection.setFixedLengthStreamingMode(contentLength);
           } else {
@@ -236,6 +236,12 @@ public interface Client {
           }
         }
       }
+
+      if (body == null && request.httpMethod().isWithBody()) {
+        // To use this Header, set 'sun.net.http.allowRestrictedHeaders' property true.
+        connection.addRequestProperty("Content-Length", "0");
+      }
+
       return connection;
     }
 
@@ -252,24 +258,26 @@ public interface Client {
     }
   }
 
-  /**
-   * Client that supports a {@link java.net.Proxy}.
-   */
+  /** Client that supports a {@link java.net.Proxy}. */
   class Proxied extends Default {
 
     public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
     private final Proxy proxy;
     private String credentials;
 
-    public Proxied(SSLSocketFactory sslContextFactory, HostnameVerifier hostnameVerifier,
-        Proxy proxy) {
+    public Proxied(
+        SSLSocketFactory sslContextFactory, HostnameVerifier hostnameVerifier, Proxy proxy) {
       super(sslContextFactory, hostnameVerifier);
       checkNotNull(proxy, "a proxy is required.");
       this.proxy = proxy;
     }
 
-    public Proxied(SSLSocketFactory sslContextFactory, HostnameVerifier hostnameVerifier,
-        Proxy proxy, String proxyUser, String proxyPassword) {
+    public Proxied(
+        SSLSocketFactory sslContextFactory,
+        HostnameVerifier hostnameVerifier,
+        Proxy proxy,
+        String proxyUser,
+        String proxyPassword) {
       this(sslContextFactory, hostnameVerifier, proxy);
       checkArgument(isNotBlank(proxyUser), "proxy user is required.");
       checkArgument(isNotBlank(proxyPassword), "proxy password is required.");

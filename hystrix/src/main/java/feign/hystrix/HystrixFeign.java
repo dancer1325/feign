@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.hystrix;
 
@@ -47,9 +49,7 @@ public final class HystrixFeign {
     private Contract contract = new Contract.Default();
     private SetterFactory setterFactory = new SetterFactory.Default();
 
-    /**
-     * Allows you to override hystrix properties such as thread pools and command keys.
-     */
+    /** Allows you to override hystrix properties such as thread pools and command keys. */
     public Builder setterFactory(SetterFactory setterFactory) {
       this.setterFactory = setterFactory;
       return this;
@@ -74,16 +74,14 @@ public final class HystrixFeign {
      * Like {@link Feign#newInstance(Target)}, except with {@link HystrixCommand#getFallback()
      * fallback} support.
      *
-     * <p>
-     * Fallbacks are known values, which you return when there's an error invoking an http method.
-     * For example, you can return a cached result as opposed to raising an error to the caller. To
-     * use this feature, pass a safe implementation of your target interface as the last parameter.
+     * <p>Fallbacks are known values, which you return when there's an error invoking an http
+     * method. For example, you can return a cached result as opposed to raising an error to the
+     * caller. To use this feature, pass a safe implementation of your target interface as the last
+     * parameter.
      *
-     * Here's an example:
-     * 
-     * <pre>
-     * {@code
+     * <p>Here's an example:
      *
+     * <pre>{@code
      * // When dealing with fallbacks, it is less tedious to keep interfaces small.
      * interface GitHub {
      *   &#64;RequestLine("GET /repos/{owner}/{repo}/contributors")
@@ -102,8 +100,7 @@ public final class HystrixFeign {
      * GitHub github = HystrixFeign.builder()
      *                             ...
      *                             .target(GitHub.class, "https://api.github.com", fallback);
-     * }
-     * </pre>
+     * }</pre>
      *
      * @see #target(Target, Object)
      */
@@ -115,14 +112,14 @@ public final class HystrixFeign {
      * Same as {@link #target(Class, String, T)}, except you can inspect a source exception before
      * creating a fallback object.
      */
-    public <T> T target(Class<T> apiType,
-                        String url,
-                        FallbackFactory<? extends T> fallbackFactory) {
+    public <T> T target(
+        Class<T> apiType, String url, FallbackFactory<? extends T> fallbackFactory) {
       return target(new Target.HardCodedTarget<T>(apiType, url), fallbackFactory);
     }
 
     @Override
-    public Feign.Builder invocationHandlerFactory(InvocationHandlerFactory invocationHandlerFactory) {
+    public Feign.Builder invocationHandlerFactory(
+        InvocationHandlerFactory invocationHandlerFactory) {
       throw new UnsupportedOperationException();
     }
 
@@ -139,14 +136,14 @@ public final class HystrixFeign {
 
     /** Configures components needed for hystrix integration. */
     Feign build(final FallbackFactory<?> nullableFallbackFactory) {
-      super.invocationHandlerFactory(new InvocationHandlerFactory() {
-        @Override
-        public InvocationHandler create(Target target,
-                                        Map<Method, MethodHandler> dispatch) {
-          return new HystrixInvocationHandler(target, dispatch, setterFactory,
-              nullableFallbackFactory);
-        }
-      });
+      super.invocationHandlerFactory(
+          new InvocationHandlerFactory() {
+            @Override
+            public InvocationHandler create(Target target, Map<Method, MethodHandler> dispatch) {
+              return new HystrixInvocationHandler(
+                  target, dispatch, setterFactory, nullableFallbackFactory);
+            }
+          });
       super.contract(new HystrixDelegatingContract(contract));
       return super.internalBuild();
     }

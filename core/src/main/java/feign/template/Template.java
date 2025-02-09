@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.template;
 
@@ -24,8 +26,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * A Generic representation of a Template Expression as defined by
- * <a href="https://tools.ietf.org/html/rfc6570">RFC 6570</a>, with some relaxed rules, allowing the
+ * A Generic representation of a Template Expression as defined by <a
+ * href="https://tools.ietf.org/html/rfc6570">RFC 6570</a>, with some relaxed rules, allowing the
  * concept to be used in areas outside of the uri.
  */
 public class Template {
@@ -48,7 +50,10 @@ public class Template {
    * @param encodeSlash if slash characters should be encoded.
    */
   Template(
-      String value, ExpansionOptions allowUnresolved, EncodingOptions encode, boolean encodeSlash,
+      String value,
+      ExpansionOptions allowUnresolved,
+      EncodingOptions encode,
+      boolean encodeSlash,
       Charset charset) {
     if (value == null) {
       throw new IllegalArgumentException("template is required.");
@@ -70,8 +75,12 @@ public class Template {
    * @param charset of the result.
    * @param chunks for this template.
    */
-  Template(ExpansionOptions allowUnresolved, EncodingOptions encode, boolean encodeSlash,
-      Charset charset, List<TemplateChunk> chunks) {
+  Template(
+      ExpansionOptions allowUnresolved,
+      EncodingOptions encode,
+      boolean encodeSlash,
+      Charset charset,
+      List<TemplateChunk> chunks) {
     this.templateChunks.addAll(chunks);
     this.allowUnresolved = ExpansionOptions.ALLOW_UNRESOLVED == allowUnresolved;
     this.encode = encode;
@@ -120,14 +129,11 @@ public class Template {
     return resolved.toString();
   }
 
-  protected String resolveExpression(
-                                     Expression expression,
-                                     Map<String, ?> variables) {
+  protected String resolveExpression(Expression expression, Map<String, ?> variables) {
     String resolved = null;
     Object value = variables.get(expression.getName());
     if (value != null) {
-      String expanded = expression.expand(
-          value, this.encode.isEncodingRequired());
+      String expanded = expression.expand(value, this.encode.isEncodingRequired());
       if (expanded != null) {
         if (!this.encodeSlash) {
           logger.fine("Explicit slash decoding specified, decoding all slashes in uri");
@@ -193,9 +199,7 @@ public class Template {
     return this.getVariables().isEmpty();
   }
 
-  /**
-   * Parse the template into {@link TemplateChunk}s.
-   */
+  /** Parse the template into {@link TemplateChunk}s. */
   private void parseTemplate() {
 
     /* parse the entire template */
@@ -229,8 +233,7 @@ public class Template {
 
   @Override
   public String toString() {
-    return this.templateChunks.stream()
-        .map(TemplateChunk::getValue).collect(Collectors.joining());
+    return this.templateChunks.stream().map(TemplateChunk::getValue).collect(Collectors.joining());
   }
 
   public boolean encodeLiteral() {
@@ -327,7 +330,8 @@ public class Template {
   }
 
   public enum EncodingOptions {
-    REQUIRED(true), NOT_REQUIRED(false);
+    REQUIRED(true),
+    NOT_REQUIRED(false);
 
     private final boolean shouldEncode;
 
@@ -341,7 +345,7 @@ public class Template {
   }
 
   public enum ExpansionOptions {
-    ALLOW_UNRESOLVED, REQUIRED
+    ALLOW_UNRESOLVED,
+    REQUIRED
   }
-
 }

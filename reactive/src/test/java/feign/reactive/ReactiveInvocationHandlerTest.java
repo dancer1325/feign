@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.reactive;
 
@@ -19,6 +21,11 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+
+import feign.InvocationHandlerFactory.MethodHandler;
+import feign.RequestLine;
+import feign.Target;
+import io.reactivex.Flowable;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -27,10 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import feign.InvocationHandlerFactory.MethodHandler;
-import feign.RequestLine;
-import feign.Target;
-import io.reactivex.Flowable;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
@@ -38,11 +41,9 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class ReactiveInvocationHandlerTest {
 
-  @Mock
-  private Target target;
+  @Mock private Target target;
 
-  @Mock
-  private MethodHandler methodHandler;
+  @Mock private MethodHandler methodHandler;
 
   private Method method;
 
@@ -55,52 +56,54 @@ class ReactiveInvocationHandlerTest {
   @Test
   void invokeOnSubscribeReactor() throws Throwable {
     given(this.methodHandler.invoke(any())).willReturn("Result");
-    ReactorInvocationHandler handler = new ReactorInvocationHandler(this.target,
-        Collections.singletonMap(method, this.methodHandler), Schedulers.boundedElastic());
+    ReactorInvocationHandler handler =
+        new ReactorInvocationHandler(
+            this.target,
+            Collections.singletonMap(method, this.methodHandler),
+            Schedulers.boundedElastic());
 
     Object result = handler.invoke(method, this.methodHandler, new Object[] {});
     assertThat(result).isInstanceOf(Mono.class);
     verifyNoInteractions(this.methodHandler);
 
     /* subscribe and execute the method */
-    StepVerifier.create((Mono) result)
-        .expectNext("Result")
-        .expectComplete()
-        .verify();
+    StepVerifier.create((Mono) result).expectNext("Result").expectComplete().verify();
     verify(this.methodHandler, times(1)).invoke(any());
   }
 
   @Test
   void invokeOnSubscribeEmptyReactor() throws Throwable {
     given(this.methodHandler.invoke(any())).willReturn(null);
-    ReactorInvocationHandler handler = new ReactorInvocationHandler(this.target,
-        Collections.singletonMap(method, this.methodHandler), Schedulers.boundedElastic());
+    ReactorInvocationHandler handler =
+        new ReactorInvocationHandler(
+            this.target,
+            Collections.singletonMap(method, this.methodHandler),
+            Schedulers.boundedElastic());
 
     Object result = handler.invoke(method, this.methodHandler, new Object[] {});
     assertThat(result).isInstanceOf(Mono.class);
     verifyNoInteractions(this.methodHandler);
 
     /* subscribe and execute the method */
-    StepVerifier.create((Mono) result)
-        .expectComplete()
-        .verify();
+    StepVerifier.create((Mono) result).expectComplete().verify();
     verify(this.methodHandler, times(1)).invoke(any());
   }
 
   @Test
   void invokeFailureReactor() throws Throwable {
     given(this.methodHandler.invoke(any())).willThrow(new IOException("Could Not Decode"));
-    ReactorInvocationHandler handler = new ReactorInvocationHandler(this.target,
-        Collections.singletonMap(this.method, this.methodHandler), Schedulers.boundedElastic());
+    ReactorInvocationHandler handler =
+        new ReactorInvocationHandler(
+            this.target,
+            Collections.singletonMap(this.method, this.methodHandler),
+            Schedulers.boundedElastic());
 
     Object result = handler.invoke(this.method, this.methodHandler, new Object[] {});
     assertThat(result).isInstanceOf(Mono.class);
     verifyNoInteractions(this.methodHandler);
 
     /* subscribe and execute the method, should result in an error */
-    StepVerifier.create((Mono) result)
-        .expectError(IOException.class)
-        .verify();
+    StepVerifier.create((Mono) result).expectError(IOException.class).verify();
     verify(this.methodHandler, times(1)).invoke(any());
   }
 
@@ -109,7 +112,8 @@ class ReactiveInvocationHandlerTest {
   void invokeOnSubscribeRxJava() throws Throwable {
     given(this.methodHandler.invoke(any())).willReturn("Result");
     RxJavaInvocationHandler handler =
-        new RxJavaInvocationHandler(this.target,
+        new RxJavaInvocationHandler(
+            this.target,
             Collections.singletonMap(this.method, this.methodHandler),
             io.reactivex.schedulers.Schedulers.trampoline());
 
@@ -118,10 +122,7 @@ class ReactiveInvocationHandlerTest {
     verifyNoInteractions(this.methodHandler);
 
     /* subscribe and execute the method */
-    StepVerifier.create((Flowable) result)
-        .expectNext("Result")
-        .expectComplete()
-        .verify();
+    StepVerifier.create((Flowable) result).expectNext("Result").expectComplete().verify();
     verify(this.methodHandler, times(1)).invoke(any());
   }
 
@@ -129,7 +130,8 @@ class ReactiveInvocationHandlerTest {
   void invokeOnSubscribeEmptyRxJava() throws Throwable {
     given(this.methodHandler.invoke(any())).willReturn(null);
     RxJavaInvocationHandler handler =
-        new RxJavaInvocationHandler(this.target,
+        new RxJavaInvocationHandler(
+            this.target,
             Collections.singletonMap(this.method, this.methodHandler),
             io.reactivex.schedulers.Schedulers.trampoline());
 
@@ -138,9 +140,7 @@ class ReactiveInvocationHandlerTest {
     verifyNoInteractions(this.methodHandler);
 
     /* subscribe and execute the method */
-    StepVerifier.create((Flowable) result)
-        .expectComplete()
-        .verify();
+    StepVerifier.create((Flowable) result).expectComplete().verify();
     verify(this.methodHandler, times(1)).invoke(any());
   }
 
@@ -148,7 +148,8 @@ class ReactiveInvocationHandlerTest {
   void invokeFailureRxJava() throws Throwable {
     given(this.methodHandler.invoke(any())).willThrow(new IOException("Could Not Decode"));
     RxJavaInvocationHandler handler =
-        new RxJavaInvocationHandler(this.target,
+        new RxJavaInvocationHandler(
+            this.target,
             Collections.singletonMap(this.method, this.methodHandler),
             io.reactivex.schedulers.Schedulers.trampoline());
 
@@ -157,16 +158,12 @@ class ReactiveInvocationHandlerTest {
     verifyNoInteractions(this.methodHandler);
 
     /* subscribe and execute the method */
-    StepVerifier.create((Flowable) result)
-        .expectError(IOException.class)
-        .verify();
+    StepVerifier.create((Flowable) result).expectError(IOException.class).verify();
     verify(this.methodHandler, times(1)).invoke(any());
   }
-
 
   public interface TestReactorService {
     @RequestLine("GET /version")
     Mono<String> version();
   }
-
 }

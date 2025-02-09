@@ -1,37 +1,38 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
 import static feign.Util.checkArgument;
 import static feign.Util.checkNotNull;
+
+import feign.codec.EncodeException;
+import feign.codec.Encoder;
+import feign.template.UriUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import feign.codec.EncodeException;
-import feign.codec.Encoder;
-import feign.template.UriUtils;
 
 final class RequestTemplateFactoryResolver {
   private final Encoder encoder;
   private final QueryMapEncoder queryMapEncoder;
 
-  RequestTemplateFactoryResolver(
-      Encoder encoder,
-      QueryMapEncoder queryMapEncoder) {
+  RequestTemplateFactoryResolver(Encoder encoder, QueryMapEncoder queryMapEncoder) {
     this.encoder = checkNotNull(encoder, "encoder");
     this.queryMapEncoder = checkNotNull(queryMapEncoder, "queryMapEncoder");
   }
@@ -46,7 +47,7 @@ final class RequestTemplateFactoryResolver {
     }
   }
 
-  private static class BuildTemplateByResolvingArgs implements RequestTemplate.Factory {
+  static class BuildTemplateByResolvingArgs implements RequestTemplate.Factory {
 
     private final QueryMapEncoder queryMapEncoder;
 
@@ -55,8 +56,8 @@ final class RequestTemplateFactoryResolver {
     private final Map<Integer, Param.Expander> indexToExpander =
         new LinkedHashMap<Integer, Param.Expander>();
 
-    private BuildTemplateByResolvingArgs(MethodMetadata metadata, QueryMapEncoder queryMapEncoder,
-        Target target) {
+    BuildTemplateByResolvingArgs(
+        MethodMetadata metadata, QueryMapEncoder queryMapEncoder, Target target) {
       this.metadata = metadata;
       this.target = target;
       this.queryMapEncoder = queryMapEncoder;
@@ -67,11 +68,11 @@ final class RequestTemplateFactoryResolver {
       if (metadata.indexToExpanderClass().isEmpty()) {
         return;
       }
-      for (Map.Entry<Integer, Class<? extends Param.Expander>> indexToExpanderClass : metadata
-          .indexToExpanderClass().entrySet()) {
+      for (Map.Entry<Integer, Class<? extends Param.Expander>> indexToExpanderClass :
+          metadata.indexToExpanderClass().entrySet()) {
         try {
-          indexToExpander
-              .put(indexToExpanderClass.getKey(), indexToExpanderClass.getValue().newInstance());
+          indexToExpander.put(
+              indexToExpanderClass.getKey(), indexToExpanderClass.getValue().newInstance());
         } catch (InstantiationException e) {
           throw new IllegalStateException(e);
         } catch (IllegalAccessException e) {
@@ -128,7 +129,8 @@ final class RequestTemplateFactoryResolver {
       }
       try {
         // encode with @QueryMap annotation if exists otherwise with the one from this resolver
-        return queryMapEncoder != null ? queryMapEncoder.encode(value)
+        return queryMapEncoder != null
+            ? queryMapEncoder.encode(value)
             : this.queryMapEncoder.encode(value);
       } catch (EncodeException e) {
         throw new IllegalStateException(e);
@@ -153,8 +155,8 @@ final class RequestTemplateFactoryResolver {
     }
 
     @SuppressWarnings("unchecked")
-    private RequestTemplate addHeaderMapHeaders(Map<String, Object> headerMap,
-                                                RequestTemplate mutable) {
+    private RequestTemplate addHeaderMapHeaders(
+        Map<String, Object> headerMap, RequestTemplate mutable) {
       for (Map.Entry<String, Object> currEntry : headerMap.entrySet()) {
         Collection<String> values = new ArrayList<String>();
 
@@ -175,8 +177,8 @@ final class RequestTemplateFactoryResolver {
     }
 
     @SuppressWarnings("unchecked")
-    private RequestTemplate addQueryMapQueryParameters(Map<String, Object> queryMap,
-                                                       RequestTemplate mutable) {
+    private RequestTemplate addQueryMapQueryParameters(
+        Map<String, Object> queryMap, RequestTemplate mutable) {
       for (Map.Entry<String, Object> currEntry : queryMap.entrySet()) {
         Collection<String> values = new ArrayList<String>();
 
@@ -204,27 +206,25 @@ final class RequestTemplateFactoryResolver {
       return mutable;
     }
 
-    protected RequestTemplate resolve(Object[] argv,
-                                      RequestTemplate mutable,
-                                      Map<String, Object> variables) {
+    protected RequestTemplate resolve(
+        Object[] argv, RequestTemplate mutable, Map<String, Object> variables) {
       return mutable.resolve(variables);
     }
   }
 
-  private static class BuildFormEncodedTemplateFromArgs extends BuildTemplateByResolvingArgs {
+  static class BuildFormEncodedTemplateFromArgs extends BuildTemplateByResolvingArgs {
 
     private final Encoder encoder;
 
-    private BuildFormEncodedTemplateFromArgs(MethodMetadata metadata, Encoder encoder,
-        QueryMapEncoder queryMapEncoder, Target target) {
+    BuildFormEncodedTemplateFromArgs(
+        MethodMetadata metadata, Encoder encoder, QueryMapEncoder queryMapEncoder, Target target) {
       super(metadata, queryMapEncoder, target);
       this.encoder = encoder;
     }
 
     @Override
-    protected RequestTemplate resolve(Object[] argv,
-                                      RequestTemplate mutable,
-                                      Map<String, Object> variables) {
+    protected RequestTemplate resolve(
+        Object[] argv, RequestTemplate mutable, Map<String, Object> variables) {
       Map<String, Object> formVariables = new LinkedHashMap<String, Object>();
       for (Map.Entry<String, Object> entry : variables.entrySet()) {
         if (metadata.formParams().contains(entry.getKey())) {
@@ -242,27 +242,28 @@ final class RequestTemplateFactoryResolver {
     }
   }
 
-  private static class BuildEncodedTemplateFromArgs extends BuildTemplateByResolvingArgs {
+  static class BuildEncodedTemplateFromArgs extends BuildTemplateByResolvingArgs {
 
     private final Encoder encoder;
 
-    private BuildEncodedTemplateFromArgs(MethodMetadata metadata, Encoder encoder,
-        QueryMapEncoder queryMapEncoder, Target target) {
+    BuildEncodedTemplateFromArgs(
+        MethodMetadata metadata, Encoder encoder, QueryMapEncoder queryMapEncoder, Target target) {
       super(metadata, queryMapEncoder, target);
       this.encoder = encoder;
     }
 
     @Override
-    protected RequestTemplate resolve(Object[] argv,
-                                      RequestTemplate mutable,
-                                      Map<String, Object> variables) {
+    protected RequestTemplate resolve(
+        Object[] argv, RequestTemplate mutable, Map<String, Object> variables) {
 
       boolean alwaysEncodeBody = mutable.methodMetadata().alwaysEncodeBody();
 
       Object body = null;
       if (!alwaysEncodeBody) {
         body = argv[metadata.bodyIndex()];
-        checkArgument(body != null, "Body parameter %s was null", metadata.bodyIndex());
+        if (mutable.methodMetadata().isBodyRequired()) {
+          checkArgument(body != null, "Body parameter %s was null", metadata.bodyIndex());
+        }
       }
 
       try {

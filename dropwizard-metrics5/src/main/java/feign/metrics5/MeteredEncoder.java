@@ -1,29 +1,28 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.metrics5;
 
-
-import java.lang.reflect.Type;
 import feign.RequestTemplate;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
 import io.dropwizard.metrics5.MetricRegistry;
 import io.dropwizard.metrics5.Timer.Context;
+import java.lang.reflect.Type;
 
-/**
- * Warp feign {@link Encoder} with metrics.
- */
+/** Warp feign {@link Encoder} with metrics. */
 public class MeteredEncoder implements Encoder {
 
   private final Encoder encoder;
@@ -31,8 +30,8 @@ public class MeteredEncoder implements Encoder {
   private final MetricSuppliers metricSuppliers;
   private final FeignMetricName metricName;
 
-  public MeteredEncoder(Encoder encoder, MetricRegistry metricRegistry,
-      MetricSuppliers metricSuppliers) {
+  public MeteredEncoder(
+      Encoder encoder, MetricRegistry metricRegistry, MetricSuppliers metricSuppliers) {
     this.encoder = encoder;
     this.metricRegistry = metricRegistry;
     this.metricSuppliers = metricSuppliers;
@@ -43,17 +42,21 @@ public class MeteredEncoder implements Encoder {
   public void encode(Object object, Type bodyType, RequestTemplate template)
       throws EncodeException {
     try (final Context classTimer =
-        metricRegistry.timer(
-            metricName.metricName(template.methodMetadata(), template.feignTarget()),
-            metricSuppliers.timers()).time()) {
+        metricRegistry
+            .timer(
+                metricName.metricName(template.methodMetadata(), template.feignTarget()),
+                metricSuppliers.timers())
+            .time()) {
       encoder.encode(object, bodyType, template);
     }
 
     if (template.body() != null) {
-      metricRegistry.histogram(
-          metricName.metricName(template.methodMetadata(), template.feignTarget(), "request_size"),
-          metricSuppliers.histograms()).update(template.body().length);
+      metricRegistry
+          .histogram(
+              metricName.metricName(
+                  template.methodMetadata(), template.feignTarget(), "request_size"),
+              metricSuppliers.histograms())
+          .update(template.body().length);
     }
   }
-
 }

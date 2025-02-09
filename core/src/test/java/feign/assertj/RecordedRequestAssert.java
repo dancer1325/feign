@@ -1,20 +1,24 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.assertj;
 
 import static org.assertj.core.data.MapEntry.entry;
 import static org.assertj.core.error.ShouldNotContain.shouldNotContain;
+
+import feign.Util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,15 +30,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
+import okhttp3.Headers;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.data.MapEntry;
 import org.assertj.core.internal.ByteArrays;
 import org.assertj.core.internal.Failures;
 import org.assertj.core.internal.Maps;
 import org.assertj.core.internal.Objects;
-import feign.Util;
-import okhttp3.mockwebserver.RecordedRequest;
-import okhttp3.Headers;
 
 public final class RecordedRequestAssert
     extends AbstractAssert<RecordedRequestAssert, RecordedRequest> {
@@ -77,9 +80,7 @@ public final class RecordedRequestAssert
   private Collection<String> getQueryParams() {
     String path = actual.getPath();
     int queryStart = path.indexOf("?") + 1;
-    String[] queryParams = actual.getPath()
-        .substring(queryStart)
-        .split("&");
+    String[] queryParams = actual.getPath().substring(queryStart).split("&");
     return Arrays.asList(queryParams);
   }
 

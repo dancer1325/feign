@@ -1,26 +1,28 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
 import static feign.ExceptionPropagationPolicy.NONE;
+
 import feign.Feign.ResponseMappingDecoder;
 import feign.Logger.NoOpLogger;
 import feign.Request.Options;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
-import feign.querymap.FieldQueryMapEncoder;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -33,8 +35,7 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, T>, T> implements Clo
 
   private final B thisB;
 
-  protected final List<RequestInterceptor> requestInterceptors =
-      new ArrayList<>();
+  protected final List<RequestInterceptor> requestInterceptors = new ArrayList<>();
   protected final List<ResponseInterceptor> responseInterceptors = new ArrayList<>();
   protected Logger.Level logLevel = Logger.Level.NONE;
   protected Contract contract = new Contract.Default();
@@ -52,7 +53,6 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, T>, T> implements Clo
   protected boolean dismiss404;
   protected ExceptionPropagationPolicy propagationPolicy = NONE;
   protected List<Capability> capabilities = new ArrayList<>();
-
 
   public BaseBuilder() {
     super();
@@ -92,15 +92,12 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, T>, T> implements Clo
   /**
    * This flag indicates that the response should not be automatically closed upon completion of
    * decoding the message. This should be set if you plan on processing the response into a
-   * lazy-evaluated construct, such as a {@link java.util.Iterator}.
-   *
-   * </p>
-   * Feign standard decoders do not have built in support for this flag. If you are using this flag,
-   * you MUST also use a custom Decoder, and be sure to close all resources appropriately somewhere
-   * in the Decoder (you can use {@link Util#ensureClosed} for convenience).
+   * lazy-evaluated construct, such as a {@link java.util.Iterator}. Feign standard decoders do not
+   * have built in support for this flag. If you are using this flag, you MUST also use a custom
+   * Decoder, and be sure to close all resources appropriately somewhere in the Decoder (you can use
+   * {@link Util#ensureClosed} for convenience).
    *
    * @since 9.6
-   *
    */
   public B doNotCloseAfterDecode() {
     this.closeAfterDecode = false;
@@ -117,9 +114,7 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, T>, T> implements Clo
     return thisB;
   }
 
-  /**
-   * Allows to map the response before passing it to the decoder.
-   */
+  /** Allows to map the response before passing it to the decoder. */
   public B mapAndDecode(ResponseMapper mapper, Decoder decoder) {
     this.decoder = new ResponseMappingDecoder(mapper, decoder);
     return thisB;
@@ -129,13 +124,11 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, T>, T> implements Clo
    * This flag indicates that the {@link #decoder(Decoder) decoder} should process responses with
    * 404 status, specifically returning null or empty instead of throwing {@link FeignException}.
    *
-   * <p/>
-   * All first-party (ex gson) decoders return well-known empty values defined by
-   * {@link Util#emptyValueOf}. To customize further, wrap an existing {@link #decoder(Decoder)
-   * decoder} or make your own.
+   * <p>All first-party (ex gson) decoders return well-known empty values defined by {@link
+   * Util#emptyValueOf}. To customize further, wrap an existing {@link #decoder(Decoder) decoder} or
+   * make your own.
    *
-   * <p/>
-   * This flag only works with 404, as opposed to all or arbitrary status codes. This was an
+   * <p>This flag only works with 404, as opposed to all or arbitrary status codes. This was an
    * explicit decision: 404 -> empty is safe, common and doesn't complicate redirection, retry or
    * fallback policy. If your server returns a different status for not-found, correct via a custom
    * {@link #client(Client) client}.
@@ -147,18 +140,15 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, T>, T> implements Clo
     return thisB;
   }
 
-
   /**
    * This flag indicates that the {@link #decoder(Decoder) decoder} should process responses with
    * 404 status, specifically returning null or empty instead of throwing {@link FeignException}.
    *
-   * <p/>
-   * All first-party (ex gson) decoders return well-known empty values defined by
-   * {@link Util#emptyValueOf}. To customize further, wrap an existing {@link #decoder(Decoder)
-   * decoder} or make your own.
+   * <p>All first-party (ex gson) decoders return well-known empty values defined by {@link
+   * Util#emptyValueOf}. To customize further, wrap an existing {@link #decoder(Decoder) decoder} or
+   * make your own.
    *
-   * <p/>
-   * This flag only works with 404, as opposed to all or arbitrary status codes. This was an
+   * <p>This flag only works with 404, as opposed to all or arbitrary status codes. This was an
    * explicit decision: 404 -> empty is safe, common and doesn't complicate redirection, retry or
    * fallback policy. If your server returns a different status for not-found, correct via a custom
    * {@link #client(Client) client}.
@@ -172,7 +162,6 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, T>, T> implements Clo
     return thisB;
   }
 
-
   public B errorDecoder(ErrorDecoder errorDecoder) {
     this.errorDecoder = errorDecoder;
     return thisB;
@@ -183,9 +172,7 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, T>, T> implements Clo
     return thisB;
   }
 
-  /**
-   * Adds a single request interceptor to the builder.
-   */
+  /** Adds a single request interceptor to the builder. */
   public B requestInterceptor(RequestInterceptor requestInterceptor) {
     this.requestInterceptors.add(requestInterceptor);
     return thisB;
@@ -215,18 +202,13 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, T>, T> implements Clo
     return thisB;
   }
 
-  /**
-   * Adds a single response interceptor to the builder.
-   */
+  /** Adds a single response interceptor to the builder. */
   public B responseInterceptor(ResponseInterceptor responseInterceptor) {
     this.responseInterceptors.add(responseInterceptor);
     return thisB;
   }
 
-
-  /**
-   * Allows you to override how reflective dispatch works inside of Feign.
-   */
+  /** Allows you to override how reflective dispatch works inside of Feign. */
   public B invocationHandlerFactory(InvocationHandlerFactory invocationHandlerFactory) {
     this.invocationHandlerFactory = invocationHandlerFactory;
     return thisB;
@@ -251,27 +233,34 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, T>, T> implements Clo
     try {
       B clone = (B) thisB.clone();
 
-      getFieldsToEnrich().forEach(field -> {
-        field.setAccessible(true);
-        try {
-          final Object originalValue = field.get(clone);
-          final Object enriched;
-          if (originalValue instanceof List) {
-            Type ownerType =
-                ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-            enriched = ((List) originalValue).stream()
-                .map(value -> Capability.enrich(value, (Class<?>) ownerType, capabilities))
-                .collect(Collectors.toList());
-          } else {
-            enriched = Capability.enrich(originalValue, field.getType(), capabilities);
-          }
-          field.set(clone, enriched);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-          throw new RuntimeException("Unable to enrich field " + field, e);
-        } finally {
-          field.setAccessible(false);
-        }
-      });
+      getFieldsToEnrich()
+          .forEach(
+              field -> {
+                field.setAccessible(true);
+                try {
+                  final Object originalValue = field.get(clone);
+                  final Object enriched;
+                  if (originalValue instanceof List) {
+                    Type ownerType =
+                        ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                    enriched =
+                        ((List) originalValue)
+                            .stream()
+                                .map(
+                                    value ->
+                                        Capability.enrich(
+                                            value, (Class<?>) ownerType, capabilities))
+                                .collect(Collectors.toList());
+                  } else {
+                    enriched = Capability.enrich(originalValue, field.getType(), capabilities);
+                  }
+                  field.set(clone, enriched);
+                } catch (IllegalArgumentException | IllegalAccessException e) {
+                  throw new RuntimeException("Unable to enrich field " + field, e);
+                } finally {
+                  field.setAccessible(false);
+                }
+              });
 
       return clone;
     } catch (CloneNotSupportedException e) {
@@ -280,8 +269,7 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, T>, T> implements Clo
   }
 
   List<Field> getFieldsToEnrich() {
-    return Util.allFields(getClass())
-        .stream()
+    return Util.allFields(getClass()).stream()
         // exclude anything generated by compiler
         .filter(field -> !field.isSynthetic())
         // and capabilities itself
@@ -302,16 +290,14 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, T>, T> implements Clo
   protected abstract T internalBuild();
 
   protected ResponseInterceptor.Chain responseInterceptorChain() {
-    ResponseInterceptor.Chain endOfChain =
-        ResponseInterceptor.Chain.DEFAULT;
-    ResponseInterceptor.Chain executionChain = this.responseInterceptors.stream()
-        .reduce(ResponseInterceptor::andThen)
-        .map(interceptor -> interceptor.apply(endOfChain))
-        .orElse(endOfChain);
+    ResponseInterceptor.Chain endOfChain = ResponseInterceptor.Chain.DEFAULT;
+    ResponseInterceptor.Chain executionChain =
+        this.responseInterceptors.stream()
+            .reduce(ResponseInterceptor::andThen)
+            .map(interceptor -> interceptor.apply(endOfChain))
+            .orElse(endOfChain);
 
-    return (ResponseInterceptor.Chain) Capability.enrich(executionChain,
-        ResponseInterceptor.Chain.class, capabilities);
+    return (ResponseInterceptor.Chain)
+        Capability.enrich(executionChain, ResponseInterceptor.Chain.class, capabilities);
   }
-
-
 }

@@ -1,31 +1,23 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.hystrix;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
@@ -36,8 +28,19 @@ import feign.RequestLine;
 import feign.Target;
 import feign.Target.HardCodedTarget;
 import feign.gson.GsonDecoder;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import rx.Completable;
 import rx.Observable;
 import rx.Single;
@@ -138,21 +141,22 @@ public class HystrixBuilderTest {
 
   interface GitHubHystrix {
     @RequestLine("GET /repos/{owner}/{repo}/contributors")
-    HystrixCommand<List<String>> contributorsHystrixCommand(@Param("owner") String owner,
-                                                            @Param("repo") String repo);
+    HystrixCommand<List<String>> contributorsHystrixCommand(
+        @Param("owner") String owner, @Param("repo") String repo);
   }
 
   @Test
   void fallbacksApplyOnError() {
     server.enqueue(new MockResponse().setResponseCode(500));
 
-    final GitHub fallback = (owner, repo) -> {
-      if (owner.equals("Netflix") && repo.equals("feign")) {
-        return Arrays.asList("stuarthendren"); // inspired this approach!
-      } else {
-        return Collections.emptyList();
-      }
-    };
+    final GitHub fallback =
+        (owner, repo) -> {
+          if (owner.equals("Netflix") && repo.equals("feign")) {
+            return Arrays.asList("stuarthendren"); // inspired this approach!
+          } else {
+            return Collections.emptyList();
+          }
+        };
 
     final GitHub api = target(GitHub.class, "http://localhost:" + server.getPort(), fallback);
 
@@ -165,31 +169,30 @@ public class HystrixBuilderTest {
   void errorInFallbackHasExpectedBehavior() {
     server.enqueue(new MockResponse().setResponseCode(500));
 
-    final GitHub fallback = (owner, repo) -> {
-      throw new RuntimeException("oops");
-    };
+    final GitHub fallback =
+        (owner, repo) -> {
+          throw new RuntimeException("oops");
+        };
 
     final GitHub api = target(GitHub.class, "http://localhost:" + server.getPort(), fallback);
 
     HystrixRuntimeException exception =
         assertThrows(HystrixRuntimeException.class, () -> api.contributors("Netflix", "feign"));
-    assertThat(exception).hasCauseInstanceOf(FeignException.class)
+    assertThat(exception)
+        .hasCauseInstanceOf(FeignException.class)
         .hasMessage("GitHub#contributors(String,String) failed and fallback failed.");
   }
 
   protected <E> E target(Class<E> api, String url) {
-    return HystrixFeign.builder()
-        .target(api, url);
+    return HystrixFeign.builder().target(api, url);
   }
 
   protected <E> E target(Target<E> api) {
-    return HystrixFeign.builder()
-        .target(api);
+    return HystrixFeign.builder().target(api);
   }
 
   protected <E> E target(Class<E> api, String url, E fallback) {
-    return HystrixFeign.builder()
-        .target(api, url, fallback);
+    return HystrixFeign.builder().target(api, url, fallback);
   }
 
   @Test
@@ -201,7 +204,8 @@ public class HystrixBuilderTest {
 
     HystrixRuntimeException exception =
         assertThrows(HystrixRuntimeException.class, () -> api.contributors("Netflix", "feign"));
-    assertThat(exception).hasCauseInstanceOf(FeignException.class)
+    assertThat(exception)
+        .hasCauseInstanceOf(FeignException.class)
         .hasMessage("GitHub#contributors(String,String) failed and no fallback available.");
   }
 
@@ -620,10 +624,7 @@ public class HystrixBuilderTest {
     final TestInterface i3 = target(t2);
     final OtherTestInterface i4 = target(t3);
 
-    assertThat(i1)
-        .isEqualTo(i2)
-        .isNotEqualTo(i3)
-        .isNotEqualTo(i4);
+    assertThat(i1).isEqualTo(i2).isNotEqualTo(i3).isNotEqualTo(i4);
 
     assertThat(i1.hashCode())
         .isEqualTo(i2.hashCode())
@@ -635,20 +636,19 @@ public class HystrixBuilderTest {
         .isNotEqualTo(i3.toString())
         .isNotEqualTo(i4.toString());
 
-    assertThat(t1)
-        .isNotEqualTo(i1);
+    assertThat(t1).isNotEqualTo(i1);
 
-    assertThat(t1.hashCode())
-        .isEqualTo(i1.hashCode());
+    assertThat(t1.hashCode()).isEqualTo(i1.hashCode());
 
-    assertThat(t1.toString())
-        .isEqualTo(i1.toString());
+    assertThat(t1.toString()).isEqualTo(i1.toString());
   }
 
   protected TestInterface target() {
     return HystrixFeign.builder()
         .decoder(new GsonDecoder())
-        .target(TestInterface.class, "http://localhost:" + server.getPort(),
+        .target(
+            TestInterface.class,
+            "http://localhost:" + server.getPort(),
             new FallbackTestInterface());
   }
 
@@ -706,7 +706,6 @@ public class HystrixBuilderTest {
     @RequestLine("GET /")
     @Headers("Accept: application/json")
     Observable<Integer> intObservable();
-
 
     @RequestLine("GET /")
     @Headers("Accept: application/json")

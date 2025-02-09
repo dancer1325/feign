@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.jaxrs;
 
@@ -17,13 +19,7 @@ import static feign.assertj.FeignAssertions.assertThat;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.net.URI;
-import java.util.List;
-import org.junit.jupiter.api.Test;
+
 import feign.MethodMetadata;
 import feign.Response;
 import feign.jaxrs.JAXRS3ContractTest.JakartaInternals.BeanParamInput;
@@ -46,37 +42,38 @@ import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.net.URI;
+import java.util.List;
+import org.junit.jupiter.api.Test;
 
 /**
- * Tests interfaces defined per {@link JAXRS3Contract} are interpreted into expected
- * {@link feign .RequestTemplate template} instances.
+ * Tests interfaces defined per {@link JAXRS3Contract} are interpreted into expected {@link feign
+ * .RequestTemplate template} instances.
  */
 class JAXRS3ContractTest extends JAXRSContractTestSupport<JAXRS3Contract> {
 
   @Test
   void injectJaxrsInternals() throws Exception {
     final MethodMetadata methodMetadata =
-        parseAndValidateMetadata(JakartaInternals.class, "inject", AsyncResponse.class,
-            UriInfo.class);
-    assertThat(methodMetadata.template())
-        .noRequestBody();
+        parseAndValidateMetadata(
+            JakartaInternals.class, "inject", AsyncResponse.class, UriInfo.class);
+    assertThat(methodMetadata.template()).noRequestBody();
   }
 
   @Test
   void injectBeanParam() throws Exception {
     final MethodMetadata methodMetadata =
         parseAndValidateMetadata(JakartaInternals.class, "beanParameters", BeanParamInput.class);
-    assertThat(methodMetadata.template())
-        .noRequestBody();
+    assertThat(methodMetadata.template()).noRequestBody();
 
     assertThat(methodMetadata.template())
         .hasHeaders(entry("X-Custom-Header", asList("{X-Custom-Header}")));
-    assertThat(methodMetadata.template())
-        .hasQueries(entry("query", asList("{query}")));
-    assertThat(methodMetadata.formParams())
-        .isNotEmpty()
-        .containsExactly("form");
-
+    assertThat(methodMetadata.template()).hasQueries(entry("query", asList("{query}")));
+    assertThat(methodMetadata.formParams()).isNotEmpty().containsExactly("form");
   }
 
   public interface JakartaInternals {
@@ -127,8 +124,7 @@ class JAXRS3ContractTest extends JAXRSContractTestSupport<JAXRS3Contract> {
     @Target({ElementType.METHOD})
     @Retention(RetentionPolicy.RUNTIME)
     @HttpMethod("PATCH")
-    public @interface PATCH {
-    }
+    public @interface PATCH {}
   }
 
   interface WithQueryParamsInPath {
@@ -243,8 +239,7 @@ class JAXRS3ContractTest extends JAXRSContractTestSupport<JAXRS3Contract> {
     @GET
     @Path("regex/{param1:[0-9]*}/{  param2 : .+}")
     Response pathParamWithMultipleRegex(
-                                        @PathParam("param1") String param1,
-                                        @PathParam("param2") String param2);
+        @PathParam("param1") String param1, @PathParam("param2") String param2);
   }
 
   @Path("/{baseparam: [0-9]+}")
@@ -253,8 +248,7 @@ class JAXRS3ContractTest extends JAXRSContractTestSupport<JAXRS3Contract> {
     @GET
     @Path("regex/{param1:[0-9]*}/{  param2 : .+}")
     Response pathParamWithMultipleRegex(
-                                        @PathParam("param1") String param1,
-                                        @PathParam("param2") String param2);
+        @PathParam("param1") String param1, @PathParam("param2") String param2);
   }
 
   interface WithURIParam {
@@ -269,9 +263,9 @@ class JAXRS3ContractTest extends JAXRSContractTestSupport<JAXRS3Contract> {
     @GET
     @Path("/domains/{domainId}/records")
     Response recordsByNameAndType(
-                                  @PathParam("domainId") int id,
-                                  @QueryParam("name") String nameFilter,
-                                  @QueryParam("type") String typeFilter);
+        @PathParam("domainId") int id,
+        @QueryParam("name") String nameFilter,
+        @QueryParam("type") String typeFilter);
 
     @GET
     Response empty(@QueryParam("") String empty);
@@ -281,9 +275,9 @@ class JAXRS3ContractTest extends JAXRSContractTestSupport<JAXRS3Contract> {
 
     @POST
     void login(
-               @FormParam("customer_name") String customer,
-               @FormParam("user_name") String user,
-               @FormParam("password") String password);
+        @FormParam("customer_name") String customer,
+        @FormParam("user_name") String user,
+        @FormParam("password") String password);
 
     @GET
     Response emptyFormParam(@FormParam("") String empty);
@@ -349,9 +343,9 @@ class JAXRS3ContractTest extends JAXRSContractTestSupport<JAXRS3Contract> {
     @Path("/api/stuff?multiple=stuff")
     @Produces("application/json")
     Response getWithHeaders(
-                            @HeaderParam("Accept") String accept,
-                            @QueryParam("multiple") String multiple,
-                            @QueryParam("another") String another);
+        @HeaderParam("Accept") String accept,
+        @QueryParam("multiple") String multiple,
+        @QueryParam("another") String another);
   }
 
   @Override
@@ -361,10 +355,7 @@ class JAXRS3ContractTest extends JAXRSContractTestSupport<JAXRS3Contract> {
 
   @Override
   protected MethodMetadata parseAndValidateMetadata(
-                                                    Class<?> targetType,
-                                                    String method,
-                                                    Class<?>... parameterTypes)
-      throws NoSuchMethodException {
+      Class<?> targetType, String method, Class<?>... parameterTypes) throws NoSuchMethodException {
     return contract.parseAndValidateMetadata(
         targetType, targetType.getMethod(method, parameterTypes));
   }

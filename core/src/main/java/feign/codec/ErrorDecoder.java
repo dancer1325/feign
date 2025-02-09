@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.codec;
 
@@ -18,6 +20,7 @@ import static feign.Util.RETRY_AFTER;
 import static feign.Util.checkNotNull;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.concurrent.TimeUnit.SECONDS;
+
 import feign.FeignException;
 import feign.Response;
 import feign.RetryableException;
@@ -31,8 +34,7 @@ import java.util.Map;
  * Allows you to massage an exception into a application-specific one. Converting out to a throttle
  * exception are examples of this in use.
  *
- * <p/>
- * Ex:
+ * <p>Ex:
  *
  * <pre>
  * class IllegalArgumentExceptionOn404Decoder implements ErrorDecoder {
@@ -47,38 +49,35 @@ import java.util.Map;
  * }
  * </pre>
  *
- * <p/>
- * <b>Error handling</b>
+ * <p><b>Error handling</b>
  *
- * <p/>
- * Responses where {@link Response#status()} is not in the 2xx range are classified as errors,
+ * <p>Responses where {@link Response#status()} is not in the 2xx range are classified as errors,
  * addressed by the {@link ErrorDecoder}. That said, certain RPC apis return errors defined in the
  * {@link Response#body()} even on a 200 status. For example, in the DynECT api, a job still running
  * condition is returned with a 200 status, encoded in json. When scenarios like this occur, you
  * should raise an application-specific exception (which may be {@link feign.RetryableException
  * retryable}).
  *
- * <p/>
- * <b>Not Found Semantics</b>
- * <p/>
- * It is commonly the case that 404 (Not Found) status has semantic value in HTTP apis. While the
- * default behavior is to raise exeception, users can alternatively enable 404 processing via
- * {@link feign.Feign.Builder#dismiss404()}.
+ * <p><b>Not Found Semantics</b>
+ *
+ * <p>It is commonly the case that 404 (Not Found) status has semantic value in HTTP apis. While the
+ * default behavior is to raise exeception, users can alternatively enable 404 processing via {@link
+ * feign.Feign.Builder#dismiss404()}.
  */
 public interface ErrorDecoder {
 
   /**
-   * Implement this method in order to decode an HTTP {@link Response} when
-   * {@link Response#status()} is not in the 2xx range. Please raise application-specific exceptions
-   * where possible. If your exception is retryable, wrap or subclass {@link RetryableException}
+   * Implement this method in order to decode an HTTP {@link Response} when {@link
+   * Response#status()} is not in the 2xx range. Please raise application-specific exceptions where
+   * possible. If your exception is retryable, wrap or subclass {@link RetryableException}
    *
    * @param methodKey {@link feign.Feign#configKey} of the java method that invoked the request. ex.
-   *        {@code IAM#getUser()}
+   *     {@code IAM#getUser()}
    * @param response HTTP response where {@link Response#status() status} is greater than or equal
-   *        to {@code 300}.
+   *     to {@code 300}.
    * @return Exception IOException, if there was a network error reading the response or an
-   *         application-specific exception decoded by the implementation. If the throwable is
-   *         retryable, it should be wrapped, or a subtype of {@link RetryableException}
+   *     application-specific exception decoded by the implementation. If the throwable is
+   *     retryable, it should be wrapped, or a subtype of {@link RetryableException}
    */
   public Exception decode(String methodKey, Response response);
 
@@ -100,8 +99,8 @@ public interface ErrorDecoder {
 
     @Override
     public Exception decode(String methodKey, Response response) {
-      FeignException exception = errorStatus(methodKey, response, maxBodyBytesLength,
-          maxBodyCharsLength);
+      FeignException exception =
+          errorStatus(methodKey, response, maxBodyBytesLength, maxBodyCharsLength);
       Long retryAfter = retryAfterDecoder.apply(firstOrNull(response.headers(), RETRY_AFTER));
       if (retryAfter != null) {
         return new RetryableException(
@@ -146,8 +145,8 @@ public interface ErrorDecoder {
     /**
      * returns an epoch millisecond that corresponds to the first time a request can be retried.
      *
-     * @param retryAfter String in
-     *        <a href="https://tools.ietf.org/html/rfc2616#section-14.37" >Retry-After format</a>
+     * @param retryAfter String in <a href="https://tools.ietf.org/html/rfc2616#section-14.37"
+     *     >Retry-After format</a>
      */
     public Long apply(String retryAfter) {
       if (retryAfter == null) {

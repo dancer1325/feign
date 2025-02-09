@@ -1,27 +1,30 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.optionals;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import java.io.IOException;
-import java.util.Optional;
-import org.junit.jupiter.api.Test;
+
 import feign.Feign;
 import feign.RequestLine;
 import feign.codec.Decoder;
+import java.io.IOException;
+import java.util.Optional;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import org.junit.jupiter.api.Test;
 
 class OptionalDecoderTests {
 
@@ -39,10 +42,11 @@ class OptionalDecoderTests {
     server.enqueue(new MockResponse().setResponseCode(404));
     server.enqueue(new MockResponse().setBody("foo"));
 
-    final OptionalInterface api = Feign.builder()
-        .dismiss404()
-        .decoder(new OptionalDecoder(new Decoder.Default()))
-        .target(OptionalInterface.class, server.url("/").toString());
+    final OptionalInterface api =
+        Feign.builder()
+            .dismiss404()
+            .decoder(new OptionalDecoder(new Decoder.Default()))
+            .target(OptionalInterface.class, server.url("/").toString());
 
     assertThat(api.getAsOptional().isPresent()).isFalse();
     assertThat(api.getAsOptional()).contains("foo");
@@ -53,9 +57,10 @@ class OptionalDecoderTests {
     final MockWebServer server = new MockWebServer();
     server.enqueue(new MockResponse().setResponseCode(204));
 
-    final OptionalInterface api = Feign.builder()
-        .decoder(new OptionalDecoder(new Decoder.Default()))
-        .target(OptionalInterface.class, server.url("/").toString());
+    final OptionalInterface api =
+        Feign.builder()
+            .decoder(new OptionalDecoder(new Decoder.Default()))
+            .target(OptionalInterface.class, server.url("/").toString());
 
     assertThat(api.getAsOptional().isPresent()).isFalse();
   }
@@ -65,9 +70,10 @@ class OptionalDecoderTests {
     final MockWebServer server = new MockWebServer();
     server.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
 
-    final OptionalInterface api = Feign.builder()
-        .decoder(new OptionalDecoder(new Decoder.Default()))
-        .target(OptionalInterface.class, server.url("/").toString());
+    final OptionalInterface api =
+        Feign.builder()
+            .decoder(new OptionalDecoder(new Decoder.Default()))
+            .target(OptionalInterface.class, server.url("/").toString());
 
     Optional<String> response = api.getAsOptional();
 
@@ -80,9 +86,10 @@ class OptionalDecoderTests {
     final MockWebServer server = new MockWebServer();
     server.enqueue(new MockResponse().setResponseCode(200));
 
-    final OptionalInterface api = Feign.builder()
-        .decoder(new OptionalDecoder(((response, type) -> null)))
-        .target(OptionalInterface.class, server.url("/").toString());
+    final OptionalInterface api =
+        Feign.builder()
+            .decoder(new OptionalDecoder(((response, type) -> null)))
+            .target(OptionalInterface.class, server.url("/").toString());
 
     assertThat(api.getAsOptional().isPresent()).isFalse();
   }
@@ -92,9 +99,10 @@ class OptionalDecoderTests {
     final MockWebServer server = new MockWebServer();
     server.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
 
-    final OptionalInterface api = Feign.builder()
-        .decoder(new OptionalDecoder(new Decoder.Default()))
-        .target(OptionalInterface.class, server.url("/").toString());
+    final OptionalInterface api =
+        Feign.builder()
+            .decoder(new OptionalDecoder(new Decoder.Default()))
+            .target(OptionalInterface.class, server.url("/").toString());
 
     assertThat(api.get()).isEqualTo("foo");
   }

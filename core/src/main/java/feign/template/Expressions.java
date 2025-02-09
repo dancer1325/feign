@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.template;
 
@@ -26,25 +28,25 @@ public final class Expressions {
   private static final int MAX_EXPRESSION_LENGTH = 10000;
 
   private static final String PATH_STYLE_OPERATOR = ";";
+
   /**
    * Literals may be present and preceded the expression.
    *
-   * The expression part must start with a '{' and end with a '}'. The contents of the expression
+   * <p>The expression part must start with a '{' and end with a '}'. The contents of the expression
    * may start with an RFC Operator or the operators reserved by the rfc: Level 2 Operators: '+' and
    * '#' Level 3 Operators: '.' and '/' and ';' and '?' and '&' Reserved Operators: '=' and ',' and
    * '!' and '@' and '|'
    *
-   * The RFC specifies that '{' or '}' or '(' or ')' or'$' is are illegal characters. Feign does not
-   * honor this portion of the RFC Expressions allow '$' characters for Collection expansions, and
-   * all other characters are legal as a regular expression may be passed as a Value Modifier in
+   * <p>The RFC specifies that '{' or '}' or '(' or ')' or'$' is are illegal characters. Feign does
+   * not honor this portion of the RFC Expressions allow '$' characters for Collection expansions,
+   * and all other characters are legal as a regular expression may be passed as a Value Modifier in
    * Feign
    *
-   * This is not a complete implementation of the rfc
+   * <p>This is not a complete implementation of the rfc
    *
-   * <a href="https://www.rfc-editor.org/rfc/rfc6570#section-2.2">RFC 6570 Expressions</a>
+   * <p><a href="https://www.rfc-editor.org/rfc/rfc6570#section-2.2">RFC 6570 Expressions</a>
    */
-  static final Pattern EXPRESSION_PATTERN =
-      Pattern.compile("^(\\{([+#./;?&=,!@|]?)(.+)\\})$");
+  static final Pattern EXPRESSION_PATTERN = Pattern.compile("^(\\{([+#./;?&=,!@|]?)(.+)\\})$");
 
   // Partially From:
   // https://stackoverflow.com/questions/29494608/regex-for-uri-templates-rfc-6570-wanted -- I
@@ -52,16 +54,16 @@ public final class Expressions {
   /**
    * A pattern for matching possible variable names.
    *
-   * This pattern accepts characters allowed in RFC 6570 Section 2.3 It also allows the characters
-   * feign has allowed in the past "[]-$"
+   * <p>This pattern accepts characters allowed in RFC 6570 Section 2.3 It also allows the
+   * characters feign has allowed in the past "[]-$"
    *
-   * The RFC specifies that a variable name followed by a ':' should be a max-length specification.
-   * Feign deviates from the rfc in that the ':' value modifier is used to mark a regular
-   * expression.
-   *
+   * <p>The RFC specifies that a variable name followed by a ':' should be a max-length
+   * specification. Feign deviates from the rfc in that the ':' value modifier is used to mark a
+   * regular expression.
    */
-  private static final Pattern VARIABLE_LIST_PATTERN = Pattern.compile(
-      "(([\\w-\\[\\]$]|%[0-9A-Fa-f]{2})(\\.?([\\w-\\[\\]$]|%[0-9A-Fa-f]{2}))*(:.*|\\*)?)(,(([\\w-\\[\\]$]|%[0-9A-Fa-f]{2})(\\.?([\\w-\\[\\]$]|%[0-9A-Fa-f]{2}))*(:.*|\\*)?))*");
+  private static final Pattern VARIABLE_LIST_PATTERN =
+      Pattern.compile(
+          "(([\\w-\\[\\]$]|%[0-9A-Fa-f]{2})(\\.?([\\w-\\[\\]$]|%[0-9A-Fa-f]{2}))*(:.*|\\*)?)(,(([\\w-\\[\\]$]|%[0-9A-Fa-f]{2})(\\.?([\\w-\\[\\]$]|%[0-9A-Fa-f]{2}))*(:.*|\\*)?))*");
 
   public static Expression create(final String value) {
 
@@ -163,13 +165,11 @@ public final class Expressions {
           if (!this.nameRequired) {
             return null;
           }
-          expanded.append(this.encode(this.getName()))
-              .append("=");
+          expanded.append(this.encode(this.getName())).append("=");
         }
       } else {
         if (this.nameRequired) {
-          expanded.append(this.encode(this.getName()))
-              .append("=");
+          expanded.append(this.encode(this.getName())).append("=");
         }
         expanded.append((encode) ? encode(variable) : variable);
       }
@@ -177,8 +177,8 @@ public final class Expressions {
       /* return the string value of the variable */
       String result = expanded.toString();
       if (!this.matches(result)) {
-        throw new IllegalArgumentException("Value " + expanded
-            + " does not match the expression pattern: " + this.getPattern());
+        throw new IllegalArgumentException(
+            "Value " + expanded + " does not match the expression pattern: " + this.getPattern());
       }
       return result;
     }
@@ -203,8 +203,7 @@ public final class Expressions {
             }
           }
           if (this.nameRequired) {
-            result.append(this.encode(this.getName()))
-                .append("=");
+            result.append(this.encode(this.getName())).append("=");
           }
           result.append(expanded);
         }
@@ -222,8 +221,7 @@ public final class Expressions {
         String name = this.encode(entry.getKey());
         String value = this.encode(entry.getValue().toString());
 
-        expanded.append(name)
-            .append("=");
+        expanded.append(name).append("=");
         if (!value.isEmpty()) {
           expanded.append(value);
         }
@@ -264,7 +262,7 @@ public final class Expressions {
     @Override
     public String getValue() {
       if (this.getPattern() != null) {
-        return "{" + this.separator + this.getName() + ":" + this.getName() + "}";
+        return "{" + this.separator + this.getName() + ":" + this.getPattern() + "}";
       }
       return "{" + this.separator + this.getName() + "}";
     }

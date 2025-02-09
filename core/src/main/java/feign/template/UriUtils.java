@@ -1,15 +1,17 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.template;
 
@@ -88,7 +90,6 @@ public class UriUtils {
     }
   }
 
-
   /**
    * Determines if the provided uri is an absolute uri.
    *
@@ -99,7 +100,6 @@ public class UriUtils {
     return uri != null && !uri.isEmpty() && uri.startsWith("http");
   }
 
-
   /**
    * Encodes the value, preserving all reserved characters.. Values that are already pct-encoded are
    * ignored.
@@ -108,9 +108,8 @@ public class UriUtils {
    * @param charset to use.
    * @return a new String with the reserved characters preserved.
    */
-  public static String encodeInternal(String value,
-                                      Charset charset,
-                                      boolean allowReservedCharacters) {
+  public static String encodeInternal(
+      String value, Charset charset, boolean allowReservedCharacters) {
     /* value is encoded, we need to split it up and skip the parts that are already encoded */
     Matcher matcher = PCT_ENCODED_PATTERN.matcher(value);
 
@@ -166,8 +165,8 @@ public class UriUtils {
       }
       return new String(bos.toByteArray(), charset);
     } catch (IOException ioe) {
-      throw new IllegalStateException("Error occurred during encoding of the uri: "
-          + ioe.getMessage(), ioe);
+      throw new IllegalStateException(
+          "Error occurred during encoding of the uri: " + ioe.getMessage(), ioe);
     }
   }
 
@@ -185,8 +184,6 @@ public class UriUtils {
     bos.write(hex2);
   }
 
-
-
   private static boolean isAlpha(int c) {
     return (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z');
   }
@@ -196,13 +193,27 @@ public class UriUtils {
   }
 
   private static boolean isGenericDelimiter(int c) {
-    return (c == ':') || (c == '/') || (c == '?') || (c == '#') || (c == '[') || (c == ']')
+    return (c == ':')
+        || (c == '/')
+        || (c == '?')
+        || (c == '#')
+        || (c == '[')
+        || (c == ']')
         || (c == '@');
   }
 
   private static boolean isSubDelimiter(int c) {
-    return (c == '!') || (c == '$') || (c == '&') || (c == '\'') || (c == '(') || (c == ')')
-        || (c == '*') || (c == '+') || (c == ',') || (c == ';') || (c == '=');
+    return (c == '!')
+        || (c == '$')
+        || (c == '&')
+        || (c == '\'')
+        || (c == '(')
+        || (c == ')')
+        || (c == '*')
+        || (c == '+')
+        || (c == ',')
+        || (c == ';')
+        || (c == '=');
   }
 
   private static boolean isUnreserved(int c) {
@@ -216,5 +227,4 @@ public class UriUtils {
   private boolean isPchar(int c) {
     return isUnreserved(c) || isSubDelimiter(c) || c == ':' || c == '@';
   }
-
 }

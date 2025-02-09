@@ -1,20 +1,23 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
+
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
@@ -25,9 +28,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -51,99 +52,74 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-/**
- * Utilities, typically copied in from guava, so as to avoid dependency conflicts.
- */
+/** Utilities, typically copied in from guava, so as to avoid dependency conflicts. */
 public class Util {
 
-  /**
-   * The HTTP Content-Length header field name.
-   */
+  /** The HTTP Content-Length header field name. */
   public static final String CONTENT_LENGTH = "Content-Length";
-  /**
-   * The HTTP Content-Encoding header field name.
-   */
+
+  /** The HTTP Content-Encoding header field name. */
   public static final String CONTENT_ENCODING = "Content-Encoding";
-  /**
-   * The HTTP Accept-Encoding header field name.
-   */
+
+  /** The HTTP Accept-Encoding header field name. */
   public static final String ACCEPT_ENCODING = "Accept-Encoding";
-  /**
-   * The HTTP Retry-After header field name.
-   */
+
+  /** The HTTP Retry-After header field name. */
   public static final String RETRY_AFTER = "Retry-After";
-  /**
-   * Value for the Content-Encoding header that indicates that GZIP encoding is in use.
-   */
+
+  /** Value for the Content-Encoding header that indicates that GZIP encoding is in use. */
   public static final String ENCODING_GZIP = "gzip";
-  /**
-   * Value for the Content-Encoding header that indicates that DEFLATE encoding is in use.
-   */
+
+  /** Value for the Content-Encoding header that indicates that DEFLATE encoding is in use. */
   public static final String ENCODING_DEFLATE = "deflate";
-  /**
-   * UTF-8: eight-bit UCS Transformation Format.
-   */
+
+  /** UTF-8: eight-bit UCS Transformation Format. */
   public static final Charset UTF_8 = Charset.forName("UTF-8");
 
   // com.google.common.base.Charsets
-  /**
-   * ISO-8859-1: ISO Latin Alphabet Number 1 (ISO-LATIN-1).
-   */
+  /** ISO-8859-1: ISO Latin Alphabet Number 1 (ISO-LATIN-1). */
   public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
+
   private static final int BUF_SIZE = 0x800; // 2K chars (4K bytes)
 
-
-  /**
-   * Type literal for {@code Map<String, ?>}.
-   */
+  /** Type literal for {@code Map<String, ?>}. */
   public static final Type MAP_STRING_WILDCARD =
-      new Types.ParameterizedTypeImpl(null, Map.class, String.class,
+      new Types.ParameterizedTypeImpl(
+          null,
+          Map.class,
+          String.class,
           new Types.WildcardTypeImpl(new Type[] {Object.class}, new Type[0]));
 
   private Util() { // no instances
   }
 
-  /**
-   * Copy of {@code com.google.common.base.Preconditions#checkArgument}.
-   */
-  public static void checkArgument(boolean expression,
-                                   String errorMessageTemplate,
-                                   Object... errorMessageArgs) {
+  /** Copy of {@code com.google.common.base.Preconditions#checkArgument}. */
+  public static void checkArgument(
+      boolean expression, String errorMessageTemplate, Object... errorMessageArgs) {
     if (!expression) {
-      throw new IllegalArgumentException(
-          format(errorMessageTemplate, errorMessageArgs));
+      throw new IllegalArgumentException(format(errorMessageTemplate, errorMessageArgs));
     }
   }
 
-  /**
-   * Copy of {@code com.google.common.base.Preconditions#checkNotNull}.
-   */
-  public static <T> T checkNotNull(T reference,
-                                   String errorMessageTemplate,
-                                   Object... errorMessageArgs) {
+  /** Copy of {@code com.google.common.base.Preconditions#checkNotNull}. */
+  public static <T> T checkNotNull(
+      T reference, String errorMessageTemplate, Object... errorMessageArgs) {
     if (reference == null) {
       // If either of these parameters is null, the right thing happens anyway
-      throw new NullPointerException(
-          format(errorMessageTemplate, errorMessageArgs));
+      throw new NullPointerException(format(errorMessageTemplate, errorMessageArgs));
     }
     return reference;
   }
 
-  /**
-   * Copy of {@code com.google.common.base.Preconditions#checkState}.
-   */
-  public static void checkState(boolean expression,
-                                String errorMessageTemplate,
-                                Object... errorMessageArgs) {
+  /** Copy of {@code com.google.common.base.Preconditions#checkState}. */
+  public static void checkState(
+      boolean expression, String errorMessageTemplate, Object... errorMessageArgs) {
     if (!expression) {
-      throw new IllegalStateException(
-          format(errorMessageTemplate, errorMessageArgs));
+      throw new IllegalStateException(format(errorMessageTemplate, errorMessageArgs));
     }
   }
 
-  /**
-   * Identifies a method as a default instance method.
-   */
+  /** Identifies a method as a default instance method. */
   public static boolean isDefault(Method method) {
     // Default methods are public non-abstract, non-synthetic, and non-static instance methods
     // declared in an interface.
@@ -152,20 +128,19 @@ public class Util {
     // methods.
     final int SYNTHETIC = 0x00001000;
     return ((method.getModifiers()
-        & (Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC | SYNTHETIC)) == Modifier.PUBLIC)
+                & (Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC | SYNTHETIC))
+            == Modifier.PUBLIC)
         && method.getDeclaringClass().isInterface();
   }
 
-  /**
-   * Adapted from {@code com.google.common.base.Strings#emptyToNull}.
-   */
+  /** Adapted from {@code com.google.common.base.Strings#emptyToNull}. */
   public static String emptyToNull(String string) {
     return string == null || string.isEmpty() ? null : string;
   }
 
   /**
-   * Removes values from the array that meet the criteria for removal via the supplied
-   * {@link Predicate} value
+   * Removes values from the array that meet the criteria for removal via the supplied {@link
+   * Predicate} value
    */
   @SuppressWarnings("unchecked")
   public static <T> T[] removeValues(T[] values, Predicate<T> shouldRemove, Class<T> type) {
@@ -179,9 +154,7 @@ public class Util {
     return collection.toArray(array);
   }
 
-  /**
-   * Adapted from {@code com.google.common.base.Strings#emptyToNull}.
-   */
+  /** Adapted from {@code com.google.common.base.Strings#emptyToNull}. */
   @SuppressWarnings("unchecked")
   public static <T> T[] toArray(Iterable<? extends T> iterable, Class<T> type) {
     Collection<T> collection;
@@ -197,9 +170,7 @@ public class Util {
     return collection.toArray(array);
   }
 
-  /**
-   * Returns an unmodifiable collection which may be empty, but is never null.
-   */
+  /** Returns an unmodifiable collection which may be empty, but is never null. */
   public static <T> Collection<T> valuesOrEmpty(Map<String, Collection<T>> map, String key) {
     Collection<T> values = map.get(key);
     return values != null ? values : Collections.emptyList();
@@ -214,9 +185,7 @@ public class Util {
     }
   }
 
-  /**
-   * Moved to {@code feign.Types.resolveLastTypeParameter}
-   */
+  /** Moved to {@code feign.Types.resolveLastTypeParameter} */
   @Deprecated
   public static Type resolveLastTypeParameter(Type genericContext, Class<?> supertype)
       throws IllegalStateException {
@@ -228,25 +197,25 @@ public class Util {
    * in the following list.
    *
    * <ul>
-   * <li>{@code [Bb]oolean}</li>
-   * <li>{@code byte[]}</li>
-   * <li>{@code Collection}</li>
-   * <li>{@code Iterator}</li>
-   * <li>{@code List}</li>
-   * <li>{@code Map}</li>
-   * <li>{@code Set}</li>
+   *   <li>{@code [Bb]oolean}
+   *   <li>{@code byte[]}
+   *   <li>{@code Collection}
+   *   <li>{@code Iterator}
+   *   <li>{@code List}
+   *   <li>{@code Map}
+   *   <li>{@code Set}
    * </ul>
    *
-   * <p/>
-   * When {@link Feign.Builder#dismiss404() decoding HTTP 404 status}, you'll need to teach decoders
-   * a default empty value for a type. This method cheaply supports typical types by only looking at
-   * the raw type (vs type hierarchy). Decorate for sophistication.
+   * <p>When {@link Feign.Builder#dismiss404() decoding HTTP 404 status}, you'll need to teach
+   * decoders a default empty value for a type. This method cheaply supports typical types by only
+   * looking at the raw type (vs type hierarchy). Decorate for sophistication.
    */
   public static Object emptyValueOf(Type type) {
     return EMPTIES.getOrDefault(Types.getRawType(type), () -> null).get();
   }
 
   private static final Map<Class<?>, Supplier<Object>> EMPTIES;
+
   static {
     final Map<Class<?>, Supplier<Object>> empties = new LinkedHashMap<>();
     empties.put(boolean.class, () -> false);
@@ -262,9 +231,7 @@ public class Util {
     EMPTIES = Collections.unmodifiableMap(empties);
   }
 
-  /**
-   * Adapted from {@code com.google.common.io.CharStreams.toString()}.
-   */
+  /** Adapted from {@code com.google.common.io.CharStreams.toString()}. */
   public static String toString(Reader reader) throws IOException {
     if (reader == null) {
       return null;
@@ -285,9 +252,7 @@ public class Util {
     }
   }
 
-  /**
-   * Adapted from {@code com.google.common.io.ByteStreams.toByteArray()}.
-   */
+  /** Adapted from {@code com.google.common.io.ByteStreams.toByteArray()}. */
   public static byte[] toByteArray(InputStream in) throws IOException {
     checkNotNull(in, "in");
     try {
@@ -299,11 +264,8 @@ public class Util {
     }
   }
 
-  /**
-   * Adapted from {@code com.google.common.io.ByteStreams.copy()}.
-   */
-  private static long copy(InputStream from, OutputStream to)
-      throws IOException {
+  /** Adapted from {@code com.google.common.io.ByteStreams.copy()}. */
+  private static long copy(InputStream from, OutputStream to) throws IOException {
     checkNotNull(from, "from");
     checkNotNull(to, "to");
     byte[] buf = new byte[BUF_SIZE];
@@ -354,18 +316,18 @@ public class Util {
   /**
    * Copy entire map of string collection.
    *
-   * The copy is unmodifiable map of unmodifiable collections.
+   * <p>The copy is unmodifiable map of unmodifiable collections.
    *
    * @param map string collection map
    * @return copy of the map or an empty map if the map is null.
    */
-  public static Map<String, Collection<String>> caseInsensitiveCopyOf(Map<String, Collection<String>> map) {
+  public static Map<String, Collection<String>> caseInsensitiveCopyOf(
+      Map<String, Collection<String>> map) {
     if (map == null) {
       return Collections.emptyMap();
     }
 
-    Map<String, Collection<String>> result =
-        new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    Map<String, Collection<String>> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     for (Map.Entry<String, Collection<String>> entry : map.entrySet()) {
       String key = entry.getKey();
@@ -402,7 +364,10 @@ public class Util {
 
   public static String getThreadIdentifier() {
     Thread currentThread = Thread.currentThread();
-    return currentThread.getThreadGroup() + "_" + currentThread.getName() + "_"
+    return currentThread.getThreadGroup()
+        + "_"
+        + currentThread.getName()
+        + "_"
         + currentThread.getId();
   }
 }

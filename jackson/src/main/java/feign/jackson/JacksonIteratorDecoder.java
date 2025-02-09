@@ -1,22 +1,27 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.jackson;
 
+import static feign.Util.UTF_8;
+import static feign.Util.ensureClosed;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.Module;
 import feign.Response;
 import feign.Util;
 import feign.codec.DecodeException;
@@ -30,18 +35,18 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import static feign.Util.UTF_8;
-import static feign.Util.ensureClosed;
 
 /**
- * Jackson decoder which return a closeable iterator. Returned iterator auto-close the
- * {@code Response} when it reached json array end or failed to parse stream. If this iterator is
- * not fetched till the end, it has to be casted to {@code Closeable} and explicity
- * {@code Closeable#close} by the consumer.
+ * Jackson decoder which return a closeable iterator. Returned iterator auto-close the {@code
+ * Response} when it reached json array end or failed to parse stream. If this iterator is not
+ * fetched till the end, it has to be casted to {@code Closeable} and explicity {@code
+ * Closeable#close} by the consumer.
+ *
  * <p>
+ *
  * <p>
- * <p>
- * Example: <br>
+ *
+ * <p>Example: <br>
  *
  * <pre>
  * <code>
@@ -65,10 +70,8 @@ public final class JacksonIteratorDecoder implements Decoder {
 
   @Override
   public Object decode(Response response, Type type) throws IOException {
-    if (response.status() == 404 || response.status() == 204)
-      return Util.emptyValueOf(type);
-    if (response.body() == null)
-      return null;
+    if (response.status() == 404 || response.status() == 204) return Util.emptyValueOf(type);
+    if (response.body() == null) return null;
     Reader reader = response.body().asReader(UTF_8);
     if (!reader.markSupported()) {
       reader = new BufferedReader(reader, 1);
@@ -80,8 +83,8 @@ public final class JacksonIteratorDecoder implements Decoder {
         return null; // Eagerly returning null avoids "No content to map due to end-of-input"
       }
       reader.reset();
-      return new JacksonIterator<Object>(actualIteratorTypeArgument(type), mapper, response,
-          reader);
+      return new JacksonIterator<Object>(
+          actualIteratorTypeArgument(type), mapper, response, reader);
     } catch (RuntimeJsonMappingException e) {
       if (e.getCause() != null && e.getCause() instanceof IOException) {
         throw IOException.class.cast(e.getCause());
@@ -107,9 +110,10 @@ public final class JacksonIteratorDecoder implements Decoder {
   }
 
   public static JacksonIteratorDecoder create(Iterable<Module> modules) {
-    return new JacksonIteratorDecoder(new ObjectMapper()
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .registerModules(modules));
+    return new JacksonIteratorDecoder(
+        new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .registerModules(modules));
   }
 
   public static JacksonIteratorDecoder create(ObjectMapper objectMapper) {

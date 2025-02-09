@@ -1,23 +1,28 @@
 /*
- * Copyright 2012-2024 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign;
 
 import static feign.assertj.MockWebServerAssertions.assertThat;
+
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanFactory;
@@ -25,8 +30,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
 
 public class ContractWithRuntimeInjectionTest {
 
@@ -41,7 +44,6 @@ public class ContractWithRuntimeInjectionTest {
     CaseExpander(boolean lowercase) {
       this.lowercase = lowercase;
     }
-
 
     @Override
     public String expand(Object value) {
@@ -97,8 +99,8 @@ public class ContractWithRuntimeInjectionTest {
       List<MethodMetadata> result = new Contract.Default().parseAndValidateMetadata(targetType);
       for (MethodMetadata md : result) {
         Map<Integer, Param.Expander> indexToExpander = new LinkedHashMap<>();
-        for (Map.Entry<Integer, Class<? extends Param.Expander>> entry : md.indexToExpanderClass()
-            .entrySet()) {
+        for (Map.Entry<Integer, Class<? extends Param.Expander>> entry :
+            md.indexToExpanderClass().entrySet()) {
           indexToExpander.put(entry.getKey(), beanFactory.getBean(entry.getValue()));
         }
         md.indexToExpander(indexToExpander);
@@ -116,7 +118,8 @@ public class ContractWithRuntimeInjectionTest {
 
     Feign.builder()
         .contract(context.getBean(Contract.class))
-        .target(TestExpander.class, baseUrl).get("FOO");
+        .target(TestExpander.class, baseUrl)
+        .get("FOO");
 
     assertThat(server.takeRequest()).hasPath("/default/path?query=foo");
   }

@@ -1,25 +1,28 @@
 /*
- * Copyright 2012-2023 The Feign Authors
+ * Copyright © 2012 The Feign Authors (feign@commonhaus.dev)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package feign.assertj;
 
 import static feign.Util.UTF_8;
+
+import feign.RequestTemplate;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.data.MapEntry;
 import org.assertj.core.internal.ByteArrays;
 import org.assertj.core.internal.Maps;
 import org.assertj.core.internal.Objects;
-import feign.RequestTemplate;
 
 public final class RequestTemplateAssert
     extends AbstractAssert<RequestTemplateAssert, RequestTemplate> {
@@ -98,11 +101,12 @@ public final class RequestTemplateAssert
     isNotNull();
     if (actual.body() != null) {
       if (actual.bodyTemplate() != null) {
-        failWithMessage("\nExpecting requestBody.bodyTemplate to be null, but was:<%s>",
-            actual.bodyTemplate());
+        failWithMessage(
+            "\nExpecting requestBody.bodyTemplate to be null, but was:<%s>", actual.bodyTemplate());
       }
       if (actual.body() != null) {
-        failWithMessage("\nExpecting requestBody.data to be null, but was:<%s>",
+        failWithMessage(
+            "\nExpecting requestBody.data to be null, but was:<%s>",
             new String(actual.body(), actual.requestCharset()));
       }
     }
