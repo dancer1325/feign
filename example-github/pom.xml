@@ -24,6 +24,7 @@
     <artifactId>parent</artifactId>
     <version>13.6-SNAPSHOT</version>
     <!-- Revert to original, as soon as I can compile the parent -->
+    <!-- <version>13.5</version> -->
   </parent>
 
   <artifactId>feign-example-github</artifactId>

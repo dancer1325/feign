@@ -44,6 +44,11 @@ GitHub Example
             </toolchains>
 
             ```
+        * Problem2: "Failed to read artifact descriptor for com.gradle:develocity-maven-extension:jar:1.23.1"
+          * Attempt1: `rm -rf .m2/repository/com/gradle/develocity-maven-extension`
+          * Attempt2: comment it
+          * Note: Where does it come from? 
+          * Solution: TODO:
 * run it
   * Attempt1: `java -cp target/classes example.github.GitHubExample`
   * Attempt2: `mvn exec:java -Dexec.mainClass="example.github.GitHubExample"`
